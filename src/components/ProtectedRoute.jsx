@@ -3,7 +3,11 @@ import {
   useLocation,
 } from 'react-router-dom';
 
-import { useAuth } from '../context/AuthContext';
+import BrandLoader from './BrandLoader';
+
+import {
+  useAuth,
+} from '../context/AuthContext';
 
 export default function ProtectedRoute({
   children,
@@ -13,18 +17,16 @@ export default function ProtectedRoute({
     loading,
   } = useAuth();
 
-  const location = useLocation();
+  const location =
+    useLocation();
 
   if (loading) {
     return (
-      <main className="auth-check-page">
-        <div className="auth-check-card">
-          <div className="auth-check-spinner" />
-
-          <p>
-            Checking your Posho Creative account...
-          </p>
-        </div>
+      <main className="protected-loading-page">
+        <BrandLoader
+          fullscreen
+          label="Securing your workspace..."
+        />
       </main>
     );
   }

@@ -3,6 +3,7 @@ import {
   Routes,
 } from 'react-router-dom';
 
+import DashboardShell from './components/DashboardShell';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -11,6 +12,12 @@ import ScrollToTop from './components/ScrollToTop';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Dashboard from './pages/Dashboard';
+import DashboardFiles from './pages/DashboardFiles';
+import DashboardNotifications from './pages/DashboardNotifications';
+import DashboardOrderDetail from './pages/DashboardOrderDetail';
+import DashboardOrders from './pages/DashboardOrders';
+import DashboardPayments from './pages/DashboardPayments';
+import DashboardProfile from './pages/DashboardProfile';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
@@ -39,9 +46,7 @@ export default function App() {
 
         <Route
           path="/services/:slug"
-          element={
-            <ServiceDetail />
-          }
+          element={<ServiceDetail />}
         />
 
         <Route
@@ -77,10 +82,45 @@ export default function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardShell />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route
+            index
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="orders"
+            element={<DashboardOrders />}
+          />
+
+          <Route
+            path="orders/:reference"
+            element={<DashboardOrderDetail />}
+          />
+
+          <Route
+            path="payments"
+            element={<DashboardPayments />}
+          />
+
+          <Route
+            path="files"
+            element={<DashboardFiles />}
+          />
+
+          <Route
+            path="notifications"
+            element={<DashboardNotifications />}
+          />
+
+          <Route
+            path="profile"
+            element={<DashboardProfile />}
+          />
+        </Route>
 
         <Route
           path="/404"

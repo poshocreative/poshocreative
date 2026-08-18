@@ -1,4 +1,5 @@
 import React from 'react';
+
 import ReactDOM from 'react-dom/client';
 
 import {
@@ -15,18 +16,22 @@ import './styles/global.css';
 import './styles/order.css';
 import './styles/auth.css';
 import './styles/dashboard.css';
+import './styles/workspace.css';
+import './styles/animations.css';
 
-const rootElement =
-  document.getElementById('root');
+const root =
+  document.getElementById(
+    'root',
+  );
 
-if (!rootElement) {
+if (!root) {
   throw new Error(
-    'The root element was not found in index.html.',
+    'Posho Creative could not find the application root.',
   );
 }
 
 ReactDOM.createRoot(
-  rootElement,
+  root,
 ).render(
   <React.StrictMode>
     <BrowserRouter>

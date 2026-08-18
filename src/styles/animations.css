@@ -1,0 +1,637 @@
+/* ==========================================================
+   POSHO CREATIVE
+   PROFESSIONAL MOTION SYSTEM
+   ========================================================== */
+
+:root {
+  --motion-fast: 180ms;
+  --motion-normal: 320ms;
+  --motion-slow: 650ms;
+
+  --motion-ease:
+    cubic-bezier(
+      0.22,
+      1,
+      0.36,
+      1
+    );
+}
+
+/* ==========================================================
+   PAGE ENTRANCE
+   ========================================================== */
+
+.page-reveal {
+  animation:
+    pageReveal
+    620ms
+    var(--motion-ease)
+    both;
+}
+
+@keyframes pageReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(15px);
+
+    filter:
+      blur(4px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0);
+
+    filter:
+      blur(0);
+  }
+}
+
+/* ==========================================================
+   STAGGERED CONTENT
+   ========================================================== */
+
+.stagger-item {
+  --stagger-index: 0;
+
+  animation:
+    staggerReveal
+    560ms
+    var(--motion-ease)
+    both;
+
+  animation-delay:
+    calc(
+      var(--stagger-index) *
+      55ms
+    );
+}
+
+.stagger-item:nth-child(1) {
+  --stagger-index: 0;
+}
+
+.stagger-item:nth-child(2) {
+  --stagger-index: 1;
+}
+
+.stagger-item:nth-child(3) {
+  --stagger-index: 2;
+}
+
+.stagger-item:nth-child(4) {
+  --stagger-index: 3;
+}
+
+.stagger-item:nth-child(5) {
+  --stagger-index: 4;
+}
+
+.stagger-item:nth-child(6) {
+  --stagger-index: 5;
+}
+
+@keyframes staggerReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(18px)
+      scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+/* ==========================================================
+   POSHO BRAND LOADER
+   ========================================================== */
+
+.protected-loading-page {
+  min-height:
+    calc(100vh - 80px);
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 50px 20px;
+
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(108, 43, 217, 0.08),
+      transparent 28%
+    ),
+    var(--background);
+}
+
+.brand-loader {
+  width:
+    min(
+      100%,
+      360px
+    );
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  text-align: center;
+}
+
+.brand-loader-fullscreen {
+  min-height: 360px;
+
+  justify-content: center;
+}
+
+.brand-loader-mark {
+  position: relative;
+
+  width: 94px;
+  height: 94px;
+
+  margin-bottom: 25px;
+
+  display: grid;
+
+  place-items: center;
+}
+
+.brand-loader-icon {
+  position: relative;
+
+  z-index: 3;
+
+  width: 58px;
+  height: 58px;
+
+  overflow: hidden;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 19px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 16px 45px
+    rgba(
+      108,
+      43,
+      217,
+      0.2
+    );
+
+  animation:
+    brandIconFloat
+    2.2s
+    ease-in-out
+    infinite;
+}
+
+.brand-loader-icon img {
+  width: 72%;
+  height: 72%;
+
+  object-fit: contain;
+}
+
+.brand-loader-ring {
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: 50%;
+
+  border:
+    1px solid
+    rgba(
+      108,
+      43,
+      217,
+      0.22
+    );
+}
+
+.brand-loader-ring-one {
+  animation:
+    brandRingPulse
+    1.8s
+    ease-out
+    infinite;
+}
+
+.brand-loader-ring-two {
+  animation:
+    brandRingPulse
+    1.8s
+    ease-out
+    700ms
+    infinite;
+}
+
+.brand-loader-copy {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.brand-loader-copy strong {
+  font-family:
+    'Manrope',
+    sans-serif;
+
+  font-size: 15px;
+
+  letter-spacing:
+    -0.02em;
+}
+
+.brand-loader-copy span {
+  color:
+    var(--text-muted);
+
+  font-size: 11px;
+}
+
+.brand-loader-progress {
+  width: 190px;
+  height: 3px;
+
+  margin-top: 20px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background:
+    rgba(
+      108,
+      43,
+      217,
+      0.1
+    );
+}
+
+.brand-loader-progress span {
+  display: block;
+
+  width: 55%;
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--brand-primary),
+      transparent
+    );
+
+  animation:
+    brandProgress
+    1.35s
+    ease-in-out
+    infinite;
+}
+
+@keyframes brandIconFloat {
+  0%,
+  100% {
+    transform:
+      translateY(0)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translateY(-5px)
+      scale(1.025);
+  }
+}
+
+@keyframes brandRingPulse {
+  0% {
+    opacity: 0;
+
+    transform:
+      scale(0.55);
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+
+    transform:
+      scale(1.2);
+  }
+}
+
+@keyframes brandProgress {
+  0% {
+    transform:
+      translateX(-190%);
+  }
+
+  100% {
+    transform:
+      translateX(290%);
+  }
+}
+
+/* ==========================================================
+   WORKSPACE GLOW
+   ========================================================== */
+
+.workspace-glow {
+  animation:
+    workspaceGlowFloat
+    11s
+    ease-in-out
+    infinite alternate;
+}
+
+.workspace-glow-two {
+  animation-delay:
+    -4s;
+}
+
+@keyframes workspaceGlowFloat {
+  from {
+    transform:
+      translate3d(
+        -12px,
+        -8px,
+        0
+      );
+  }
+
+  to {
+    transform:
+      translate3d(
+        20px,
+        15px,
+        0
+      );
+  }
+}
+
+/* ==========================================================
+   ACTIVE ACCOUNT DOT
+   ========================================================== */
+
+.workspace-live-indicator > span {
+  animation:
+    connectedPulse
+    2s
+    ease-out
+    infinite;
+}
+
+@keyframes connectedPulse {
+  0% {
+    box-shadow:
+      0 0 0 0
+      rgba(
+        108,
+        43,
+        217,
+        0.36
+      );
+  }
+
+  70% {
+    box-shadow:
+      0 0 0 8px
+      rgba(
+        108,
+        43,
+        217,
+        0
+      );
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 0
+      rgba(
+        108,
+        43,
+        217,
+        0
+      );
+  }
+}
+
+/* ==========================================================
+   HIGHLIGHT ORBIT
+   ========================================================== */
+
+.workspace-highlight-orbit {
+  animation:
+    orbitContainer
+    18s
+    linear
+    infinite;
+}
+
+.workspace-highlight-orbit span {
+  animation:
+    orbitDot
+    2.5s
+    ease-in-out
+    infinite;
+}
+
+.workspace-highlight-orbit span:nth-child(2) {
+  animation-delay:
+    -800ms;
+}
+
+.workspace-highlight-orbit span:nth-child(3) {
+  animation-delay:
+    -1.6s;
+}
+
+@keyframes orbitContainer {
+  to {
+    transform:
+      rotate(360deg);
+  }
+}
+
+@keyframes orbitDot {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================
+   ORDER SUBMISSION OVERLAY
+   ========================================================== */
+
+.order-submission-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9999;
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 24px;
+
+  background:
+    rgba(
+      248,
+      247,
+      250,
+      0.84
+    );
+
+  backdrop-filter:
+    blur(18px);
+
+  animation:
+    submissionFade
+    250ms
+    ease
+    both;
+}
+
+.order-submission-card {
+  width:
+    min(
+      100%,
+      480px
+    );
+
+  padding:
+    45px 30px;
+
+  border:
+    1px solid
+    var(--brand-primary-border);
+
+  border-radius:
+    var(--radius-large);
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.95
+    );
+
+  box-shadow:
+    0 35px 100px
+    rgba(
+      55,
+      27,
+      99,
+      0.16
+    );
+}
+
+@keyframes submissionFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================
+   INTERACTION MOTION
+   ========================================================== */
+
+.workspace-stat-card,
+.workspace-file-card,
+.workspace-panel,
+.project-payment-card {
+  transition:
+    transform
+    var(--motion-normal)
+    var(--motion-ease),
+    box-shadow
+    var(--motion-normal)
+    var(--motion-ease),
+    border-color
+    var(--motion-normal)
+    ease;
+}
+
+.workspace-stat-card:hover,
+.workspace-file-card:hover {
+  transform:
+    translateY(-4px);
+
+  border-color:
+    var(--brand-primary-border);
+
+  box-shadow:
+    0 20px 55px
+    rgba(
+      108,
+      43,
+      217,
+      0.08
+    );
+}
+
+/* ==========================================================
+   REDUCED MOTION
+   ========================================================== */
+
+@media (
+  prefers-reduced-motion:
+    reduce
+) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior:
+      auto !important;
+
+    animation-duration:
+      0.001ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.001ms !important;
+  }
+}
