@@ -5,12 +5,14 @@ import {
 
 import DashboardShell from './components/DashboardShell';
 import Footer from './components/Footer';
+import GlobalMotion from './components/GlobalMotion';
 import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 
 import About from './pages/About';
 import Contact from './pages/Contact';
+
 import Dashboard from './pages/Dashboard';
 import DashboardFiles from './pages/DashboardFiles';
 import DashboardNotifications from './pages/DashboardNotifications';
@@ -18,6 +20,7 @@ import DashboardOrderDetail from './pages/DashboardOrderDetail';
 import DashboardOrders from './pages/DashboardOrders';
 import DashboardPayments from './pages/DashboardPayments';
 import DashboardProfile from './pages/DashboardProfile';
+
 import Home from './pages/Home';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
@@ -30,6 +33,8 @@ export default function App() {
   return (
     <div className="app">
       <ScrollToTop />
+
+      <GlobalMotion />
 
       <Header />
 
@@ -46,7 +51,9 @@ export default function App() {
 
         <Route
           path="/services/:slug"
-          element={<ServiceDetail />}
+          element={
+            <ServiceDetail />
+          }
         />
 
         <Route
@@ -88,48 +95,66 @@ export default function App() {
         >
           <Route
             index
-            element={<Dashboard />}
+            element={
+              <Dashboard />
+            }
           />
 
           <Route
             path="orders"
-            element={<DashboardOrders />}
+            element={
+              <DashboardOrders />
+            }
           />
 
           <Route
             path="orders/:reference"
-            element={<DashboardOrderDetail />}
+            element={
+              <DashboardOrderDetail />
+            }
           />
 
           <Route
             path="payments"
-            element={<DashboardPayments />}
+            element={
+              <DashboardPayments />
+            }
           />
 
           <Route
             path="files"
-            element={<DashboardFiles />}
+            element={
+              <DashboardFiles />
+            }
           />
 
           <Route
             path="notifications"
-            element={<DashboardNotifications />}
+            element={
+              <DashboardNotifications />
+            }
           />
 
           <Route
             path="profile"
-            element={<DashboardProfile />}
+            element={
+              <DashboardProfile />
+            }
           />
         </Route>
 
         <Route
           path="/404"
-          element={<NotFound />}
+          element={
+            <NotFound />
+          }
         />
 
         <Route
           path="*"
-          element={<NotFound />}
+          element={
+            <NotFound />
+          }
         />
       </Routes>
 
