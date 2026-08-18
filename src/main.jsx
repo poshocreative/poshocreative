@@ -18,6 +18,7 @@ import './styles/auth.css';
 import './styles/dashboard.css';
 import './styles/workspace.css';
 import './styles/animations.css';
+import './styles/mobile-nav.css';
 
 const root =
   document.getElementById(
