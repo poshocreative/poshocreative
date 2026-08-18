@@ -16,8 +16,17 @@ import './styles/order.css';
 import './styles/auth.css';
 import './styles/dashboard.css';
 
+const rootElement =
+  document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error(
+    'The root element was not found in index.html.',
+  );
+}
+
 ReactDOM.createRoot(
-  document.getElementById('root'),
+  rootElement,
 ).render(
   <React.StrictMode>
     <BrowserRouter>

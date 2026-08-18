@@ -1,22 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 
+const fallbackSupabaseUrl =
+  'https://cocsnjywtqggbenipsoh.supabase.co';
+
+const fallbackSupabasePublishableKey =
+  'sb_publishable_eziuJejIeWeiG4s-yqsIIg_dgghwZAB';
+
 const supabaseUrl =
-  import.meta.env.VITE_SUPABASE_URL;
+  import.meta.env.VITE_SUPABASE_URL ||
+  fallbackSupabaseUrl;
 
 const supabasePublishableKey =
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-if (!supabaseUrl) {
-  throw new Error(
-    'VITE_SUPABASE_URL is missing. Check the .env.local file in the Posho Creative project root.',
-  );
-}
-
-if (!supabasePublishableKey) {
-  throw new Error(
-    'VITE_SUPABASE_PUBLISHABLE_KEY is missing. Check the .env.local file in the Posho Creative project root.',
-  );
-}
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  fallbackSupabasePublishableKey;
 
 export const supabase = createClient(
   supabaseUrl,

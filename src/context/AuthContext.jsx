@@ -12,114 +12,174 @@ import { supabase } from '../lib/supabase';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [profileLoading, setProfileLoading] = useState(false);
+  const [session, setSession] =
+    useState(null);
 
-  const loadProfile = useCallback(async (userId) => {
-    if (!userId) {
-      setProfile(null);
-      return null;
-    }
+  const [user, setUser] =
+    useState(null);
 
-    setProfileLoading(true);
+  const [profile, setProfile] =
+    useState(null);
 
-    const { data, error } = await supabase
-      .from('customers')
-      .select(`
-        id,
-        user_id,
-        full_name,
-        email,
-        phone,
-        business_name,
-        preferred_contact_method,
-        created_at,
-        updated_at
-      `)
-      .eq('user_id', userId)
-      .maybeSingle();
+  const [loading, setLoading] =
+    useState(true);
 
-    setProfileLoading(false);
+  const [profileLoading, setProfileLoading] =
+    useState(false);
 
-    if (error) {
-      console.error(
-        'Unable to load customer profile:',
-        error,
-      );
+  const loadProfile = useCallback(
+    async (userId) => {
+      if (!userId) {
+        setProfile(null);
+        return null;
+      }
 
-      setProfile(null);
+      setProfileLoading(true);
 
-      return null;
-    }
+      try {
+        const {
+          data,
+          error,
+        } = await supabase
+          .from('customers')
+          .select(`
+            id,
+            user_id,
+            full_name,
+            email,
+            phone,
+            business_name,
+            preferred_contact_method,
+            created_at,
+            updated_at
+          `)
+          .eq('user_id', userId)
+          .maybeSingle();
 
-    setProfile(data ?? null);
+        if (error) {
+          console.error(
+            'Unable to load customer profile:',
+            error,
+          );
 
-    return data ?? null;
-  }, []);
+          setProfile(null);
+
+          return null;
+        }
+
+        setProfile(data || null);
+
+        return data || null;
+      } catch (error) {
+        console.error(
+          'Unexpected profile loading error:',
+          error,
+        );
+
+        setProfile(null);
+
+        return null;
+      } finally {
+        setProfileLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     let mounted = true;
 
     const initialiseAuth = async () => {
-      const {
-        data: { session: initialSession },
-        error,
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data,
+          error,
+        } =
+          await supabase.auth.getSession();
 
-      if (!mounted) {
-        return;
-      }
+        if (!mounted) {
+          return;
+        }
 
-      if (error) {
+        if (error) {
+          console.error(
+            'Unable to restore Supabase session:',
+            error,
+          );
+        }
+
+        const initialSession =
+          data?.session || null;
+
+        setSession(initialSession);
+
+        setUser(
+          initialSession?.user || null,
+        );
+
+        if (
+          initialSession?.user?.id
+        ) {
+          await loadProfile(
+            initialSession.user.id,
+          );
+        }
+      } catch (error) {
         console.error(
-          'Unable to restore session:',
+          'Authentication initialization failed:',
           error,
         );
-      }
 
-      setSession(initialSession ?? null);
-      setUser(initialSession?.user ?? null);
-
-      if (initialSession?.user?.id) {
-        await loadProfile(
-          initialSession.user.id,
-        );
-      }
-
-      if (mounted) {
-        setLoading(false);
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     initialiseAuth();
 
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
-        setSession(nextSession ?? null);
-        setUser(nextSession?.user ?? null);
+      data: authListener,
+    } =
+      supabase.auth.onAuthStateChange(
+        (_event, nextSession) => {
+          if (!mounted) {
+            return;
+          }
 
-        if (nextSession?.user?.id) {
-          setTimeout(() => {
-            loadProfile(
-              nextSession.user.id,
-            );
-          }, 0);
-        } else {
-          setProfile(null);
-        }
+          setSession(
+            nextSession || null,
+          );
 
-        setLoading(false);
-      },
-    );
+          setUser(
+            nextSession?.user || null,
+          );
+
+          if (
+            nextSession?.user?.id
+          ) {
+            setTimeout(() => {
+              loadProfile(
+                nextSession.user.id,
+              );
+            }, 0);
+          } else {
+            setProfile(null);
+          }
+        },
+      );
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+
+      authListener?.subscription
+        ?.unsubscribe();
     };
   }, [loadProfile]);
 
@@ -130,79 +190,133 @@ export function AuthProvider({ children }) {
     businessName,
     password,
   }) => {
-    const emailRedirectTo =
-      `${window.location.origin}/dashboard`;
+    try {
+      const emailRedirectTo =
+        `${window.location.origin}/dashboard`;
 
-    const { data, error } =
-      await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
-        password,
-        options: {
-          emailRedirectTo,
-          data: {
-            full_name: fullName.trim(),
-            phone: phone.trim(),
-            business_name:
-              businessName.trim(),
-            preferred_contact_method:
-              'whatsapp',
+      const {
+        data,
+        error,
+      } =
+        await supabase.auth.signUp({
+          email:
+            email
+              .trim()
+              .toLowerCase(),
+
+          password,
+
+          options: {
+            emailRedirectTo,
+
+            data: {
+              full_name:
+                fullName.trim(),
+
+              phone:
+                phone.trim(),
+
+              business_name:
+                businessName.trim(),
+
+              preferred_contact_method:
+                'whatsapp',
+            },
           },
-        },
-      });
+        });
 
-    return {
-      data,
-      error,
-    };
+      return {
+        data,
+        error,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        error,
+      };
+    }
   };
 
   const signIn = async ({
     email,
     password,
   }) => {
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
-        password,
-      });
+    try {
+      const {
+        data,
+        error,
+      } =
+        await supabase.auth
+          .signInWithPassword({
+            email:
+              email
+                .trim()
+                .toLowerCase(),
 
-    return {
-      data,
-      error,
-    };
+            password,
+          });
+
+      return {
+        data,
+        error,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        error,
+      };
+    }
   };
 
   const signOut = async () => {
-    const { error } =
-      await supabase.auth.signOut();
+    try {
+      const {
+        error,
+      } =
+        await supabase.auth.signOut();
 
-    if (!error) {
-      setSession(null);
-      setUser(null);
-      setProfile(null);
+      if (!error) {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+      }
+
+      return {
+        error,
+      };
+    } catch (error) {
+      return {
+        error,
+      };
     }
-
-    return {
-      error,
-    };
   };
 
-  const refreshProfile = async () => {
-    if (!user?.id) {
-      return null;
-    }
+  const refreshProfile =
+    useCallback(async () => {
+      if (!user?.id) {
+        return null;
+      }
 
-    return loadProfile(user.id);
-  };
+      return loadProfile(
+        user.id,
+      );
+    }, [
+      user?.id,
+      loadProfile,
+    ]);
 
   const value = useMemo(
     () => ({
       session,
       user,
       profile,
+
       loading,
       profileLoading,
-      isAuthenticated: Boolean(user),
+
+      isAuthenticated:
+        Boolean(user),
+
       signUp,
       signIn,
       signOut,
@@ -214,19 +328,22 @@ export function AuthProvider({ children }) {
       profile,
       loading,
       profileLoading,
-      loadProfile,
+      refreshProfile,
     ],
   );
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={value}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
 
   if (!context) {
     throw new Error(

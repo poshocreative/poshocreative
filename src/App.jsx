@@ -39,7 +39,9 @@ export default function App() {
 
         <Route
           path="/services/:slug"
-          element={<ServiceDetail />}
+          element={
+            <ServiceDetail />
+          }
         />
 
         <Route
