@@ -21,6 +21,7 @@ import DashboardOrders from './pages/DashboardOrders';
 import DashboardPayments from './pages/DashboardPayments';
 import DashboardProfile from './pages/DashboardProfile';
 
+import EmailVerified from './pages/EmailVerified';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
@@ -74,6 +75,13 @@ export default function App() {
         <Route
           path="/signup"
           element={<Signup />}
+        />
+
+        <Route
+          path="/email-verified"
+          element={
+            <EmailVerified />
+          }
         />
 
         <Route

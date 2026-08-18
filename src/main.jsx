@@ -19,6 +19,7 @@ import './styles/dashboard.css';
 import './styles/workspace.css';
 import './styles/animations.css';
 import './styles/mobile-nav.css';
+import './styles/system-pages.css';
 
 const root =
   document.getElementById(
