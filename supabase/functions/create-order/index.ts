@@ -1,4 +1,6 @@
-import { withSupabase } from 'npm:@supabase/server@^1';
+import {
+  withSupabase,
+} from 'npm:@supabase/server@^1';
 
 type FileInput = {
   name: string;
@@ -9,12 +11,16 @@ type FileInput = {
 type OrderPayload = {
   serviceSlug: string;
   projectType: string;
+
   projectTitle: string;
   projectDescription: string;
   projectGoal: string;
+
   referenceLinks?: string;
+
   budget: string;
   timeline: string;
+
   deadline?: string | null;
 
   customer: {
@@ -27,94 +33,118 @@ type OrderPayload = {
   files?: FileInput[];
 };
 
-const allowedServices = new Set([
-  'website-development',
-  'graphic-design',
-  'social-media-management',
-  'advertising',
-  'business-services',
-  'creative-solutions',
-]);
+const allowedBudgets =
+  new Set([
+    'not-sure',
+    'under-50k',
+    '50k-150k',
+    '150k-500k',
+    '500k-plus',
+  ]);
 
-const allowedBudgets = new Set([
-  'not-sure',
-  'under-50k',
-  '50k-150k',
-  '150k-500k',
-  '500k-plus',
-]);
+const allowedTimelines =
+  new Set([
+    'flexible',
+    'one-week',
+    'two-four-weeks',
+    'one-three-months',
+    'specific-date',
+  ]);
 
-const allowedTimelines = new Set([
-  'flexible',
-  'one-week',
-  'two-four-weeks',
-  'one-three-months',
-  'specific-date',
-]);
+const allowedContacts =
+  new Set([
+    'whatsapp',
+    'email',
+    'phone',
+  ]);
 
-const allowedContactMethods = new Set([
-  'whatsapp',
-  'email',
-  'phone',
-]);
+const allowedMimeTypes =
+  new Set([
+    'image/png',
+    'image/jpeg',
+    'image/webp',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ]);
 
-const allowedMimeTypes = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-]);
+const MAX_FILES = 6;
 
-const maxFileSize = 10 * 1024 * 1024;
-const maxFiles = 6;
+const MAX_FILE_SIZE =
+  10 * 1024 * 1024;
 
-function cleanText(
+function clean(
   value: unknown,
-  maximumLength: number,
+  max: number,
 ) {
-  if (typeof value !== 'string') {
+  if (
+    typeof value !==
+    'string'
+  ) {
     return '';
   }
 
   return value
     .trim()
-    .slice(0, maximumLength);
+    .slice(0, max);
 }
 
-function safeFilename(filename: string) {
-  const cleaned = filename
-    .trim()
-    .replace(/[^a-zA-Z0-9._-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^\.+/, '');
-
-  return cleaned || 'project-file';
+function safeFilename(
+  value: string,
+) {
+  return (
+    value
+      .trim()
+      .replace(
+        /[^a-zA-Z0-9._-]/g,
+        '-',
+      )
+      .replace(
+        /-+/g,
+        '-',
+      )
+      .replace(
+        /^\.+/,
+        '',
+      ) ||
+    'project-file'
+  );
 }
 
-function generateReference() {
-  const date = new Date()
-    .toISOString()
-    .slice(0, 10)
-    .replaceAll('-', '');
+function createReference() {
+  const date =
+    new Date()
+      .toISOString()
+      .slice(0, 10)
+      .replaceAll(
+        '-',
+        '',
+      );
 
   const random =
-    crypto.randomUUID()
-      .split('-')[0]
+    crypto
+      .randomUUID()
+      .replaceAll(
+        '-',
+        '',
+      )
+      .slice(0, 8)
       .toUpperCase();
 
   return `PC-${date}-${random}`;
 }
 
-function badRequest(message: string) {
+function responseError(
+  message: string,
+  status = 400,
+) {
   return Response.json(
     {
       success: false,
       message,
     },
     {
-      status: 400,
+      status,
     },
   );
 }
@@ -125,16 +155,17 @@ export default {
       auth: 'user',
     },
 
-    async (req, ctx) => {
-      if (req.method !== 'POST') {
-        return Response.json(
-          {
-            success: false,
-            message: 'Method not allowed.',
-          },
-          {
-            status: 405,
-          },
+    async (
+      req,
+      ctx,
+    ) => {
+      if (
+        req.method !==
+        'POST'
+      ) {
+        return responseError(
+          'Method not allowed.',
+          405,
         );
       }
 
@@ -142,150 +173,149 @@ export default {
         const userId =
           ctx.userClaims?.id;
 
-        const authenticatedEmail =
-          cleanText(
-            ctx.userClaims?.email,
+        const email =
+          clean(
+            ctx.userClaims
+              ?.email,
             320,
           ).toLowerCase();
 
         if (
           !userId ||
-          !authenticatedEmail
+          !email
         ) {
-          return Response.json(
-            {
-              success: false,
-              message:
-                'A valid Posho Creative account is required.',
-            },
-            {
-              status: 401,
-            },
+          return responseError(
+            'A verified Posho Creative account is required.',
+            401,
           );
         }
 
         const body =
-          (await req.json()) as OrderPayload;
+          (await req.json()) as
+            OrderPayload;
 
         const serviceSlug =
-          cleanText(
+          clean(
             body.serviceSlug,
             100,
           );
 
         const projectType =
-          cleanText(
+          clean(
             body.projectType,
             120,
           );
 
         const projectTitle =
-          cleanText(
+          clean(
             body.projectTitle,
             180,
           );
 
         const projectDescription =
-          cleanText(
+          clean(
             body.projectDescription,
             10000,
           );
 
         const projectGoal =
-          cleanText(
+          clean(
             body.projectGoal,
             5000,
           );
 
         const referenceLinks =
-          cleanText(
+          clean(
             body.referenceLinks,
             5000,
           );
 
         const budget =
-          cleanText(
+          clean(
             body.budget,
             50,
           );
 
         const timeline =
-          cleanText(
+          clean(
             body.timeline,
             50,
           );
 
         const deadline =
-          cleanText(
+          clean(
             body.deadline,
             20,
           ) || null;
 
         const fullName =
-          cleanText(
-            body.customer?.fullName,
+          clean(
+            body.customer
+              ?.fullName,
             180,
           );
 
         const phone =
-          cleanText(
-            body.customer?.phone,
+          clean(
+            body.customer
+              ?.phone,
             80,
           );
 
         const businessName =
-          cleanText(
-            body.customer?.businessName,
+          clean(
+            body.customer
+              ?.businessName,
             180,
           );
 
-        const preferredContactMethod =
-          cleanText(
+        const contactMethod =
+          clean(
             body.customer
               ?.preferredContactMethod,
             30,
           );
 
         if (
-          !allowedServices.has(
-            serviceSlug,
-          )
+          !serviceSlug ||
+          !projectType
         ) {
-          return badRequest(
-            'Choose a valid Posho Creative service.',
+          return responseError(
+            'Choose a valid service and project type.',
           );
         }
 
-        if (!projectType) {
-          return badRequest(
-            'Choose a project type.',
-          );
-        }
-
-        if (!projectTitle) {
-          return badRequest(
+        if (
+          !projectTitle
+        ) {
+          return responseError(
             'Enter a project title.',
           );
         }
 
         if (
-          projectDescription.length < 30
+          projectDescription
+            .length < 30
         ) {
-          return badRequest(
+          return responseError(
             'Provide a more detailed project description.',
           );
         }
 
-        if (!projectGoal) {
-          return badRequest(
+        if (
+          !projectGoal
+        ) {
+          return responseError(
             'Tell us what you want the project to achieve.',
           );
         }
 
         if (
-          !allowedBudgets.has(budget)
+          !allowedBudgets.has(
+            budget,
+          )
         ) {
-          return badRequest(
+          return responseError(
             'Choose a valid budget range.',
           );
         }
@@ -295,7 +325,7 @@ export default {
             timeline,
           )
         ) {
-          return badRequest(
+          return responseError(
             'Choose a valid project timeline.',
           );
         }
@@ -305,44 +335,115 @@ export default {
             'specific-date' &&
           !deadline
         ) {
-          return badRequest(
+          return responseError(
             'Provide your required deadline.',
           );
         }
 
-        if (!fullName) {
-          return badRequest(
-            'Enter your full name.',
-          );
-        }
-
-        if (!phone) {
-          return badRequest(
-            'Enter your phone or WhatsApp number.',
+        if (
+          !fullName ||
+          !phone
+        ) {
+          return responseError(
+            'Your name and phone number are required.',
           );
         }
 
         if (
-          !allowedContactMethods.has(
-            preferredContactMethod,
+          !allowedContacts.has(
+            contactMethod,
           )
         ) {
-          return badRequest(
+          return responseError(
             'Choose a valid contact method.',
           );
         }
 
+        const {
+          data: catalogItem,
+          error: catalogError,
+        } =
+          await ctx
+            .supabaseAdmin
+            .from(
+              'service_catalog',
+            )
+            .select(`
+              id,
+              service_slug,
+              project_type,
+              title,
+              pricing_type,
+              price_kobo,
+              currency,
+              active
+            `)
+            .eq(
+              'service_slug',
+              serviceSlug,
+            )
+            .eq(
+              'project_type',
+              projectType,
+            )
+            .eq(
+              'active',
+              true,
+            )
+            .maybeSingle();
+
+        if (
+          catalogError
+        ) {
+          throw catalogError;
+        }
+
+        if (
+          !catalogItem
+        ) {
+          return responseError(
+            'That Posho Creative service is not currently available for ordering.',
+          );
+        }
+
+        const priceKobo =
+          catalogItem
+            .price_kobo ===
+          null
+            ? null
+            : Number(
+                catalogItem
+                  .price_kobo,
+              );
+
+        const immediatePayment =
+          (
+            catalogItem
+              .pricing_type ===
+              'fixed' ||
+            catalogItem
+              .pricing_type ===
+              'monthly'
+          ) &&
+          priceKobo !== null &&
+          priceKobo > 0;
+
+        const requiresQuote =
+          !immediatePayment;
+
         const submittedFiles =
-          Array.isArray(body.files)
+          Array.isArray(
+            body.files,
+          )
             ? body.files
             : [];
 
         if (
           submittedFiles.length >
-          maxFiles
+          MAX_FILES
         ) {
-          return badRequest(
-            `A maximum of ${maxFiles} files is allowed.`,
+          return responseError(
+            `A maximum of ${MAX_FILES} files is allowed.`,
           );
         }
 
@@ -357,16 +458,17 @@ export default {
             typeof file.size !==
               'number'
           ) {
-            return badRequest(
-              'One or more uploaded files are invalid.',
+            return responseError(
+              'One or more selected files are invalid.',
             );
           }
 
           if (
             file.size <= 0 ||
-            file.size > maxFileSize
+            file.size >
+              MAX_FILE_SIZE
           ) {
-            return badRequest(
+            return responseError(
               'Each project file must be 10 MB or smaller.',
             );
           }
@@ -377,7 +479,7 @@ export default {
               file.type,
             )
           ) {
-            return badRequest(
+            return responseError(
               `Unsupported file type: ${file.name}`,
             );
           }
@@ -387,10 +489,43 @@ export default {
           data: customer,
           error: customerError,
         } =
-          await ctx.supabaseAdmin
-            .from('customers')
-            .select(
-              `
+          await ctx
+            .supabaseAdmin
+            .from(
+              'customers',
+            )
+            .select(`
+              id,
+              user_id,
+              full_name,
+              email,
+              phone,
+              business_name,
+              preferred_contact_method
+            `)
+            .eq(
+              'user_id',
+              userId,
+            )
+            .maybeSingle();
+
+        if (
+          customerError
+        ) {
+          throw customerError;
+        }
+
+        if (!customer) {
+          const {
+            data:
+              emailCustomer,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'customers',
+              )
+              .select(`
                 id,
                 user_id,
                 full_name,
@@ -398,116 +533,91 @@ export default {
                 phone,
                 business_name,
                 preferred_contact_method
-              `,
-            )
-            .eq('user_id', userId)
-            .maybeSingle();
-
-        if (
-          customerError &&
-          customerError.code !==
-            'PGRST116'
-        ) {
-          throw customerError;
-        }
-
-        if (!customer) {
-          const {
-            data: emailCustomer,
-          } =
-            await ctx.supabaseAdmin
-              .from('customers')
-              .select(
-                `
-                  id,
-                  user_id,
-                  full_name,
-                  email,
-                  phone,
-                  business_name,
-                  preferred_contact_method
-                `,
-              )
+              `)
               .eq(
                 'normalized_email',
-                authenticatedEmail,
+                email,
               )
               .maybeSingle();
 
           customer =
-            emailCustomer ?? null;
+            emailCustomer;
         }
 
         if (customer) {
           const {
-            data: updatedCustomer,
-            error: updateError,
+            data:
+              updatedCustomer,
+            error:
+              updateCustomerError,
           } =
-            await ctx.supabaseAdmin
-              .from('customers')
+            await ctx
+              .supabaseAdmin
+              .from(
+                'customers',
+              )
               .update({
-                user_id: userId,
-                full_name: fullName,
+                user_id:
+                  userId,
+
+                full_name:
+                  fullName,
+
                 phone,
+
                 business_name:
                   businessName ||
                   null,
+
                 preferred_contact_method:
-                  preferredContactMethod,
+                  contactMethod,
               })
               .eq(
                 'id',
                 customer.id,
               )
-              .select(
-                `
-                  id,
-                  user_id,
-                  full_name,
-                  email,
-                  phone,
-                  business_name,
-                  preferred_contact_method
-                `,
-              )
+              .select()
               .single();
 
-          if (updateError) {
-            throw updateError;
+          if (
+            updateCustomerError
+          ) {
+            throw updateCustomerError;
           }
 
           customer =
             updatedCustomer;
         } else {
           const {
-            data: createdCustomer,
-            error: createCustomerError,
+            data:
+              createdCustomer,
+            error:
+              createCustomerError,
           } =
-            await ctx.supabaseAdmin
-              .from('customers')
+            await ctx
+              .supabaseAdmin
+              .from(
+                'customers',
+              )
               .insert({
-                user_id: userId,
-                full_name: fullName,
-                email:
-                  authenticatedEmail,
+                user_id:
+                  userId,
+
+                full_name:
+                  fullName,
+
+                email,
+
                 phone,
+
                 business_name:
                   businessName ||
                   null,
+
                 preferred_contact_method:
-                  preferredContactMethod,
+                  contactMethod,
               })
-              .select(
-                `
-                  id,
-                  user_id,
-                  full_name,
-                  email,
-                  phone,
-                  business_name,
-                  preferred_contact_method
-                `,
-              )
+              .select()
               .single();
 
           if (
@@ -526,18 +636,7 @@ export default {
           );
         }
 
-        let createdOrder:
-          | {
-              id: string;
-              reference: string;
-              status: string;
-              created_at: string;
-            }
-          | null = null;
-
-        let lastOrderError:
-          | unknown
-          | null = null;
+        let order = null;
 
         for (
           let attempt = 0;
@@ -545,14 +644,17 @@ export default {
           attempt += 1
         ) {
           const reference =
-            generateReference();
+            createReference();
 
           const {
             data,
             error,
           } =
-            await ctx.supabaseAdmin
-              .from('orders')
+            await ctx
+              .supabaseAdmin
+              .from(
+                'orders',
+              )
               .insert({
                 reference,
 
@@ -561,6 +663,9 @@ export default {
 
                 user_id:
                   userId,
+
+                catalog_item_id:
+                  catalogItem.id,
 
                 service_slug:
                   serviceSlug,
@@ -587,18 +692,42 @@ export default {
 
                 deadline,
 
+                pricing_type:
+                  catalogItem
+                    .pricing_type,
+
+                service_price_kobo:
+                  priceKobo,
+
+                requires_quote:
+                  requiresQuote,
+
+                quoted_amount_kobo:
+                  immediatePayment
+                    ? priceKobo
+                    : null,
+
                 status:
-                  'new',
+                  immediatePayment
+                    ? 'awaiting_payment'
+                    : 'under_review',
 
                 payment_status:
                   'pending',
+
+                customer_action_required:
+                  immediatePayment,
+
+                customer_action_label:
+                  immediatePayment
+                    ? 'Payment available'
+                    : null,
 
                 customer_snapshot: {
                   full_name:
                     fullName,
 
-                  email:
-                    authenticatedEmail,
+                  email,
 
                   phone,
 
@@ -607,55 +736,48 @@ export default {
                     null,
 
                   preferred_contact_method:
-                    preferredContactMethod,
+                    contactMethod,
                 },
 
                 last_customer_activity_at:
                   new Date()
                     .toISOString(),
               })
-              .select(
-                `
-                  id,
-                  reference,
-                  status,
-                  created_at
-                `,
-              )
+              .select(`
+                id,
+                reference,
+                status,
+                payment_status,
+                pricing_type,
+                service_price_kobo,
+                requires_quote,
+                quoted_amount_kobo,
+                created_at
+              `)
               .single();
 
           if (!error) {
-            createdOrder =
-              data;
-
+            order = data;
             break;
           }
 
-          lastOrderError =
-            error;
-
           if (
-            error.code !== '23505'
+            error.code !==
+            '23505'
           ) {
-            break;
+            throw error;
           }
         }
 
-        if (!createdOrder) {
-          console.error(
-            'Order creation failed:',
-            lastOrderError,
-          );
-
+        if (!order) {
           throw new Error(
-            'Your order could not be created.',
+            'Your project could not be created.',
           );
         }
 
         const uploads: Array<{
           fileId: string;
           clientIndex: number;
-          originalName: string;
           path: string;
           token: string;
         }> = [];
@@ -670,28 +792,26 @@ export default {
             const file =
               submittedFiles[index];
 
-            const originalName =
-              cleanText(
-                file.name,
-                255,
-              );
-
             const filename =
-              `${crypto.randomUUID()}-${safeFilename(originalName)}`;
+              `${crypto.randomUUID()}-${safeFilename(file.name)}`;
 
             const storagePath =
-              `${userId}/${createdOrder.id}/${filename}`;
+              `${userId}/${order.id}/${filename}`;
 
             const {
-              data: fileRecord,
+              data:
+                fileRecord,
               error:
                 fileRecordError,
             } =
-              await ctx.supabaseAdmin
-                .from('order_files')
+              await ctx
+                .supabaseAdmin
+                .from(
+                  'order_files',
+                )
                 .insert({
                   order_id:
-                    createdOrder.id,
+                    order.id,
 
                   bucket_name:
                     'project-references',
@@ -700,7 +820,10 @@ export default {
                     storagePath,
 
                   original_name:
-                    originalName,
+                    clean(
+                      file.name,
+                      255,
+                    ),
 
                   mime_type:
                     file.type ||
@@ -716,10 +839,7 @@ export default {
                     'customer_reference',
                 })
                 .select(
-                  `
-                    id,
-                    storage_path
-                  `,
+                  'id',
                 )
                 .single();
 
@@ -736,11 +856,13 @@ export default {
             }
 
             const {
-              data: signedUpload,
+              data:
+                signedUpload,
               error:
-                signedUploadError,
+                uploadError,
             } =
-              await ctx.supabaseAdmin
+              await ctx
+                .supabaseAdmin
                 .storage
                 .from(
                   'project-references',
@@ -750,13 +872,13 @@ export default {
                 );
 
             if (
-              signedUploadError ||
+              uploadError ||
               !signedUpload
             ) {
               throw (
-                signedUploadError ||
+                uploadError ||
                 new Error(
-                  'Unable to prepare secure upload.',
+                  'Unable to prepare secure file upload.',
                 )
               );
             }
@@ -768,8 +890,6 @@ export default {
               clientIndex:
                 index,
 
-              originalName,
-
               path:
                 signedUpload.path,
 
@@ -777,23 +897,31 @@ export default {
                 signedUpload.token,
             });
           }
-        } catch (filePreparationError) {
-          await ctx.supabaseAdmin
-            .from('orders')
+        } catch (
+          fileError
+        ) {
+          await ctx
+            .supabaseAdmin
+            .from(
+              'orders',
+            )
             .delete()
             .eq(
               'id',
-              createdOrder.id,
+              order.id,
             );
 
-          throw filePreparationError;
+          throw fileError;
         }
 
-        await ctx.supabaseAdmin
-          .from('notification_events')
+        await ctx
+          .supabaseAdmin
+          .from(
+            'notification_events',
+          )
           .insert({
             order_id:
-              createdOrder.id,
+              order.id,
 
             customer_id:
               customer.id,
@@ -805,20 +933,27 @@ export default {
               'order_created',
 
             recipient:
-              authenticatedEmail,
+              email,
 
             status:
               'pending',
 
             payload: {
               reference:
-                createdOrder.reference,
+                order.reference,
 
               project_title:
                 projectTitle,
 
-              service_slug:
-                serviceSlug,
+              service_title:
+                catalogItem.title,
+
+              requires_quote:
+                requiresQuote,
+
+              quoted_amount_kobo:
+                order
+                  .quoted_amount_kobo,
             },
           });
 
@@ -826,19 +961,7 @@ export default {
           {
             success: true,
 
-            order: {
-              id:
-                createdOrder.id,
-
-              reference:
-                createdOrder.reference,
-
-              status:
-                createdOrder.status,
-
-              createdAt:
-                createdOrder.created_at,
-            },
+            order,
 
             uploads,
           },
@@ -848,22 +971,15 @@ export default {
         );
       } catch (error) {
         console.error(
-          'create-order error:',
+          'create-order:',
           error,
         );
 
-        return Response.json(
-          {
-            success: false,
-
-            message:
-              error instanceof Error
-                ? error.message
-                : 'An unexpected error occurred while creating the project.',
-          },
-          {
-            status: 500,
-          },
+        return responseError(
+          error instanceof Error
+            ? error.message
+            : 'Your project could not be created.',
+          500,
         );
       }
     },

@@ -21,6 +21,7 @@ import './styles/animations.css';
 import './styles/mobile-nav.css';
 import './styles/system-pages.css';
 import './styles/admin.css';
+import './styles/commerce.css';
 
 const root =
   document.getElementById(

@@ -21,15 +21,17 @@ export default function DashboardShell() {
   const {
     profile,
     user,
-  } = useAuth();
+  } =
+    useAuth();
 
-  const name =
+  const fullName =
     profile?.full_name ||
-    user?.email?.split('@')[0] ||
+    user?.email
+      ?.split('@')[0] ||
     'Customer';
 
   const firstName =
-    name
+    fullName
       .trim()
       .split(' ')[0];
 
@@ -38,19 +40,19 @@ export default function DashboardShell() {
       <div className="workspace-glow workspace-glow-one" />
       <div className="workspace-glow workspace-glow-two" />
 
-      <section className="workspace-header">
+      <section className="workspace-header workspace-header-v2">
         <div className="container workspace-header-inner">
           <div className="workspace-heading">
             <span>
-              POSHO CREATIVE WORKSPACE
+              CLIENT WORKSPACE
             </span>
 
             <h1>
-              {firstName}'s workspace.
+              Welcome, {firstName}.
             </h1>
 
             <p>
-              Projects, payments, files and updates in one place.
+              Projects, quotes, payments, files and updates — organised around your account.
             </p>
           </div>
 
@@ -58,48 +60,59 @@ export default function DashboardShell() {
             to="/order"
             className="button button-primary"
           >
-            <Plus size={18} />
-            Start new project
+            <Plus
+              size={18}
+            />
+            New project
           </Link>
         </div>
       </section>
 
       <div className="workspace-navigation-wrapper">
         <div className="container">
-          <nav
-            className="workspace-navigation"
-            aria-label="Customer workspace"
-          >
+          <nav className="workspace-navigation">
             <NavLink
               to="/dashboard"
               end
             >
-              <LayoutDashboard size={17} />
+              <LayoutDashboard
+                size={17}
+              />
               Overview
             </NavLink>
 
             <NavLink to="/dashboard/orders">
-              <ReceiptText size={17} />
-              Orders
+              <ReceiptText
+                size={17}
+              />
+              Projects
             </NavLink>
 
             <NavLink to="/dashboard/payments">
-              <ReceiptText size={17} />
+              <ReceiptText
+                size={17}
+              />
               Payments
             </NavLink>
 
             <NavLink to="/dashboard/files">
-              <FileText size={17} />
+              <FileText
+                size={17}
+              />
               Files
             </NavLink>
 
             <NavLink to="/dashboard/notifications">
-              <Bell size={17} />
+              <Bell
+                size={17}
+              />
               Updates
             </NavLink>
 
             <NavLink to="/dashboard/profile">
-              <Settings size={17} />
+              <Settings
+                size={17}
+              />
               Profile
             </NavLink>
           </nav>

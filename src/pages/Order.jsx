@@ -10,18 +10,25 @@ import {
   Check,
   CheckCircle2,
   FileText,
+  LockKeyhole,
   Mail,
   Paperclip,
   Phone,
   RotateCcw,
+  ShieldCheck,
   Trash2,
   UploadCloud,
   UserRound,
 } from 'lucide-react';
 
 import {
+  Link,
   useSearchParams,
 } from 'react-router-dom';
+
+import {
+  useAuth,
+} from '../context/AuthContext';
 
 import {
   budgetOptions,
@@ -31,7 +38,17 @@ import {
   timelineOptions,
 } from '../data/orderCatalog';
 
-const STORAGE_KEY = 'poshoCreativeOrderDraft';
+import {
+  createProjectOrder,
+  formatMoney,
+} from '../lib/orders';
+
+import {
+  supabase,
+} from '../lib/supabase';
+
+const DRAFT_KEY =
+  'poshoCreativeOrderDraft';
 
 const steps = [
   {
@@ -60,512 +77,1131 @@ const steps = [
   },
 ];
 
-function createEmptyForm(service = '') {
+const allowedFileTypes =
+  new Set([
+    'image/png',
+    'image/jpeg',
+    'image/webp',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ]);
+
+function createEmptyForm(
+  service = '',
+) {
   return {
     service,
-    projectType: '',
-    projectTitle: '',
-    projectDescription: '',
-    projectGoal: '',
-    referenceLinks: '',
-    budget: '',
-    timeline: '',
-    deadline: '',
-    fullName: '',
-    email: '',
-    phone: '',
-    businessName: '',
-    contactMethod: 'whatsapp',
-    confirmation: false,
+
+    projectType:
+      '',
+
+    projectTitle:
+      '',
+
+    projectDescription:
+      '',
+
+    projectGoal:
+      '',
+
+    referenceLinks:
+      '',
+
+    budget:
+      '',
+
+    timeline:
+      '',
+
+    deadline:
+      '',
+
+    fullName:
+      '',
+
+    email:
+      '',
+
+    phone:
+      '',
+
+    businessName:
+      '',
+
+    contactMethod:
+      'whatsapp',
+
+    confirmation:
+      false,
   };
 }
 
-function createReference() {
-  const now = new Date();
-
-  const date = [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, '0'),
-    String(now.getDate()).padStart(2, '0'),
-  ].join('');
-
-  const random = Math.random()
-    .toString(36)
-    .slice(2, 6)
-    .toUpperCase();
-
-  return `PC-${date}-${random}`;
-}
-
-function formatFileSize(bytes) {
-  if (bytes < 1024) {
+function formatFileSize(
+  bytes,
+) {
+  if (
+    bytes <
+    1024
+  ) {
     return `${bytes} B`;
   }
 
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
+  if (
+    bytes <
+    1024 *
+      1024
+  ) {
+    return `${(
+      bytes /
+      1024
+    ).toFixed(
+      1,
+    )} KB`;
   }
 
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(
+    bytes /
+    (
+      1024 *
+      1024
+    )
+  ).toFixed(
+    1,
+  )} MB`;
+}
+
+function formatCatalogPrice(
+  item,
+) {
+  if (!item) {
+    return 'Price confirmed during review';
+  }
+
+  if (
+    item.pricing_type ===
+    'custom'
+  ) {
+    return 'Custom quote';
+  }
+
+  if (
+    item.price_kobo ===
+      null ||
+    item.price_kobo ===
+      undefined
+  ) {
+    return 'Quote required';
+  }
+
+  const money =
+    formatMoney(
+      item.price_kobo,
+      item.currency ||
+        'NGN',
+    );
+
+  if (
+    item.pricing_type ===
+    'starting_at'
+  ) {
+    return `From ${money}`;
+  }
+
+  if (
+    item.pricing_type ===
+    'monthly'
+  ) {
+    return `${money} / month`;
+  }
+
+  return money;
 }
 
 export default function Order() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const {
+    user,
+    profile,
+  } =
+    useAuth();
 
-  const queryService = searchParams.get('service') || '';
+  const [
+    searchParams,
+    setSearchParams,
+  ] =
+    useSearchParams();
 
-  const validQueryService = getOrderService(queryService)
-    ? queryService
-    : '';
+  const queryService =
+    searchParams.get(
+      'service',
+    ) || '';
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const validQueryService =
+    getOrderService(
+      queryService,
+    )
+      ? queryService
+      : '';
 
-  const [form, setForm] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+  const [
+    currentStep,
+    setCurrentStep,
+  ] =
+    useState(1);
 
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
+  const [
+    form,
+    setForm,
+  ] =
+    useState(() => {
+      const stored =
+        localStorage
+          .getItem(
+            DRAFT_KEY,
+          );
 
-        return {
-          ...createEmptyForm(validQueryService),
-          ...parsed,
-          service:
-            validQueryService ||
-            parsed.service ||
-            '',
-          confirmation: false,
-        };
-      } catch {
-        return createEmptyForm(validQueryService);
+      if (stored) {
+        try {
+          const parsed =
+            JSON.parse(
+              stored,
+            );
+
+          return {
+            ...createEmptyForm(
+              validQueryService,
+            ),
+
+            ...parsed,
+
+            service:
+              validQueryService ||
+              parsed.service ||
+              '',
+
+            confirmation:
+              false,
+          };
+        } catch {
+          return createEmptyForm(
+            validQueryService,
+          );
+        }
       }
-    }
 
-    return createEmptyForm(validQueryService);
-  });
+      return createEmptyForm(
+        validQueryService,
+      );
+    });
 
-  const [files, setFiles] = useState([]);
-  const [error, setError] = useState('');
-  const [submittedReference, setSubmittedReference] =
+  const [
+    files,
+    setFiles,
+  ] =
+    useState([]);
+
+  const [
+    catalog,
+    setCatalog,
+  ] =
+    useState([]);
+
+  const [
+    error,
+    setError,
+  ] =
     useState('');
 
-  const selectedService = useMemo(
-    () => getOrderService(form.service),
-    [form.service],
-  );
+  const [
+    submitting,
+    setSubmitting,
+  ] =
+    useState(false);
 
-  const selectedProjectType = useMemo(
-    () =>
-      selectedService?.projectTypes.find(
-        (item) => item.id === form.projectType,
-      ),
-    [selectedService, form.projectType],
-  );
+  const [
+    submissionStage,
+    setSubmissionStage,
+  ] =
+    useState('');
 
-  const selectedBudget = useMemo(
-    () =>
-      budgetOptions.find(
-        (item) => item.id === form.budget,
-      ),
-    [form.budget],
-  );
+  const [
+    submittedOrder,
+    setSubmittedOrder,
+  ] =
+    useState(null);
 
-  const selectedTimeline = useMemo(
-    () =>
-      timelineOptions.find(
-        (item) => item.id === form.timeline,
-      ),
-    [form.timeline],
-  );
+  const selectedService =
+    useMemo(
+      () =>
+        getOrderService(
+          form.service,
+        ),
 
-  const selectedContactMethod = useMemo(
-    () =>
-      contactMethods.find(
-        (item) => item.id === form.contactMethod,
-      ),
-    [form.contactMethod],
-  );
+      [
+        form.service,
+      ],
+    );
+
+  const selectedProjectType =
+    useMemo(
+      () =>
+        selectedService
+          ?.projectTypes
+          ?.find(
+            (
+              item,
+            ) =>
+              item.id ===
+              form.projectType,
+          ),
+
+      [
+        selectedService,
+        form.projectType,
+      ],
+    );
+
+  const selectedBudget =
+    useMemo(
+      () =>
+        budgetOptions
+          .find(
+            (
+              item,
+            ) =>
+              item.id ===
+              form.budget,
+          ),
+
+      [
+        form.budget,
+      ],
+    );
+
+  const selectedTimeline =
+    useMemo(
+      () =>
+        timelineOptions
+          .find(
+            (
+              item,
+            ) =>
+              item.id ===
+              form.timeline,
+          ),
+
+      [
+        form.timeline,
+      ],
+    );
+
+  const selectedContact =
+    useMemo(
+      () =>
+        contactMethods
+          .find(
+            (
+              item,
+            ) =>
+              item.id ===
+              form.contactMethod,
+          ),
+
+      [
+        form.contactMethod,
+      ],
+    );
+
+  const catalogMap =
+    useMemo(
+      () =>
+        new Map(
+          catalog.map(
+            (
+              item,
+            ) => [
+              `${item.service_slug}:${item.project_type}`,
+              item,
+            ],
+          ),
+        ),
+
+      [
+        catalog,
+      ],
+    );
+
+  const selectedCatalogItem =
+    useMemo(
+      () =>
+        catalogMap.get(
+          `${form.service}:${form.projectType}`,
+        ) ||
+        null,
+
+      [
+        catalogMap,
+        form.service,
+        form.projectType,
+      ],
+    );
 
   useEffect(() => {
     document.title =
       'Start a Project | Posho Creative';
 
-    const description = document.querySelector(
-      'meta[name="description"]',
+    /*
+     * Remove legacy fake submitted orders
+     * from the old prototype.
+     *
+     * Draft data may still stay locally,
+     * but submitted orders are now server-only.
+     */
+    localStorage.removeItem(
+      'poshoCreativeLocalOrders',
     );
-
-    if (description) {
-      description.setAttribute(
-        'content',
-        'Start a project with Posho Creative. Choose a service, describe your requirements and submit your project request.',
-      );
-    }
   }, []);
 
   useEffect(() => {
-    const saveableForm = {
+    const loadCatalog =
+      async () => {
+        try {
+          const {
+            data,
+            error:
+              catalogError,
+          } =
+            await supabase
+              .from(
+                'service_catalog',
+              )
+              .select(`
+                id,
+                service_slug,
+                project_type,
+                title,
+                pricing_type,
+                price_kobo,
+                currency,
+                active,
+                sort_order
+              `)
+              .eq(
+                'active',
+                true,
+              )
+              .order(
+                'sort_order',
+                {
+                  ascending:
+                    true,
+                },
+              );
+
+          if (
+            catalogError
+          ) {
+            console.warn(
+              'Service pricing could not be loaded:',
+              catalogError,
+            );
+
+            return;
+          }
+
+          setCatalog(
+            data ||
+              [],
+          );
+        } catch (
+          catalogError
+        ) {
+          console.warn(
+            'Service catalogue unavailable:',
+            catalogError,
+          );
+        }
+      };
+
+    loadCatalog();
+  }, []);
+
+  useEffect(() => {
+    setForm(
+      (
+        current,
+      ) => ({
+        ...current,
+
+        fullName:
+          current.fullName ||
+          profile
+            ?.full_name ||
+          user
+            ?.user_metadata
+            ?.full_name ||
+          '',
+
+        email:
+          user?.email ||
+          profile?.email ||
+          current.email ||
+          '',
+
+        phone:
+          current.phone ||
+          profile?.phone ||
+          user
+            ?.user_metadata
+            ?.phone ||
+          '',
+
+        businessName:
+          current.businessName ||
+          profile
+            ?.business_name ||
+          user
+            ?.user_metadata
+            ?.business_name ||
+          '',
+
+        contactMethod:
+          current.contactMethod ||
+          profile
+            ?.preferred_contact_method ||
+          'whatsapp',
+      }),
+    );
+  }, [
+    user,
+    profile,
+  ]);
+
+  useEffect(() => {
+    const saveable = {
       ...form,
-      confirmation: false,
+
+      confirmation:
+        false,
     };
 
     localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(saveableForm),
+      DRAFT_KEY,
+      JSON.stringify(
+        saveable,
+      ),
     );
-  }, [form]);
+  }, [
+    form,
+  ]);
 
   useEffect(() => {
     if (
       validQueryService &&
-      form.service !== validQueryService
+      form.service !==
+        validQueryService
     ) {
-      setForm((current) => ({
-        ...current,
-        service: validQueryService,
-        projectType: '',
-      }));
+      setForm(
+        (
+          current,
+        ) => ({
+          ...current,
+
+          service:
+            validQueryService,
+
+          projectType:
+            '',
+        }),
+      );
     }
-  }, [validQueryService, form.service]);
+  }, [
+    validQueryService,
+    form.service,
+  ]);
 
-  const updateField = (field, value) => {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
+  const updateField =
+    (
+      field,
+      value,
+    ) => {
+      setForm(
+        (
+          current,
+        ) => ({
+          ...current,
 
-    setError('');
-  };
-
-  const chooseService = (slug) => {
-    setForm((current) => ({
-      ...current,
-      service: slug,
-      projectType: '',
-    }));
-
-    setSearchParams({
-      service: slug,
-    });
-
-    setError('');
-  };
-
-  const handleFiles = (event) => {
-    const selectedFiles = Array.from(
-      event.target.files || [],
-    );
-
-    if (!selectedFiles.length) {
-      return;
-    }
-
-    const allowed = selectedFiles.filter(
-      (file) => file.size <= 10 * 1024 * 1024,
-    );
-
-    const combined = [
-      ...files,
-      ...allowed,
-    ].slice(0, 6);
-
-    setFiles(combined);
-
-    event.target.value = '';
-  };
-
-  const removeFile = (index) => {
-    setFiles((current) =>
-      current.filter(
-        (_, itemIndex) => itemIndex !== index,
-      ),
-    );
-  };
-
-  const validateStep = () => {
-    if (currentStep === 1 && !form.service) {
-      setError(
-        'Choose the Posho Creative service you need.',
+          [field]:
+            value,
+        }),
       );
 
-      return false;
-    }
-
-    if (
-      currentStep === 2 &&
-      !form.projectType
-    ) {
-      setError(
-        'Choose the type of project you want to start.',
-      );
-
-      return false;
-    }
-
-    if (currentStep === 3) {
-      if (!form.projectTitle.trim()) {
-        setError(
-          'Give your project a short title.',
-        );
-
-        return false;
-      }
-
-      if (
-        form.projectDescription.trim().length < 30
-      ) {
-        setError(
-          'Tell us a little more about the project. Your description should be at least 30 characters.',
-        );
-
-        return false;
-      }
-
-      if (!form.projectGoal.trim()) {
-        setError(
-          'Tell us what you want this project to achieve.',
-        );
-
-        return false;
-      }
-    }
-
-    if (currentStep === 4) {
-      if (!form.budget) {
-        setError(
-          'Choose the budget range that best matches your project.',
-        );
-
-        return false;
-      }
-
-      if (!form.timeline) {
-        setError(
-          'Choose your preferred project timeline.',
-        );
-
-        return false;
-      }
-
-      if (
-        form.timeline === 'specific-date' &&
-        !form.deadline
-      ) {
-        setError(
-          'Enter the deadline you want us to consider.',
-        );
-
-        return false;
-      }
-    }
-
-    if (currentStep === 5) {
-      if (!form.fullName.trim()) {
-        setError(
-          'Enter your full name.',
-        );
-
-        return false;
-      }
-
-      if (!form.email.trim()) {
-        setError(
-          'Enter your email address.',
-        );
-
-        return false;
-      }
-
-      if (
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-          form.email,
-        )
-      ) {
-        setError(
-          'Enter a valid email address.',
-        );
-
-        return false;
-      }
-
-      if (!form.phone.trim()) {
-        setError(
-          'Enter your phone or WhatsApp number.',
-        );
-
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  const nextStep = () => {
-    if (!validateStep()) {
-      return;
-    }
-
-    setCurrentStep((current) =>
-      Math.min(current + 1, 6),
-    );
-
-    setError('');
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-
-  const previousStep = () => {
-    setCurrentStep((current) =>
-      Math.max(current - 1, 1),
-    );
-
-    setError('');
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-
-  const resetOrder = () => {
-    localStorage.removeItem(STORAGE_KEY);
-
-    setForm(
-      createEmptyForm(validQueryService),
-    );
-
-    setFiles([]);
-    setCurrentStep(1);
-    setError('');
-    setSubmittedReference('');
-
-    if (!validQueryService) {
-      setSearchParams({});
-    }
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-
-  const submitOrder = () => {
-    if (!form.confirmation) {
-      setError(
-        'Confirm that the information provided is correct before submitting.',
-      );
-
-      return;
-    }
-
-    const reference = createReference();
-
-    const orderRecord = {
-      reference,
-      ...form,
-      serviceTitle:
-        selectedService?.title || '',
-      projectTypeTitle:
-        selectedProjectType?.label || '',
-      budgetTitle:
-        selectedBudget?.label || '',
-      timelineTitle:
-        selectedTimeline?.label || '',
-      contactMethodTitle:
-        selectedContactMethod?.label || '',
-      files: files.map((file) => ({
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      })),
-      submittedAt: new Date().toISOString(),
+      setError('');
     };
 
-    const existingOrders = JSON.parse(
-      localStorage.getItem(
-        'poshoCreativeLocalOrders',
-      ) || '[]',
-    );
+  const chooseService =
+    (
+      slug,
+    ) => {
+      setForm(
+        (
+          current,
+        ) => ({
+          ...current,
 
-    localStorage.setItem(
-      'poshoCreativeLocalOrders',
-      JSON.stringify([
-        orderRecord,
-        ...existingOrders,
-      ]),
-    );
+          service:
+            slug,
 
-    localStorage.removeItem(STORAGE_KEY);
+          projectType:
+            '',
+        }),
+      );
 
-    setSubmittedReference(reference);
+      setSearchParams({
+        service:
+          slug,
+      });
 
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
+      setError('');
+    };
 
-  if (submittedReference) {
+  const handleFiles =
+    (
+      event,
+    ) => {
+      const incoming =
+        Array.from(
+          event
+            .target
+            .files ||
+            [],
+        );
+
+      if (
+        !incoming.length
+      ) {
+        return;
+      }
+
+      const invalidType =
+        incoming.find(
+          (
+            file,
+          ) =>
+            file.type &&
+            !allowedFileTypes.has(
+              file.type,
+            ),
+        );
+
+      if (
+        invalidType
+      ) {
+        setError(
+          `"${invalidType.name}" is not a supported file type. Use PNG, JPG, WEBP, PDF, DOC or DOCX.`,
+        );
+
+        event.target.value =
+          '';
+
+        return;
+      }
+
+      const tooLarge =
+        incoming.find(
+          (
+            file,
+          ) =>
+            file.size >
+            10 *
+              1024 *
+              1024,
+        );
+
+      if (
+        tooLarge
+      ) {
+        setError(
+          `"${tooLarge.name}" is larger than 10 MB.`,
+        );
+
+        event.target.value =
+          '';
+
+        return;
+      }
+
+      if (
+        files.length +
+          incoming.length >
+        6
+      ) {
+        setError(
+          'You can upload a maximum of 6 files.',
+        );
+
+        event.target.value =
+          '';
+
+        return;
+      }
+
+      setFiles(
+        (
+          current,
+        ) => [
+          ...current,
+          ...incoming,
+        ],
+      );
+
+      event.target.value =
+        '';
+
+      setError('');
+    };
+
+  const removeFile =
+    (
+      index,
+    ) => {
+      setFiles(
+        (
+          current,
+        ) =>
+          current.filter(
+            (
+              _,
+              itemIndex,
+            ) =>
+              itemIndex !==
+              index,
+          ),
+      );
+    };
+
+  const validateStep =
+    () => {
+      if (
+        currentStep ===
+          1 &&
+        !form.service
+      ) {
+        setError(
+          'Choose the Posho Creative service you need.',
+        );
+
+        return false;
+      }
+
+      if (
+        currentStep ===
+          2 &&
+        !form.projectType
+      ) {
+        setError(
+          'Choose the type of project you want to start.',
+        );
+
+        return false;
+      }
+
+      if (
+        currentStep ===
+        3
+      ) {
+        if (
+          !form.projectTitle
+            .trim()
+        ) {
+          setError(
+            'Give your project a short title.',
+          );
+
+          return false;
+        }
+
+        if (
+          form
+            .projectDescription
+            .trim()
+            .length <
+          30
+        ) {
+          setError(
+            'Your project description should contain at least 30 characters.',
+          );
+
+          return false;
+        }
+
+        if (
+          !form.projectGoal
+            .trim()
+        ) {
+          setError(
+            'Tell us what you want this project to achieve.',
+          );
+
+          return false;
+        }
+      }
+
+      if (
+        currentStep ===
+        4
+      ) {
+        if (
+          !form.budget
+        ) {
+          setError(
+            'Choose your project budget range.',
+          );
+
+          return false;
+        }
+
+        if (
+          !form.timeline
+        ) {
+          setError(
+            'Choose your preferred project timeline.',
+          );
+
+          return false;
+        }
+
+        if (
+          form.timeline ===
+            'specific-date' &&
+          !form.deadline
+        ) {
+          setError(
+            'Enter your required deadline.',
+          );
+
+          return false;
+        }
+      }
+
+      if (
+        currentStep ===
+        5
+      ) {
+        if (
+          !form.fullName
+            .trim()
+        ) {
+          setError(
+            'Enter your full name.',
+          );
+
+          return false;
+        }
+
+        if (
+          !user?.email
+        ) {
+          setError(
+            'Your authenticated email could not be found. Please sign out and sign in again.',
+          );
+
+          return false;
+        }
+
+        if (
+          !form.phone
+            .trim()
+        ) {
+          setError(
+            'Enter your phone or WhatsApp number.',
+          );
+
+          return false;
+        }
+      }
+
+      return true;
+    };
+
+  const nextStep =
+    () => {
+      if (
+        !validateStep()
+      ) {
+        return;
+      }
+
+      setCurrentStep(
+        (
+          current,
+        ) =>
+          Math.min(
+            current + 1,
+            6,
+          ),
+      );
+
+      setError('');
+
+      window.scrollTo({
+        top: 0,
+        behavior:
+          'smooth',
+      });
+    };
+
+  const previousStep =
+    () => {
+      setCurrentStep(
+        (
+          current,
+        ) =>
+          Math.max(
+            current - 1,
+            1,
+          ),
+      );
+
+      setError('');
+
+      window.scrollTo({
+        top: 0,
+        behavior:
+          'smooth',
+      });
+    };
+
+  const resetOrder =
+    () => {
+      localStorage.removeItem(
+        DRAFT_KEY,
+      );
+
+      setForm(
+        createEmptyForm(
+          validQueryService,
+        ),
+      );
+
+      setFiles([]);
+      setCurrentStep(1);
+      setError('');
+      setSubmittedOrder(
+        null,
+      );
+      setSubmissionStage(
+        '',
+      );
+
+      window.scrollTo({
+        top: 0,
+        behavior:
+          'smooth',
+      });
+    };
+
+  const submitOrder =
+    async () => {
+      if (
+        !form.confirmation
+      ) {
+        setError(
+          'Confirm that your project information is correct before submitting.',
+        );
+
+        return;
+      }
+
+      if (
+        submitting
+      ) {
+        return;
+      }
+
+      try {
+        setSubmitting(
+          true,
+        );
+
+        setError('');
+
+        setSubmissionStage(
+          'Securing your project request...',
+        );
+
+        const createdOrder =
+          await createProjectOrder({
+            form: {
+              ...form,
+
+              email:
+                user?.email ||
+                form.email,
+            },
+
+            files,
+
+            onStageChange:
+              setSubmissionStage,
+          });
+
+        localStorage.removeItem(
+          DRAFT_KEY,
+        );
+
+        localStorage.removeItem(
+          'poshoCreativeLocalOrders',
+        );
+
+        setSubmittedOrder(
+          createdOrder,
+        );
+
+        window.scrollTo({
+          top: 0,
+          behavior:
+            'smooth',
+        });
+      } catch (
+        submissionError
+      ) {
+        console.error(
+          'Real project submission failed:',
+          submissionError,
+        );
+
+        setError(
+          submissionError
+            .message ||
+            'Your project could not be submitted. Nothing has been charged. Please try again.',
+        );
+      } finally {
+        setSubmitting(
+          false,
+        );
+
+        setSubmissionStage(
+          '',
+        );
+      }
+    };
+
+  if (
+    submittedOrder
+  ) {
     return (
       <main className="order-success-page">
         <div className="container">
           <div className="order-success-card">
             <div className="order-success-icon">
-              <CheckCircle2 size={38} />
+              <CheckCircle2
+                size={38}
+              />
             </div>
 
             <span className="section-kicker">
-              Project request completed
+              PROJECT CREATED
             </span>
 
             <h1>
-              Your idea is ready
+              Your project
               <br />
-              for the next step.
+              is now in your workspace.
             </h1>
 
             <p>
-              Your project reference is
+              Posho Creative has received your project request.
+
+              {' '}
+
+              Your reference is
+
+              {' '}
+
               <strong>
-                {' '}
-                {submittedReference}
+                {submittedOrder.reference}
               </strong>
               .
             </p>
 
             <div className="order-success-summary">
               <div>
-                <span>Service</span>
+                <span>
+                  Service
+                </span>
+
                 <strong>
-                  {selectedService?.title}
+                  {selectedService
+                    ?.title}
                 </strong>
               </div>
 
               <div>
-                <span>Project</span>
+                <span>
+                  Project
+                </span>
+
                 <strong>
-                  {selectedProjectType?.label}
+                  {selectedProjectType
+                    ?.label}
                 </strong>
               </div>
 
               <div>
-                <span>Customer</span>
+                <span>
+                  Status
+                </span>
+
                 <strong>
-                  {form.fullName}
+                  {submittedOrder.status
+                    ?.replaceAll(
+                      '_',
+                      ' ',
+                    )}
                 </strong>
               </div>
             </div>
 
-            <button
-              type="button"
-              className="button button-primary"
-              onClick={resetOrder}
+            <div
+              style={{
+                display:
+                  'flex',
+
+                justifyContent:
+                  'center',
+
+                flexWrap:
+                  'wrap',
+
+                gap:
+                  '10px',
+
+                marginTop:
+                  '28px',
+              }}
             >
-              Start another project
-              <ArrowRight size={18} />
-            </button>
+              <Link
+                to={`/dashboard/orders/${submittedOrder.reference}`}
+                className="button button-primary"
+              >
+                Open project
+
+                <ArrowRight
+                  size={18}
+                />
+              </Link>
+
+              <button
+                type="button"
+                className="button button-secondary"
+                onClick={
+                  resetOrder
+                }
+              >
+                Start another project
+              </button>
+            </div>
           </div>
         </div>
       </main>
@@ -579,47 +1215,61 @@ export default function Order() {
           <div className="order-header-copy">
             <div className="eyebrow">
               <span className="eyebrow-dot" />
+
               Start a project
             </div>
 
             <h1>
               Tell us what
-              <span> you imagine.</span>
+              <span>
+                {' '}
+                you imagine.
+              </span>
             </h1>
 
             <p>
-              Answer a few focused questions so we can
-              understand your project properly.
+              Create a real Posho Creative project connected permanently to your account.
             </p>
           </div>
 
           <div className="order-progress">
-            {steps.map((step) => (
-              <div
-                className={`order-progress-item ${
-                  currentStep === step.id
-                    ? 'active'
-                    : ''
-                } ${
-                  currentStep > step.id
-                    ? 'complete'
-                    : ''
-                }`}
-                key={step.id}
-              >
-                <div className="order-progress-circle">
-                  {currentStep > step.id ? (
-                    <Check size={15} />
-                  ) : (
+            {steps.map(
+              (
+                step,
+              ) => (
+                <div
+                  key={
                     step.id
-                  )}
-                </div>
+                  }
+                  className={`order-progress-item ${
+                    currentStep ===
+                    step.id
+                      ? 'active'
+                      : ''
+                  } ${
+                    currentStep >
+                    step.id
+                      ? 'complete'
+                      : ''
+                  }`}
+                >
+                  <div className="order-progress-circle">
+                    {currentStep >
+                    step.id ? (
+                      <Check
+                        size={15}
+                      />
+                    ) : (
+                      step.id
+                    )}
+                  </div>
 
-                <span>
-                  {step.label}
-                </span>
-              </div>
-            ))}
+                  <span>
+                    {step.label}
+                  </span>
+                </div>
+              ),
+            )}
           </div>
         </div>
       </section>
@@ -632,173 +1282,225 @@ export default function Order() {
                 Step {currentStep} of 6
               </span>
 
-              {currentStep === 1 && (
+              {currentStep ===
+                1 && (
                 <>
                   <h2>
-                    What can we help you with?
+                    Choose a service.
                   </h2>
 
                   <p>
-                    Choose the main service that best
-                    matches your project.
+                    Select the main Posho Creative service your project requires.
                   </p>
                 </>
               )}
 
-              {currentStep === 2 && (
+              {currentStep ===
+                2 && (
                 <>
                   <h2>
                     What are we creating?
                   </h2>
 
                   <p>
-                    Choose the project type that most
-                    closely matches what you need.
+                    Choose the project category that best matches your requirements.
                   </p>
                 </>
               )}
 
-              {currentStep === 3 && (
+              {currentStep ===
+                3 && (
                 <>
                   <h2>
-                    Tell us about the idea.
+                    Tell us about the project.
                   </h2>
 
                   <p>
-                    Give us enough context to understand
-                    what success looks like for you.
+                    Give us the information we need to understand the work properly.
                   </p>
                 </>
               )}
 
-              {currentStep === 4 && (
+              {currentStep ===
+                4 && (
                 <>
                   <h2>
                     Budget and timing.
                   </h2>
 
                   <p>
-                    This helps us understand the scale
-                    and urgency of the project.
+                    Tell us the scale and preferred delivery timeline.
                   </p>
                 </>
               )}
 
-              {currentStep === 5 && (
+              {currentStep ===
+                5 && (
                 <>
                   <h2>
-                    How should we reach you?
+                    Contact information.
                   </h2>
 
                   <p>
-                    Provide accurate details so we can
-                    follow up about your project.
+                    This project will be permanently connected to your signed-in account.
                   </p>
                 </>
               )}
 
-              {currentStep === 6 && (
+              {currentStep ===
+                6 && (
                 <>
                   <h2>
                     Review your project.
                   </h2>
 
                   <p>
-                    Check the information carefully
-                    before submitting your request.
+                    Confirm the details before the project is securely created.
                   </p>
                 </>
               )}
             </div>
 
-            {currentStep === 1 && (
+            {currentStep ===
+              1 && (
               <div className="order-service-grid">
-                {orderCatalog.map((service) => {
-                  const Icon = service.icon;
+                {orderCatalog.map(
+                  (
+                    service,
+                  ) => {
+                    const Icon =
+                      service.icon;
 
-                  return (
-                    <button
-                      type="button"
-                      key={service.slug}
-                      className={`order-service-option ${
-                        form.service === service.slug
-                          ? 'selected'
-                          : ''
-                      }`}
-                      onClick={() =>
-                        chooseService(service.slug)
-                      }
-                    >
-                      <div className="order-service-option-top">
-                        <div className="order-option-icon">
-                          <Icon size={23} />
-                        </div>
+                    const selected =
+                      form.service ===
+                      service.slug;
 
-                        <div className="order-option-check">
-                          {form.service ===
-                            service.slug && (
-                            <Check size={15} />
-                          )}
-                        </div>
-                      </div>
-
-                      <h3>
-                        {service.title}
-                      </h3>
-
-                      <p>
-                        {service.description}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {currentStep === 2 &&
-              selectedService && (
-                <div className="order-project-type-grid">
-                  {selectedService.projectTypes.map(
-                    (project) => (
+                    return (
                       <button
+                        key={
+                          service.slug
+                        }
                         type="button"
-                        key={project.id}
-                        className={`order-project-type-option ${
-                          form.projectType ===
-                          project.id
+                        className={`order-service-option ${
+                          selected
                             ? 'selected'
                             : ''
                         }`}
                         onClick={() =>
-                          updateField(
-                            'projectType',
-                            project.id,
+                          chooseService(
+                            service.slug,
                           )
                         }
                       >
-                        <div>
-                          <h3>
-                            {project.label}
-                          </h3>
+                        <div className="order-service-option-top">
+                          <div className="order-option-icon">
+                            <Icon
+                              size={22}
+                            />
+                          </div>
 
-                          <p>
-                            {project.description}
-                          </p>
+                          <div className="order-option-check">
+                            <Check
+                              size={14}
+                            />
+                          </div>
                         </div>
 
-                        <div className="order-radio">
-                          {form.projectType ===
-                            project.id && (
-                            <span />
-                          )}
-                        </div>
+                        <h3>
+                          {service.title}
+                        </h3>
+
+                        <p>
+                          {service.description}
+                        </p>
                       </button>
-                    ),
-                  )}
-                </div>
-              )}
+                    );
+                  },
+                )}
+              </div>
+            )}
 
-            {currentStep === 3 && (
+            {currentStep ===
+              2 &&
+              selectedService && (
+              <div className="order-project-type-grid">
+                {selectedService
+                  .projectTypes
+                  .map(
+                    (
+                      item,
+                    ) => {
+                      const selected =
+                        form.projectType ===
+                        item.id;
+
+                      const pricing =
+                        catalogMap.get(
+                          `${form.service}:${item.id}`,
+                        );
+
+                      return (
+                        <button
+                          key={
+                            item.id
+                          }
+                          type="button"
+                          className={`order-project-type-option ${
+                            selected
+                              ? 'selected'
+                              : ''
+                          }`}
+                          onClick={() =>
+                            updateField(
+                              'projectType',
+                              item.id,
+                            )
+                          }
+                        >
+                          <div>
+                            <h3>
+                              {item.label}
+                            </h3>
+
+                            <p>
+                              {item.description}
+                            </p>
+
+                            <strong
+                              style={{
+                                display:
+                                  'block',
+
+                                marginTop:
+                                  '10px',
+
+                                color:
+                                  'var(--brand-primary)',
+
+                                fontSize:
+                                  '12px',
+                              }}
+                            >
+                              {formatCatalogPrice(
+                                pricing,
+                              )}
+                            </strong>
+                          </div>
+
+                          <div className="order-radio">
+                            {selected && (
+                              <span />
+                            )}
+                          </div>
+                        </button>
+                      );
+                    },
+                  )}
+              </div>
+            )}
+
+            {currentStep ===
+              3 && (
               <div className="order-form-stack">
                 <div className="order-field">
                   <label htmlFor="projectTitle">
@@ -807,203 +1509,242 @@ export default function Order() {
 
                   <input
                     id="projectTitle"
-                    type="text"
-                    value={form.projectTitle}
-                    onChange={(event) =>
+                    value={
+                      form.projectTitle
+                    }
+                    onChange={(
+                      event,
+                    ) =>
                       updateField(
                         'projectTitle',
-                        event.target.value,
+                        event
+                          .target
+                          .value,
                       )
                     }
-                    placeholder="Example: New company website"
+                    placeholder="Example: Posho Foods company website"
                   />
                 </div>
 
                 <div className="order-field">
                   <label htmlFor="projectDescription">
-                    Describe the project
+                    Project description
                   </label>
 
                   <textarea
                     id="projectDescription"
-                    rows="7"
                     value={
                       form.projectDescription
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event,
+                    ) =>
                       updateField(
                         'projectDescription',
-                        event.target.value,
+                        event
+                          .target
+                          .value,
                       )
                     }
-                    placeholder="Tell us what you need, the important features, what you already have and anything else we should understand..."
+                    placeholder="Explain what you need, what already exists and the important requirements."
                   />
-
-                  <span className="order-field-hint">
-                    Minimum 30 characters.
-                  </span>
                 </div>
 
                 <div className="order-field">
                   <label htmlFor="projectGoal">
-                    What should this project achieve?
+                    Main goal
                   </label>
 
                   <textarea
                     id="projectGoal"
-                    rows="4"
-                    value={form.projectGoal}
-                    onChange={(event) =>
+                    value={
+                      form.projectGoal
+                    }
+                    onChange={(
+                      event,
+                    ) =>
                       updateField(
                         'projectGoal',
-                        event.target.value,
+                        event
+                          .target
+                          .value,
                       )
                     }
-                    placeholder="Example: Make our business look more professional and generate more enquiries."
+                    placeholder="What should this project achieve for you?"
                   />
                 </div>
 
                 <div className="order-field">
                   <label htmlFor="referenceLinks">
                     Reference links
-                    <span>Optional</span>
+                    <span>
+                      Optional
+                    </span>
                   </label>
 
                   <textarea
                     id="referenceLinks"
-                    rows="3"
-                    value={form.referenceLinks}
-                    onChange={(event) =>
+                    value={
+                      form.referenceLinks
+                    }
+                    onChange={(
+                      event,
+                    ) =>
                       updateField(
                         'referenceLinks',
-                        event.target.value,
+                        event
+                          .target
+                          .value,
                       )
                     }
-                    placeholder="Paste websites, social pages, examples or inspiration links here."
+                    placeholder="Paste websites, social pages or other references."
                   />
                 </div>
 
                 <div className="order-upload-block">
                   <div className="order-upload-copy">
                     <div className="order-upload-icon">
-                      <UploadCloud size={24} />
+                      <UploadCloud
+                        size={22}
+                      />
                     </div>
 
                     <div>
                       <h3>
-                        Upload references
+                        Reference files
                       </h3>
 
                       <p>
-                        Images, PDFs or other useful
-                        project references. Up to 6 files,
-                        maximum 10 MB each.
+                        Upload up to 6 PNG, JPG, WEBP, PDF, DOC or DOCX files. Maximum 10 MB each.
                       </p>
                     </div>
                   </div>
 
                   <label className="order-upload-button">
-                    <Paperclip size={17} />
-                    Choose files
+                    <Paperclip
+                      size={16}
+                    />
+
+                    Add files
 
                     <input
                       type="file"
                       multiple
-                      onChange={handleFiles}
                       accept=".png,.jpg,.jpeg,.webp,.pdf,.doc,.docx"
+                      onChange={
+                        handleFiles
+                      }
                     />
                   </label>
                 </div>
 
-                {files.length > 0 && (
+                {files.length >
+                  0 && (
                   <div className="order-file-list">
-                    {files.map((file, index) => (
-                      <div
-                        className="order-file-item"
-                        key={`${file.name}-${index}`}
-                      >
-                        <div className="order-file-details">
-                          <FileText size={20} />
-
-                          <div>
-                            <strong>
-                              {file.name}
-                            </strong>
-
-                            <span>
-                              {formatFileSize(
-                                file.size,
-                              )}
-                            </span>
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removeFile(index)
-                          }
-                          aria-label={`Remove ${file.name}`}
+                    {files.map(
+                      (
+                        file,
+                        index,
+                      ) => (
+                        <div
+                          key={`${file.name}-${file.lastModified}-${index}`}
+                          className="order-file-item"
                         >
-                          <Trash2 size={17} />
-                        </button>
-                      </div>
-                    ))}
+                          <div className="order-file-details">
+                            <FileText
+                              size={18}
+                            />
+
+                            <div>
+                              <strong>
+                                {file.name}
+                              </strong>
+
+                              <span>
+                                {formatFileSize(
+                                  file.size,
+                                )}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeFile(
+                                index,
+                              )
+                            }
+                            aria-label={`Remove ${file.name}`}
+                          >
+                            <Trash2
+                              size={16}
+                            />
+                          </button>
+                        </div>
+                      ),
+                    )}
                   </div>
                 )}
               </div>
             )}
 
-            {currentStep === 4 && (
+            {currentStep ===
+              4 && (
               <div className="order-form-stack">
                 <div>
                   <div className="order-subheading">
                     <h3>
-                      Estimated budget
+                      Project budget
                     </h3>
 
                     <p>
-                      Choose the closest range. Final
-                      pricing will depend on the actual
-                      project requirements.
+                      Choose the range that best reflects your current budget.
                     </p>
                   </div>
 
                   <div className="order-choice-list">
-                    {budgetOptions.map((option) => (
-                      <button
-                        type="button"
-                        key={option.id}
-                        className={`order-choice-row ${
-                          form.budget === option.id
-                            ? 'selected'
-                            : ''
-                        }`}
-                        onClick={() =>
-                          updateField(
-                            'budget',
-                            option.id,
-                          )
-                        }
-                      >
-                        <div>
-                          <strong>
-                            {option.label}
-                          </strong>
+                    {budgetOptions.map(
+                      (
+                        option,
+                      ) => (
+                        <button
+                          key={
+                            option.id
+                          }
+                          type="button"
+                          className={`order-choice-row ${
+                            form.budget ===
+                            option.id
+                              ? 'selected'
+                              : ''
+                          }`}
+                          onClick={() =>
+                            updateField(
+                              'budget',
+                              option.id,
+                            )
+                          }
+                        >
+                          <div>
+                            <strong>
+                              {option.label}
+                            </strong>
 
-                          <span>
-                            {option.description}
-                          </span>
-                        </div>
+                            <span>
+                              {option.description}
+                            </span>
+                          </div>
 
-                        <div className="order-radio">
-                          {form.budget ===
-                            option.id && (
-                            <span />
-                          )}
-                        </div>
-                      </button>
-                    ))}
+                          <div className="order-radio">
+                            {form.budget ===
+                              option.id && (
+                              <span />
+                            )}
+                          </div>
+                        </button>
+                      ),
+                    )}
                   </div>
                 </div>
 
@@ -1014,17 +1755,20 @@ export default function Order() {
                     </h3>
 
                     <p>
-                      Tell us how soon you would like the
-                      project completed.
+                      Select the timing that best matches your plans.
                     </p>
                   </div>
 
                   <div className="order-choice-list">
                     {timelineOptions.map(
-                      (option) => (
+                      (
+                        option,
+                      ) => (
                         <button
+                          key={
+                            option.id
+                          }
                           type="button"
-                          key={option.id}
                           className={`order-choice-row ${
                             form.timeline ===
                             option.id
@@ -1064,17 +1808,23 @@ export default function Order() {
                   'specific-date' && (
                   <div className="order-field">
                     <label htmlFor="deadline">
-                      Project deadline
+                      Required deadline
                     </label>
 
                     <input
                       id="deadline"
                       type="date"
-                      value={form.deadline}
-                      onChange={(event) =>
+                      value={
+                        form.deadline
+                      }
+                      onChange={(
+                        event,
+                      ) =>
                         updateField(
                           'deadline',
-                          event.target.value,
+                          event
+                            .target
+                            .value,
                         )
                       }
                     />
@@ -1083,7 +1833,8 @@ export default function Order() {
               </div>
             )}
 
-            {currentStep === 5 && (
+            {currentStep ===
+              5 && (
               <div className="order-form-stack">
                 <div className="order-two-column-fields">
                   <div className="order-field">
@@ -1092,16 +1843,23 @@ export default function Order() {
                     </label>
 
                     <div className="order-input-icon-wrapper">
-                      <UserRound size={18} />
+                      <UserRound
+                        size={17}
+                      />
 
                       <input
                         id="fullName"
-                        type="text"
-                        value={form.fullName}
-                        onChange={(event) =>
+                        value={
+                          form.fullName
+                        }
+                        onChange={(
+                          event,
+                        ) =>
                           updateField(
                             'fullName',
-                            event.target.value,
+                            event
+                              .target
+                              .value,
                           )
                         }
                         placeholder="Your full name"
@@ -1110,71 +1868,88 @@ export default function Order() {
                   </div>
 
                   <div className="order-field">
-                    <label htmlFor="businessName">
-                      Business or organisation
-                      <span>Optional</span>
-                    </label>
-
-                    <input
-                      id="businessName"
-                      type="text"
-                      value={form.businessName}
-                      onChange={(event) =>
-                        updateField(
-                          'businessName',
-                          event.target.value,
-                        )
-                      }
-                      placeholder="Business name"
-                    />
-                  </div>
-                </div>
-
-                <div className="order-two-column-fields">
-                  <div className="order-field">
                     <label htmlFor="email">
-                      Email address
+                      Account email
                     </label>
 
                     <div className="order-input-icon-wrapper">
-                      <Mail size={18} />
+                      <Mail
+                        size={17}
+                      />
 
                       <input
                         id="email"
                         type="email"
-                        value={form.email}
-                        onChange={(event) =>
-                          updateField(
-                            'email',
-                            event.target.value,
-                          )
+                        value={
+                          user?.email ||
+                          form.email
                         }
-                        placeholder="you@example.com"
+                        readOnly
                       />
                     </div>
-                  </div>
 
+                    <span className="order-field-hint">
+                      Orders are permanently linked to this authenticated account.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="order-two-column-fields">
                   <div className="order-field">
                     <label htmlFor="phone">
                       Phone / WhatsApp
                     </label>
 
                     <div className="order-input-icon-wrapper">
-                      <Phone size={18} />
+                      <Phone
+                        size={17}
+                      />
 
                       <input
                         id="phone"
-                        type="tel"
-                        value={form.phone}
-                        onChange={(event) =>
+                        value={
+                          form.phone
+                        }
+                        onChange={(
+                          event,
+                        ) =>
                           updateField(
                             'phone',
-                            event.target.value,
+                            event
+                              .target
+                              .value,
                           )
                         }
                         placeholder="+234..."
                       />
                     </div>
+                  </div>
+
+                  <div className="order-field">
+                    <label htmlFor="businessName">
+                      Business name
+                      <span>
+                        Optional
+                      </span>
+                    </label>
+
+                    <input
+                      id="businessName"
+                      value={
+                        form.businessName
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        updateField(
+                          'businessName',
+                          event
+                            .target
+                            .value,
+                        )
+                      }
+                      placeholder="Business or organisation"
+                    />
                   </div>
                 </div>
 
@@ -1183,39 +1958,36 @@ export default function Order() {
                     <h3>
                       Preferred contact method
                     </h3>
-
-                    <p>
-                      How would you prefer Posho Creative
-                      to contact you about this project?
-                    </p>
                   </div>
 
                   <div className="order-contact-methods">
                     {contactMethods.map(
-                      (method) => (
+                      (
+                        option,
+                      ) => (
                         <button
+                          key={
+                            option.id
+                          }
                           type="button"
-                          key={method.id}
                           className={`order-contact-method ${
                             form.contactMethod ===
-                            method.id
+                            option.id
                               ? 'selected'
                               : ''
                           }`}
                           onClick={() =>
                             updateField(
                               'contactMethod',
-                              method.id,
+                              option.id,
                             )
                           }
                         >
-                          <span>
-                            {method.label}
-                          </span>
+                          {option.label}
 
                           <div className="order-radio">
                             {form.contactMethod ===
-                              method.id && (
+                              option.id && (
                               <span />
                             )}
                           </div>
@@ -1227,144 +1999,141 @@ export default function Order() {
               </div>
             )}
 
-            {currentStep === 6 && (
-              <div className="order-review">
-                <div className="order-review-section">
-                  <span>
-                    Service
-                  </span>
-
-                  <div>
-                    <strong>
-                      {selectedService?.title}
-                    </strong>
-
-                    <p>
-                      {selectedProjectType?.label}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="order-review-section">
-                  <span>
-                    Project
-                  </span>
-
-                  <div>
-                    <strong>
-                      {form.projectTitle}
-                    </strong>
-
-                    <p>
-                      {form.projectDescription}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="order-review-section">
-                  <span>
-                    Goal
-                  </span>
-
-                  <div>
-                    <p>
-                      {form.projectGoal}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="order-review-section">
-                  <span>
-                    Budget & timeline
-                  </span>
-
-                  <div>
-                    <strong>
-                      {selectedBudget?.label}
-                    </strong>
-
-                    <p>
-                      {selectedTimeline?.label}
-
-                      {form.deadline
-                        ? ` · ${form.deadline}`
-                        : ''}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="order-review-section">
-                  <span>
-                    Contact
-                  </span>
-
-                  <div>
-                    <strong>
-                      {form.fullName}
-                    </strong>
-
-                    <p>
-                      {form.email}
-                    </p>
-
-                    <p>
-                      {form.phone}
-                    </p>
-
-                    <p>
-                      Preferred: {' '}
-                      {
-                        selectedContactMethod?.label
-                      }
-                    </p>
-                  </div>
-                </div>
-
-                {files.length > 0 && (
+            {currentStep ===
+              6 && (
+              <div>
+                <div className="order-review">
                   <div className="order-review-section">
                     <span>
-                      References
+                      Service
                     </span>
 
                     <div>
                       <strong>
-                        {files.length}{' '}
-                        {files.length === 1
-                          ? 'file'
-                          : 'files'}
+                        {selectedService
+                          ?.title}
                       </strong>
 
-                      {files.map((file) => (
-                        <p key={file.name}>
-                          {file.name}
-                        </p>
-                      ))}
+                      <p>
+                        {selectedProjectType
+                          ?.label}
+                      </p>
+
+                      <p>
+                        {formatCatalogPrice(
+                          selectedCatalogItem,
+                        )}
+                      </p>
                     </div>
                   </div>
-                )}
+
+                  <div className="order-review-section">
+                    <span>
+                      Project
+                    </span>
+
+                    <div>
+                      <strong>
+                        {form.projectTitle}
+                      </strong>
+
+                      <p>
+                        {form.projectDescription}
+                      </p>
+
+                      <p>
+                        Goal: {form.projectGoal}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="order-review-section">
+                    <span>
+                      Budget
+                    </span>
+
+                    <div>
+                      <strong>
+                        {selectedBudget
+                          ?.label}
+                      </strong>
+
+                      <p>
+                        {selectedTimeline
+                          ?.label}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="order-review-section">
+                    <span>
+                      Account
+                    </span>
+
+                    <div>
+                      <strong>
+                        {form.fullName}
+                      </strong>
+
+                      <p>
+                        {user?.email}
+                      </p>
+
+                      <p>
+                        {form.phone}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="order-review-section">
+                    <span>
+                      Files
+                    </span>
+
+                    <div>
+                      <strong>
+                        {files.length}
+                        {' '}
+                        file
+                        {files.length ===
+                        1
+                          ? ''
+                          : 's'}
+                      </strong>
+
+                      <p>
+                        Files are uploaded privately to your project workspace after the project record is created.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
                 <label className="order-confirmation">
                   <input
                     type="checkbox"
-                    checked={form.confirmation}
-                    onChange={(event) =>
+                    checked={
+                      form.confirmation
+                    }
+                    onChange={(
+                      event,
+                    ) =>
                       updateField(
                         'confirmation',
-                        event.target.checked,
+                        event
+                          .target
+                          .checked,
                       )
                     }
                   />
 
                   <span className="order-checkbox">
-                    {form.confirmation && (
-                      <Check size={14} />
-                    )}
+                    <Check
+                      size={14}
+                    />
                   </span>
 
                   <span>
-                    I confirm that the information I have
-                    provided is accurate and can be used
-                    to review my project request.
+                    I confirm that the information above is correct and understand that Posho Creative will use it to create and manage this project in my account.
                   </span>
                 </label>
               </div>
@@ -1376,37 +2145,87 @@ export default function Order() {
               </div>
             )}
 
-            <div className="order-navigation">
-              <div>
-                {currentStep > 1 && (
-                  <button
-                    type="button"
-                    className="order-back-button"
-                    onClick={previousStep}
-                  >
-                    <ArrowLeft size={17} />
-                    Back
-                  </button>
-                )}
-              </div>
+            {submitting && (
+              <div
+                className="order-summary-note"
+                style={{
+                  margin:
+                    '24px 0 0',
+                }}
+              >
+                <ShieldCheck
+                  size={18}
+                />
 
-              {currentStep < 6 ? (
+                <p>
+                  {submissionStage ||
+                    'Creating your secure project workspace...'}
+
+                  <br />
+
+                  Please do not close this page.
+                </p>
+              </div>
+            )}
+
+            <div className="order-navigation">
+              {currentStep >
+              1 ? (
+                <button
+                  type="button"
+                  className="order-back-button"
+                  onClick={
+                    previousStep
+                  }
+                  disabled={
+                    submitting
+                  }
+                >
+                  <ArrowLeft
+                    size={17}
+                  />
+
+                  Back
+                </button>
+              ) : (
+                <span />
+              )}
+
+              {currentStep <
+              6 ? (
                 <button
                   type="button"
                   className="button button-primary"
-                  onClick={nextStep}
+                  onClick={
+                    nextStep
+                  }
                 >
                   Continue
-                  <ArrowRight size={18} />
+
+                  <ArrowRight
+                    size={17}
+                  />
                 </button>
               ) : (
                 <button
                   type="button"
                   className="button button-primary"
-                  onClick={submitOrder}
+                  onClick={
+                    submitOrder
+                  }
+                  disabled={
+                    submitting
+                  }
                 >
-                  Submit project request
-                  <ArrowRight size={18} />
+                  {submitting
+                    ? 'Creating project...'
+                    : 'Create project'}
+
+                  {!submitting && (
+                    <ArrowRight
+                      size={17}
+                    />
+                  )}
                 </button>
               )}
             </div>
@@ -1420,33 +2239,64 @@ export default function Order() {
 
               <button
                 type="button"
-                onClick={resetOrder}
+                onClick={
+                  resetOrder
+                }
               >
-                <RotateCcw size={15} />
-                Start over
+                <RotateCcw
+                  size={13}
+                />
+
+                Reset
               </button>
             </div>
 
             <div className="order-summary-content">
               <div className="order-summary-row">
                 <span>
+                  Account
+                </span>
+
+                <strong>
+                  {user?.email}
+                </strong>
+              </div>
+
+              <div className="order-summary-row">
+                <span>
                   Service
                 </span>
 
                 <strong>
-                  {selectedService?.title ||
+                  {selectedService
+                    ?.title ||
                     'Not selected'}
                 </strong>
               </div>
 
               <div className="order-summary-row">
                 <span>
-                  Project type
+                  Project
                 </span>
 
                 <strong>
-                  {selectedProjectType?.label ||
+                  {selectedProjectType
+                    ?.label ||
                     'Not selected'}
+                </strong>
+              </div>
+
+              <div className="order-summary-row">
+                <span>
+                  Price
+                </span>
+
+                <strong>
+                  {selectedProjectType
+                    ? formatCatalogPrice(
+                        selectedCatalogItem,
+                      )
+                    : 'Select a project type'}
                 </strong>
               </div>
 
@@ -1456,7 +2306,8 @@ export default function Order() {
                 </span>
 
                 <strong>
-                  {selectedBudget?.label ||
+                  {selectedBudget
+                    ?.label ||
                     'Not selected'}
                 </strong>
               </div>
@@ -1467,19 +2318,32 @@ export default function Order() {
                 </span>
 
                 <strong>
-                  {selectedTimeline?.label ||
+                  {selectedTimeline
+                    ?.label ||
                     'Not selected'}
+                </strong>
+              </div>
+
+              <div className="order-summary-row">
+                <span>
+                  Contact
+                </span>
+
+                <strong>
+                  {selectedContact
+                    ?.label ||
+                    'WhatsApp'}
                 </strong>
               </div>
             </div>
 
             <div className="order-summary-note">
-              <CheckCircle2 size={19} />
+              <LockKeyhole
+                size={17}
+              />
 
               <p>
-                Your progress is saved automatically in
-                this browser while you complete the
-                order.
+                Submitted projects are stored in Supabase and linked to your authenticated Posho Creative account. Reference files are uploaded to private storage.
               </p>
             </div>
           </aside>

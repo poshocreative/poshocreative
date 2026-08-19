@@ -5,6 +5,7 @@ import {
 } from 'react-router-dom';
 
 import AdminProtectedRoute from './components/AdminProtectedRoute';
+import AdminShell from './components/AdminShell';
 import DashboardShell from './components/DashboardShell';
 import Footer from './components/Footer';
 import GlobalMotion from './components/GlobalMotion';
@@ -15,13 +16,20 @@ import SeoManager from './components/SeoManager';
 
 import About from './pages/About';
 import AdminAccess from './pages/AdminAccess';
+import AdminCustomers from './pages/AdminCustomers';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminOrderDetail from './pages/AdminOrderDetail';
+import AdminOrders from './pages/AdminOrders';
+import AdminPayments from './pages/AdminPayments';
+import AdminPricing from './pages/AdminPricing';
+import AdminQuotes from './pages/AdminQuotes';
 import Contact from './pages/Contact';
 import Dashboard from './pages/Dashboard';
 import DashboardFiles from './pages/DashboardFiles';
 import DashboardNotifications from './pages/DashboardNotifications';
 import DashboardOrderDetail from './pages/DashboardOrderDetail';
 import DashboardOrders from './pages/DashboardOrders';
+import DashboardPay from './pages/DashboardPay';
 import DashboardPayments from './pages/DashboardPayments';
 import DashboardProfile from './pages/DashboardProfile';
 import EmailVerified from './pages/EmailVerified';
@@ -29,6 +37,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Order from './pages/Order';
+import PaymentReturn from './pages/PaymentReturn';
 import ServiceDetail from './pages/ServiceDetail';
 import Services from './pages/Services';
 import Signup from './pages/Signup';
@@ -65,16 +74,12 @@ export default function App() {
 
         <Route
           path="/services"
-          element={
-            <Services />
-          }
+          element={<Services />}
         />
 
         <Route
           path="/services/:slug"
-          element={
-            <ServiceDetail />
-          }
+          element={<ServiceDetail />}
         />
 
         <Route
@@ -84,9 +89,7 @@ export default function App() {
 
         <Route
           path="/contact"
-          element={
-            <Contact />
-          }
+          element={<Contact />}
         />
 
         <Route
@@ -96,15 +99,20 @@ export default function App() {
 
         <Route
           path="/signup"
-          element={
-            <Signup />
-          }
+          element={<Signup />}
         />
 
         <Route
           path="/email-verified"
+          element={<EmailVerified />}
+        />
+
+        <Route
+          path="/payment-return"
           element={
-            <EmailVerified />
+            <ProtectedRoute>
+              <PaymentReturn />
+            </ProtectedRoute>
           }
         />
 
@@ -127,51 +135,42 @@ export default function App() {
         >
           <Route
             index
-            element={
-              <Dashboard />
-            }
+            element={<Dashboard />}
           />
 
           <Route
             path="orders"
-            element={
-              <DashboardOrders />
-            }
+            element={<DashboardOrders />}
           />
 
           <Route
             path="orders/:reference"
-            element={
-              <DashboardOrderDetail />
-            }
+            element={<DashboardOrderDetail />}
+          />
+
+          <Route
+            path="orders/:reference/pay"
+            element={<DashboardPay />}
           />
 
           <Route
             path="payments"
-            element={
-              <DashboardPayments />
-            }
+            element={<DashboardPayments />}
           />
 
           <Route
             path="files"
-            element={
-              <DashboardFiles />
-            }
+            element={<DashboardFiles />}
           />
 
           <Route
             path="notifications"
-            element={
-              <DashboardNotifications />
-            }
+            element={<DashboardNotifications />}
           />
 
           <Route
             path="profile"
-            element={
-              <DashboardProfile />
-            }
+            element={<DashboardProfile />}
           />
         </Route>
 
@@ -188,23 +187,54 @@ export default function App() {
           path="/admin"
           element={
             <AdminProtectedRoute>
-              <AdminDashboard />
+              <AdminShell />
             </AdminProtectedRoute>
           }
-        />
+        >
+          <Route
+            index
+            element={<AdminDashboard />}
+          />
+
+          <Route
+            path="orders"
+            element={<AdminOrders />}
+          />
+
+          <Route
+            path="orders/:reference"
+            element={<AdminOrderDetail />}
+          />
+
+          <Route
+            path="customers"
+            element={<AdminCustomers />}
+          />
+
+          <Route
+            path="quotes"
+            element={<AdminQuotes />}
+          />
+
+          <Route
+            path="payments"
+            element={<AdminPayments />}
+          />
+
+          <Route
+            path="pricing"
+            element={<AdminPricing />}
+          />
+        </Route>
 
         <Route
           path="/404"
-          element={
-            <NotFound />
-          }
+          element={<NotFound />}
         />
 
         <Route
           path="*"
-          element={
-            <NotFound />
-          }
+          element={<NotFound />}
         />
       </Routes>
 

@@ -6,10 +6,9 @@ import {
 
 import {
   ArrowRight,
-  CheckCircle2,
+  CircleDollarSign,
   Clock3,
   FolderKanban,
-  ReceiptText,
   Sparkles,
 } from 'lucide-react';
 
@@ -20,70 +19,45 @@ import {
 import BrandLoader from '../components/BrandLoader';
 
 import {
-  getMyOrders,
+  formatMoney,
   formatOrderStatus,
+  getMyOrders,
 } from '../lib/orders';
 
-function formatDate(value) {
-  if (!value) {
-    return '';
-  }
-
-  return new Intl.DateTimeFormat(
-    'en-NG',
-    {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    },
-  ).format(
-    new Date(value),
-  );
-}
-
 export default function Dashboard() {
-  const [orders, setOrders] =
+  const [
+    orders,
+    setOrders,
+  ] =
     useState([]);
 
-  const [loading, setLoading] =
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(true);
-
-  const [error, setError] =
-    useState('');
 
   useEffect(() => {
     document.title =
-      'Customer Workspace | Posho Creative';
+      'Client Workspace | Posho Creative';
 
-    const load = async () => {
-      try {
-        setLoading(true);
-
-        const data =
-          await getMyOrders();
-
-        setOrders(data);
-      } catch (loadError) {
-        console.error(
-          loadError,
-        );
-
-        setError(
-          'We could not load your projects.',
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    getMyOrders()
+      .then(setOrders)
+      .catch(
+        console.error,
+      )
+      .finally(() =>
+        setLoading(false),
+      );
   }, []);
 
-  const stats =
+  const metrics =
     useMemo(() => {
       const active =
         orders.filter(
-          (order) =>
+          (
+            order,
+          ) =>
             ![
               'completed',
               'cancelled',
@@ -92,41 +66,71 @@ export default function Dashboard() {
             ),
         ).length;
 
-      const awaiting =
+      const action =
         orders.filter(
-          (order) =>
-            [
-              'quote_sent',
-              'awaiting_payment',
-              'awaiting_client',
-            ].includes(
-              order.status,
-            ),
+          (
+            order,
+          ) =>
+            order
+              .customer_action_required,
         ).length;
 
       const completed =
         orders.filter(
-          (order) =>
+          (
+            order,
+          ) =>
             order.status ===
             'completed',
         ).length;
 
+      const outstanding =
+        orders.reduce(
+          (
+            total,
+            order,
+          ) =>
+            total +
+            Math.max(
+              Number(
+                order
+                  .quoted_amount_kobo ||
+                  0,
+              ) -
+                Number(
+                  order
+                    .paid_amount_kobo ||
+                    0,
+                ),
+              0,
+            ),
+          0,
+        );
+
       return {
         active,
-        awaiting,
+        action,
         completed,
-        total:
-          orders.length,
+        outstanding,
       };
-    }, [orders]);
+    }, [
+      orders,
+    ]);
 
   if (loading) {
     return (
-      <div className="workspace-loading-panel page-reveal">
-        <BrandLoader label="Loading your projects..." />
-      </div>
+      <BrandLoader label="Opening your workspace..." />
     );
   }
+
+  const actionOrders =
+    orders.filter(
+      (
+        order,
+      ) =>
+        order
+          .customer_action_required,
+    );
 
   return (
     <div className="workspace-view page-reveal">
@@ -137,7 +141,7 @@ export default function Dashboard() {
           </span>
 
           <h2>
-            Your projects at a glance.
+            Everything that needs your attention.
           </h2>
         </div>
 
@@ -147,184 +151,214 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {error && (
-        <div className="workspace-alert">
-          {error}
-        </div>
-      )}
-
       <div className="workspace-stat-grid">
-        <article className="workspace-stat-card stagger-item">
-          <div className="workspace-stat-icon">
-            <FolderKanban size={21} />
-          </div>
+        <article className="workspace-stat-card">
+          <FolderKanban
+            size={22}
+          />
 
           <span>
             Active projects
           </span>
 
           <strong>
-            {stats.active}
+            {metrics.active}
           </strong>
         </article>
 
-        <article className="workspace-stat-card stagger-item">
-          <div className="workspace-stat-icon">
-            <Clock3 size={21} />
-          </div>
+        <article className="workspace-stat-card">
+          <Clock3
+            size={22}
+          />
 
           <span>
-            Awaiting action
+            Action required
           </span>
 
           <strong>
-            {stats.awaiting}
+            {metrics.action}
           </strong>
         </article>
 
-        <article className="workspace-stat-card stagger-item">
-          <div className="workspace-stat-icon">
-            <CheckCircle2 size={21} />
-          </div>
+        <article className="workspace-stat-card">
+          <CircleDollarSign
+            size={22}
+          />
+
+          <span>
+            Outstanding
+          </span>
+
+          <strong className="workspace-money-stat">
+            {formatMoney(
+              metrics.outstanding,
+            )}
+          </strong>
+        </article>
+
+        <article className="workspace-stat-card">
+          <Sparkles
+            size={22}
+          />
 
           <span>
             Completed
           </span>
 
           <strong>
-            {stats.completed}
-          </strong>
-        </article>
-
-        <article className="workspace-stat-card stagger-item">
-          <div className="workspace-stat-icon">
-            <ReceiptText size={21} />
-          </div>
-
-          <span>
-            Total orders
-          </span>
-
-          <strong>
-            {stats.total}
+            {metrics.completed}
           </strong>
         </article>
       </div>
 
-      <div className="workspace-dashboard-grid">
-        <section className="workspace-panel">
-          <div className="workspace-panel-heading">
-            <div>
-              <span>
-                PROJECTS
-              </span>
-
-              <h3>
-                Recent activity
-              </h3>
-            </div>
-
-            <Link
-              to="/dashboard/orders"
-              className="text-link"
-            >
-              View all
-              <ArrowRight size={17} />
-            </Link>
-          </div>
-
-          {orders.length === 0 ? (
-            <div className="workspace-empty">
-              <div className="workspace-empty-icon">
-                <Sparkles size={27} />
-              </div>
-
-              <h3>
-                Your first project starts here.
-              </h3>
-
-              <p>
-                Once you submit a Posho Creative project, its status, files and payments will appear in this workspace.
-              </p>
-
-              <Link
-                to="/order"
-                className="button button-primary"
-              >
-                Start a project
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-          ) : (
-            <div className="workspace-order-list">
-              {orders
-                .slice(0, 5)
-                .map(
-                  (
-                    order,
-                    index,
-                  ) => (
-                    <Link
-                      key={order.id}
-                      to={`/dashboard/orders/${order.reference}`}
-                      className="workspace-order-row stagger-item"
-                      style={{
-                        '--stagger-index':
-                          index,
-                      }}
-                    >
-                      <div>
-                        <small>
-                          {order.reference}
-                        </small>
-
-                        <strong>
-                          {order.project_title}
-                        </strong>
-                      </div>
-
-                      <span
-                        className={`workspace-status workspace-status-${order.status}`}
-                      >
-                        {formatOrderStatus(
-                          order.status,
-                        )}
-                      </span>
-
-                      <time>
-                        {formatDate(
-                          order.created_at,
-                        )}
-                      </time>
-
-                      <ArrowRight size={18} />
-                    </Link>
-                  ),
-                )}
-            </div>
-          )}
-        </section>
-
-        <aside className="workspace-highlight-card">
+      {actionOrders.length >
+        0 && (
+        <section className="workspace-action-section">
           <span>
-            YOUR WORKSPACE
+            ACTION REQUIRED
           </span>
 
           <h3>
-            Every idea stays connected.
+            Your projects are waiting for you.
           </h3>
 
-          <p>
-            Orders, progress updates, project files and payments remain attached to your Posho Creative account.
-          </p>
+          <div className="workspace-action-list">
+            {actionOrders.map(
+              (
+                order,
+              ) => (
+                <Link
+                  key={
+                    order.id
+                  }
+                  to={`/dashboard/orders/${order.reference}`}
+                >
+                  <div>
+                    <small>
+                      {
+                        order.reference
+                      }
+                    </small>
 
-          <div className="workspace-highlight-orbit">
-            <span />
-            <span />
-            <span />
+                    <strong>
+                      {
+                        order.project_title
+                      }
+                    </strong>
+
+                    <span>
+                      {order.customer_action_label ||
+                        formatOrderStatus(
+                          order.status,
+                        )}
+                    </span>
+                  </div>
+
+                  <ArrowRight
+                    size={18}
+                  />
+                </Link>
+              ),
+            )}
           </div>
-        </aside>
-      </div>
+        </section>
+      )}
+
+      <section className="workspace-panel">
+        <div className="workspace-panel-heading">
+          <div>
+            <span>
+              RECENT PROJECTS
+            </span>
+
+            <h3>
+              Project activity
+            </h3>
+          </div>
+
+          <Link
+            to="/dashboard/orders"
+            className="text-link"
+          >
+            View all
+            <ArrowRight
+              size={17}
+            />
+          </Link>
+        </div>
+
+        {orders.length ===
+        0 ? (
+          <div className="workspace-empty">
+            <h3>
+              Start your first project.
+            </h3>
+
+            <p>
+              Your project journey, quote, payment and delivered files will all appear here.
+            </p>
+
+            <Link
+              to="/order"
+              className="button button-primary"
+            >
+              Start project
+            </Link>
+          </div>
+        ) : (
+          <div className="workspace-order-list">
+            {orders
+              .slice(
+                0,
+                6,
+              )
+              .map(
+                (
+                  order,
+                ) => (
+                  <Link
+                    key={
+                      order.id
+                    }
+                    to={`/dashboard/orders/${order.reference}`}
+                    className="workspace-order-row"
+                  >
+                    <div>
+                      <small>
+                        {
+                          order.reference
+                        }
+                      </small>
+
+                      <strong>
+                        {
+                          order.project_title
+                        }
+                      </strong>
+                    </div>
+
+                    <span className={`workspace-status workspace-status-${order.status}`}>
+                      {formatOrderStatus(
+                        order.status,
+                      )}
+                    </span>
+
+                    <span>
+                      {formatMoney(
+                        order
+                          .quoted_amount_kobo,
+                      )}
+                    </span>
+
+                    <ArrowRight
+                      size={18}
+                    />
+                  </Link>
+                ),
+              )}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

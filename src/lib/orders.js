@@ -1,14 +1,16 @@
 import {
+  FunctionsFetchError,
   FunctionsHttpError,
   FunctionsRelayError,
-  FunctionsFetchError,
 } from '@supabase/supabase-js';
 
-import { supabase } from './supabase';
+import {
+  supabase,
+} from './supabase';
 
-async function createReadableFunctionError(
+async function readableFunctionError(
   error,
-  fallbackMessage,
+  fallback,
 ) {
   if (
     error instanceof
@@ -16,15 +18,16 @@ async function createReadableFunctionError(
   ) {
     try {
       const response =
-        await error.context.json();
+        await error.context
+          .json();
 
       return new Error(
         response?.message ||
-          fallbackMessage,
+          fallback,
       );
     } catch {
       return new Error(
-        fallbackMessage,
+        fallback,
       );
     }
   }
@@ -42,7 +45,7 @@ async function createReadableFunctionError(
 
   return new Error(
     error?.message ||
-      fallbackMessage,
+      fallback,
   );
 }
 
@@ -55,77 +58,80 @@ export async function createProjectOrder({
     'Securing your project request...',
   );
 
-  const payload = {
-    serviceSlug:
-      form.service,
-
-    projectType:
-      form.projectType,
-
-    projectTitle:
-      form.projectTitle,
-
-    projectDescription:
-      form.projectDescription,
-
-    projectGoal:
-      form.projectGoal,
-
-    referenceLinks:
-      form.referenceLinks,
-
-    budget:
-      form.budget,
-
-    timeline:
-      form.timeline,
-
-    deadline:
-      form.deadline || null,
-
-    customer: {
-      fullName:
-        form.fullName,
-
-      phone:
-        form.phone,
-
-      businessName:
-        form.businessName,
-
-      preferredContactMethod:
-        form.contactMethod,
-    },
-
-    files: files.map(
-      (file) => ({
-        name:
-          file.name,
-
-        size:
-          file.size,
-
-        type:
-          file.type,
-      }),
-    ),
-  };
-
   const {
     data,
     error,
   } =
-    await supabase.functions.invoke(
-      'create-order',
-      {
-        body: payload,
-      },
-    );
+    await supabase.functions
+      .invoke(
+        'create-order',
+        {
+          body: {
+            serviceSlug:
+              form.service,
+
+            projectType:
+              form.projectType,
+
+            projectTitle:
+              form.projectTitle,
+
+            projectDescription:
+              form.projectDescription,
+
+            projectGoal:
+              form.projectGoal,
+
+            referenceLinks:
+              form.referenceLinks,
+
+            budget:
+              form.budget,
+
+            timeline:
+              form.timeline,
+
+            deadline:
+              form.deadline ||
+              null,
+
+            customer: {
+              fullName:
+                form.fullName,
+
+              phone:
+                form.phone,
+
+              businessName:
+                form.businessName,
+
+              preferredContactMethod:
+                form.contactMethod,
+            },
+
+            files:
+              files.map(
+                (
+                  file,
+                ) => ({
+                  name:
+                    file.name,
+
+                  size:
+                    file.size,
+
+                  type:
+                    file.type,
+                }),
+              ),
+          },
+        },
+      );
 
   if (error) {
-    throw await createReadableFunctionError(
+    throw await readableFunctionError(
       error,
-      'We could not create your project request.',
+      'Your project could not be created.',
     );
   }
 
@@ -135,88 +141,82 @@ export async function createProjectOrder({
   ) {
     throw new Error(
       data?.message ||
-        'We could not create your project request.',
+        'Your project could not be created.',
     );
   }
 
   const uploads =
-    Array.isArray(data.uploads)
+    Array.isArray(
+      data.uploads,
+    )
       ? data.uploads
       : [];
 
-  const uploadedFileIds = [];
+  const uploadedFileIds =
+    [];
 
-  if (uploads.length > 0) {
-    onStageChange?.(
-      uploads.length === 1
-        ? 'Uploading your reference file securely...'
-        : `Uploading ${uploads.length} project files securely...`,
-    );
+  for (
+    let index = 0;
+    index <
+    uploads.length;
+    index += 1
+  ) {
+    const upload =
+      uploads[index];
 
-    for (
-      let index = 0;
-      index < uploads.length;
-      index += 1
-    ) {
-      const upload =
-        uploads[index];
+    const source =
+      files[
+        upload.clientIndex
+      ];
 
-      const sourceFile =
-        files[
-          upload.clientIndex
-        ];
-
-      if (!sourceFile) {
-        throw new Error(
-          'A selected project file could not be prepared for upload.',
-        );
-      }
-
-      onStageChange?.(
-        `Uploading file ${index + 1} of ${uploads.length}...`,
-      );
-
-      const {
-        error: uploadError,
-      } =
-        await supabase.storage
-          .from(
-            'project-references',
-          )
-          .uploadToSignedUrl(
-            upload.path,
-            upload.token,
-            sourceFile,
-            {
-              contentType:
-                sourceFile.type ||
-                undefined,
-
-              cacheControl:
-                '3600',
-            },
-          );
-
-      if (uploadError) {
-        throw new Error(
-          `We created your project, but "${sourceFile.name}" could not be uploaded. You can add the file again from your dashboard.`,
-        );
-      }
-
-      uploadedFileIds.push(
-        upload.fileId,
-      );
+    if (!source) {
+      continue;
     }
 
     onStageChange?.(
-      'Finalising your project workspace...',
+      `Uploading file ${index + 1} of ${uploads.length}...`,
     );
 
     const {
-      data: confirmationData,
-      error: confirmationError,
+      error:
+        uploadError,
     } =
-      await supabase.functions.invoke(
+      await supabase
+        .storage
+        .from(
+          'project-references',
+        )
+        .uploadToSignedUrl(
+          upload.path,
+          upload.token,
+          source,
+          {
+            contentType:
+              source.type ||
+              undefined,
+          },
+        );
+
+    if (uploadError) {
+      throw new Error(
+        `Your project was created, but "${source.name}" could not be uploaded.`,
+      );
+    }
+
+    uploadedFileIds.push(
+      upload.fileId,
+    );
+  }
+
+  if (
+    uploadedFileIds.length
+  ) {
+    onStageChange?.(
+      'Confirming secure uploads...',
+    );
+
+    await supabase.functions
+      .invoke(
         'confirm-order-files',
         {
           body: {
@@ -228,28 +228,14 @@ export async function createProjectOrder({
           },
         },
       );
-
-    if (confirmationError) {
-      console.error(
-        'File confirmation failed:',
-        confirmationError,
-      );
-    }
-
-    if (
-      confirmationData &&
-      confirmationData.success ===
-        false
-    ) {
-      console.error(
-        'File confirmation response:',
-        confirmationData,
-      );
-    }
   }
 
+  localStorage.removeItem(
+    'poshoCreativeOrderDraft',
+  );
+
   onStageChange?.(
-    'Your project workspace is ready.',
+    'Your workspace is ready.',
   );
 
   return data.order;
@@ -275,8 +261,13 @@ export async function getMyOrders() {
         deadline,
         status,
         payment_status,
+        pricing_type,
+        service_price_kobo,
+        requires_quote,
         quoted_amount_kobo,
         paid_amount_kobo,
+        customer_action_required,
+        customer_action_label,
         submitted_at,
         created_at,
         updated_at
@@ -318,8 +309,14 @@ export async function getOrderByReference(
         deadline,
         status,
         payment_status,
+        pricing_type,
+        service_price_kobo,
+        requires_quote,
         quoted_amount_kobo,
         paid_amount_kobo,
+        customer_action_required,
+        customer_action_label,
+        current_quote_id,
         submitted_at,
         created_at,
         updated_at
@@ -339,119 +336,164 @@ export async function getOrderByReference(
   }
 
   const [
-    filesResult,
-    historyResult,
-    notesResult,
-    paymentsResult,
-  ] = await Promise.all([
-    supabase
-      .from('order_files')
-      .select(`
-        id,
-        storage_path,
-        original_name,
-        mime_type,
-        size_bytes,
-        upload_status,
-        file_role,
-        uploaded_at,
-        created_at
-      `)
-      .eq(
-        'order_id',
-        order.id,
-      )
-      .order(
-        'created_at',
-        {
-          ascending: true,
-        },
-      ),
+    files,
+    history,
+    notes,
+    payments,
+    quotes,
+  ] =
+    await Promise.all([
+      supabase
+        .from(
+          'order_files',
+        )
+        .select(`
+          id,
+          storage_path,
+          original_name,
+          mime_type,
+          size_bytes,
+          upload_status,
+          file_role,
+          uploaded_at,
+          created_at
+        `)
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              true,
+          },
+        ),
 
-    supabase
-      .from(
-        'order_status_history',
-      )
-      .select(`
-        id,
-        previous_status,
-        new_status,
-        note,
-        created_at
-      `)
-      .eq(
-        'order_id',
-        order.id,
-      )
-      .order(
-        'created_at',
-        {
-          ascending: true,
-        },
-      ),
+      supabase
+        .from(
+          'order_status_history',
+        )
+        .select(`
+          id,
+          previous_status,
+          new_status,
+          note,
+          created_at
+        `)
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              true,
+          },
+        ),
 
-    supabase
-      .from('order_notes')
-      .select(`
-        id,
-        note,
-        created_at
-      `)
-      .eq(
-        'order_id',
-        order.id,
-      )
-      .eq(
-        'is_internal',
-        false,
-      )
-      .order(
-        'created_at',
-        {
-          ascending: false,
-        },
-      ),
+      supabase
+        .from(
+          'order_notes',
+        )
+        .select(`
+          id,
+          note,
+          created_at
+        `)
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .eq(
+          'is_internal',
+          false,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
 
-    supabase
-      .from(
-        'payment_transactions',
-      )
-      .select(`
-        id,
-        provider,
-        provider_reference,
-        amount_kobo,
-        currency,
-        status,
-        verified_at,
-        created_at
-      `)
-      .eq(
-        'order_id',
-        order.id,
-      )
-      .order(
-        'created_at',
-        {
-          ascending: false,
-        },
-      ),
-  ]);
+      supabase
+        .from(
+          'payment_transactions',
+        )
+        .select(`
+          id,
+          provider,
+          provider_reference,
+          amount_kobo,
+          currency,
+          payment_method,
+          status,
+          verified_at,
+          created_at
+        `)
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+
+      supabase
+        .from(
+          'order_quotes',
+        )
+        .select(`
+          id,
+          amount_kobo,
+          currency,
+          status,
+          message,
+          valid_until,
+          sent_at,
+          created_at
+        `)
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+    ]);
 
   return {
     ...order,
 
     files:
-      filesResult.data || [],
+      files.data ||
+      [],
 
     history:
-      historyResult.data || [],
+      history.data ||
+      [],
 
     notes:
-      notesResult.data || [],
+      notes.data ||
+      [],
 
     payments:
-      paymentsResult.data || [],
+      payments.data ||
+      [],
+
+    quotes:
+      quotes.data ||
+      [],
   };
 }
 
@@ -471,6 +513,7 @@ export async function getMyPayments() {
         provider_reference,
         amount_kobo,
         currency,
+        payment_method,
         status,
         verified_at,
         created_at,
@@ -493,13 +536,55 @@ export async function getMyPayments() {
   return data || [];
 }
 
+export async function getPaymentReceipt(
+  id,
+) {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'payment_transactions',
+      )
+      .select(`
+        id,
+        provider,
+        provider_reference,
+        amount_kobo,
+        currency,
+        payment_method,
+        status,
+        verified_at,
+        created_at,
+        orders (
+          reference,
+          project_title,
+          service_slug
+        )
+      `)
+      .eq(
+        'id',
+        id,
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function getMyFiles() {
   const {
     data,
     error,
   } =
     await supabase
-      .from('order_files')
+      .from(
+        'order_files',
+      )
       .select(`
         id,
         order_id,
@@ -541,7 +626,8 @@ export async function downloadProjectFile(
     data,
     error,
   } =
-    await supabase.storage
+    await supabase
+      .storage
       .from(
         'project-references',
       )
@@ -556,12 +642,6 @@ export async function downloadProjectFile(
 
   if (error) {
     throw error;
-  }
-
-  if (!data?.signedUrl) {
-    throw new Error(
-      'A secure download link could not be created.',
-    );
   }
 
   window.location.assign(
@@ -602,6 +682,25 @@ export async function getMyNotifications() {
   return data || [];
 }
 
+export async function markNotificationRead(
+  id,
+) {
+  const {
+    error,
+  } =
+    await supabase.rpc(
+      'mark_my_notification_read',
+      {
+        p_notification_id:
+          id,
+      },
+    );
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function updateCustomerProfile({
   userId,
   fullName,
@@ -614,7 +713,9 @@ export async function updateCustomerProfile({
     error,
   } =
     await supabase
-      .from('customers')
+      .from(
+        'customers',
+      )
       .update({
         full_name:
           fullName.trim(),
@@ -640,10 +741,8 @@ export async function updateCustomerProfile({
     throw error;
   }
 
-  const {
-    error: authError,
-  } =
-    await supabase.auth.updateUser({
+  await supabase.auth
+    .updateUser({
       data: {
         full_name:
           fullName.trim(),
@@ -656,29 +755,28 @@ export async function updateCustomerProfile({
       },
     });
 
-  if (authError) {
-    console.error(
-      'Auth metadata update failed:',
-      authError,
-    );
-  }
-
   return data;
 }
 
 export function formatOrderStatus(
-  status,
+  value,
 ) {
-  if (!status) {
+  if (!value) {
     return '';
   }
 
-  return status
-    .replaceAll('_', ' ')
+  return value
+    .replaceAll(
+      '_',
+      ' ',
+    )
     .replace(
       /\b\w/g,
-      (character) =>
-        character.toUpperCase(),
+      (
+        character,
+      ) =>
+        character
+          .toUpperCase(),
     );
 }
 
@@ -687,8 +785,10 @@ export function formatMoney(
   currency = 'NGN',
 ) {
   if (
-    amountKobo === null ||
-    amountKobo === undefined
+    amountKobo ===
+      null ||
+    amountKobo ===
+      undefined
   ) {
     return 'Not quoted yet';
   }
@@ -696,12 +796,17 @@ export function formatMoney(
   return new Intl.NumberFormat(
     'en-NG',
     {
-      style: 'currency',
+      style:
+        'currency',
+
       currency,
-      maximumFractionDigits: 0,
+
+      maximumFractionDigits:
+        0,
     },
   ).format(
-    Number(amountKobo) /
-      100,
+    Number(
+      amountKobo,
+    ) / 100,
   );
 }

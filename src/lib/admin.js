@@ -6,10 +6,40 @@ import {
   supabase,
 } from './supabase';
 
+async function actionError(
+  error,
+  fallback,
+) {
+  if (
+    error instanceof
+    FunctionsHttpError
+  ) {
+    try {
+      const body =
+        await error.context
+          .json();
+
+      return new Error(
+        body?.message ||
+          fallback,
+      );
+    } catch {
+      return new Error(
+        fallback,
+      );
+    }
+  }
+
+  return new Error(
+    error?.message ||
+      fallback,
+  );
+}
+
 export async function getAdminAccessState() {
   const [
-    accountResult,
-    accessResult,
+    account,
+    access,
   ] =
     await Promise.all([
       supabase.rpc(
@@ -21,25 +51,21 @@ export async function getAdminAccessState() {
       ),
     ]);
 
-  if (
-    accountResult.error
-  ) {
-    throw accountResult.error;
+  if (account.error) {
+    throw account.error;
   }
 
-  if (
-    accessResult.error
-  ) {
-    throw accessResult.error;
+  if (access.error) {
+    throw access.error;
   }
 
   return {
     isAdminAccount:
-      accountResult.data ===
+      account.data ===
       true,
 
     hasAccess:
-      accessResult.data ===
+      access.data ===
       true,
   };
 }
@@ -62,52 +88,23 @@ export async function verifyAdminAccessCode(
       );
 
   if (error) {
-    if (
-      error instanceof
-      FunctionsHttpError
-    ) {
-      try {
-        const response =
-          await error.context
-            .json();
-
-        const customError =
-          new Error(
-            response?.message ||
-              'Administrative access could not be verified.',
-          );
-
-        customError.details =
-          response;
-
-        throw customError;
-      } catch (
-        parseError
-      ) {
-        if (
-          parseError?.details
-        ) {
-          throw parseError;
-        }
-      }
-    }
-
-    throw new Error(
+    throw await actionError(
+      error,
       'Administrative access could not be verified.',
     );
   }
 
   if (!data?.success) {
-    const customError =
+    const custom =
       new Error(
         data?.message ||
           'Administrative access could not be verified.',
       );
 
-    customError.details =
+    custom.details =
       data;
 
-    throw customError;
+    throw custom;
   }
 
   return data;
@@ -115,22 +112,28 @@ export async function verifyAdminAccessCode(
 
 export async function getAdminOverview() {
   const [
-    customersResult,
-    ordersResult,
-    paymentsResult,
+    customers,
+    orders,
+    payments,
+    quotes,
   ] =
     await Promise.all([
       supabase
-        .from('customers')
+        .from(
+          'customers',
+        )
         .select(
           'id',
           {
-            count: 'exact',
+            count:
+              'exact',
           },
         ),
 
       supabase
-        .from('orders')
+        .from(
+          'orders',
+        )
         .select(`
           id,
           reference,
@@ -138,6 +141,9 @@ export async function getAdminOverview() {
           service_slug,
           status,
           payment_status,
+          quoted_amount_kobo,
+          paid_amount_kobo,
+          customer_action_required,
           created_at,
           customers (
             full_name,
@@ -159,50 +165,50 @@ export async function getAdminOverview() {
         .select(`
           id,
           amount_kobo,
-          currency,
           status
+        `),
+
+      supabase
+        .from(
+          'order_quotes',
+        )
+        .select(`
+          id,
+          status,
+          amount_kobo
         `),
     ]);
 
-  if (
-    customersResult.error
-  ) {
-    throw customersResult.error;
+  if (customers.error) {
+    throw customers.error;
   }
 
-  if (ordersResult.error) {
-    throw ordersResult.error;
+  if (orders.error) {
+    throw orders.error;
   }
 
-  if (
-    paymentsResult.error
-  ) {
-    throw paymentsResult.error;
+  if (payments.error) {
+    throw payments.error;
   }
 
-  const orders =
-    ordersResult.data ||
+  if (quotes.error) {
+    throw quotes.error;
+  }
+
+  const orderRows =
+    orders.data ||
     [];
 
-  const payments =
-    paymentsResult.data ||
+  const paymentRows =
+    payments.data ||
     [];
 
-  const activeOrders =
-    orders.filter(
-      (order) =>
-        ![
-          'completed',
-          'cancelled',
-        ].includes(
-          order.status,
-        ),
-    ).length;
-
-  const successfulRevenue =
-    payments
+  const revenue =
+    paymentRows
       .filter(
-        (payment) =>
+        (
+          payment,
+        ) =>
           payment.status ===
           'successful',
       )
@@ -220,22 +226,479 @@ export async function getAdminOverview() {
         0,
       );
 
+  const outstanding =
+    orderRows.reduce(
+      (
+        total,
+        order,
+      ) =>
+        total +
+        Math.max(
+          Number(
+            order
+              .quoted_amount_kobo ||
+              0,
+          ) -
+            Number(
+              order
+                .paid_amount_kobo ||
+                0,
+            ),
+          0,
+        ),
+      0,
+    );
+
   return {
     customers:
-      customersResult.count ||
+      customers.count ||
       0,
 
     totalOrders:
-      orders.length,
+      orderRows.length,
 
-    activeOrders,
+    activeOrders:
+      orderRows.filter(
+        (
+          order,
+        ) =>
+          ![
+            'completed',
+            'cancelled',
+          ].includes(
+            order.status,
+          ),
+      ).length,
 
-    successfulRevenue,
+    awaitingQuote:
+      orderRows.filter(
+        (
+          order,
+        ) =>
+          order.status ===
+          'under_review',
+      ).length,
+
+    awaitingPayment:
+      orderRows.filter(
+        (
+          order,
+        ) =>
+          order.status ===
+          'awaiting_payment',
+      ).length,
+
+    customerActions:
+      orderRows.filter(
+        (
+          order,
+        ) =>
+          order
+            .customer_action_required,
+      ).length,
+
+    revenue,
+
+    outstanding,
 
     recentOrders:
-      orders.slice(
+      orderRows.slice(
         0,
         8,
       ),
   };
+}
+
+export async function getAdminOrders() {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'orders',
+      )
+      .select(`
+        id,
+        reference,
+        project_title,
+        service_slug,
+        project_type,
+        status,
+        payment_status,
+        requires_quote,
+        quoted_amount_kobo,
+        paid_amount_kobo,
+        customer_action_required,
+        created_at,
+        customers (
+          id,
+          full_name,
+          email,
+          phone
+        )
+      `)
+      .order(
+        'created_at',
+        {
+          ascending: false,
+        },
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getAdminOrder(
+  reference,
+) {
+  const {
+    data: order,
+    error,
+  } =
+    await supabase
+      .from(
+        'orders',
+      )
+      .select(`
+        *,
+        customers (
+          id,
+          full_name,
+          email,
+          phone,
+          business_name
+        )
+      `)
+      .eq(
+        'reference',
+        reference,
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!order) {
+    return null;
+  }
+
+  const [
+    quotes,
+    notes,
+    files,
+    payments,
+    history,
+  ] =
+    await Promise.all([
+      supabase
+        .from(
+          'order_quotes',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+
+      supabase
+        .from(
+          'order_notes',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+
+      supabase
+        .from(
+          'order_files',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+
+      supabase
+        .from(
+          'payment_transactions',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+
+      supabase
+        .from(
+          'order_status_history',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+    ]);
+
+  return {
+    ...order,
+    quotes:
+      quotes.data ||
+      [],
+    notes:
+      notes.data ||
+      [],
+    files:
+      files.data ||
+      [],
+    payments:
+      payments.data ||
+      [],
+    history:
+      history.data ||
+      [],
+  };
+}
+
+export async function runAdminOrderAction(
+  body,
+) {
+  const {
+    data,
+    error,
+  } =
+    await supabase.functions
+      .invoke(
+        'admin-order-action',
+        {
+          body,
+        },
+      );
+
+  if (error) {
+    throw await actionError(
+      error,
+      'Administrative action failed.',
+    );
+  }
+
+  if (!data?.success) {
+    throw new Error(
+      data?.message ||
+        'Administrative action failed.',
+    );
+  }
+
+  return data;
+}
+
+export async function getAdminCustomers() {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'customers',
+      )
+      .select(`
+        id,
+        full_name,
+        email,
+        phone,
+        business_name,
+        created_at,
+        orders (
+          id,
+          status,
+          quoted_amount_kobo,
+          paid_amount_kobo
+        )
+      `)
+      .order(
+        'created_at',
+        {
+          ascending: false,
+        },
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getAdminPayments() {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'payment_transactions',
+      )
+      .select(`
+        id,
+        provider,
+        provider_reference,
+        provider_transaction_id,
+        payment_method,
+        amount_kobo,
+        currency,
+        status,
+        verified_at,
+        created_at,
+        orders (
+          reference,
+          project_title
+        )
+      `)
+      .order(
+        'created_at',
+        {
+          ascending: false,
+        },
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getAdminQuotes() {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'order_quotes',
+      )
+      .select(`
+        id,
+        amount_kobo,
+        currency,
+        status,
+        message,
+        valid_until,
+        sent_at,
+        created_at,
+        orders (
+          reference,
+          project_title,
+          customers (
+            full_name,
+            email
+          )
+        )
+      `)
+      .order(
+        'created_at',
+        {
+          ascending: false,
+        },
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getAdminCatalog() {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'service_catalog',
+      )
+      .select('*')
+      .order(
+        'sort_order',
+        {
+          ascending: true,
+        },
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function updateCatalogItem(
+  id,
+  patch,
+) {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'service_catalog',
+      )
+      .update(
+        patch,
+      )
+      .eq(
+        'id',
+        id,
+      )
+      .select()
+      .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }
