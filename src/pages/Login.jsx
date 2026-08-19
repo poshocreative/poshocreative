@@ -18,44 +18,81 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 
-import { useAuth } from '../context/AuthContext';
+import {
+  isAdminEmail,
+} from '../config/app';
+
+import {
+  useAuth,
+} from '../context/AuthContext';
 
 export default function Login() {
   const {
     signIn,
     isAuthenticated,
     loading,
+    user,
   } = useAuth();
 
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
-  const [searchParams] =
+  const [
+    searchParams,
+  ] =
     useSearchParams();
 
   const next =
-    searchParams.get('next') ||
+    searchParams.get(
+      'next',
+    ) ||
     '/dashboard';
 
-  const [form, setForm] = useState({
+  const [
+    form,
+    setForm,
+  ] = useState({
     email: '',
     password: '',
   });
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false);
 
-  const [submitting, setSubmitting] =
-    useState(false);
+  const [
+    submitting,
+    setSubmitting,
+  ] = useState(false);
 
-  const [error, setError] =
-    useState('');
+  const [
+    error,
+    setError,
+  ] = useState('');
 
   useEffect(() => {
     document.title =
       'Sign In | Posho Creative';
   }, []);
 
-  if (!loading && isAuthenticated) {
+  if (
+    !loading &&
+    isAuthenticated
+  ) {
+    if (
+      isAdminEmail(
+        user?.email,
+      )
+    ) {
+      return (
+        <Navigate
+          to="/admin/access"
+          replace
+        />
+      );
+    }
+
     return (
       <Navigate
         to={next}
@@ -68,72 +105,115 @@ export default function Login() {
     field,
     value,
   ) => {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
+    setForm(
+      (
+        current,
+      ) => ({
+        ...current,
+        [field]:
+          value,
+      }),
+    );
 
     setError('');
   };
 
-  const handleSubmit = async (
-    event,
-  ) => {
-    event.preventDefault();
+  const handleSubmit =
+    async (
+      event,
+    ) => {
+      event.preventDefault();
 
-    if (
-      !form.email.trim() ||
-      !form.password
-    ) {
-      setError(
-        'Enter your email and password.',
-      );
-
-      return;
-    }
-
-    setSubmitting(true);
-    setError('');
-
-    const {
-      error: signInError,
-    } = await signIn(form);
-
-    setSubmitting(false);
-
-    if (signInError) {
       if (
-        signInError.message
-          .toLowerCase()
-          .includes('invalid login')
+        !form.email.trim() ||
+        !form.password
       ) {
         setError(
-          'The email or password you entered is incorrect.',
+          'Enter your email and password.',
         );
-      } else if (
-        signInError.message
-          .toLowerCase()
-          .includes(
-            'email not confirmed',
-          )
-      ) {
-        setError(
-          'Confirm your email address before signing in.',
-        );
-      } else {
-        setError(
-          signInError.message ||
-            'We could not sign you in.',
-        );
+
+        return;
       }
 
-      return;
-    }
+      setSubmitting(
+        true,
+      );
 
-    navigate(next, {
-      replace: true,
-    });
-  };
+      setError('');
+
+      const {
+        data,
+        error:
+          signInError,
+      } =
+        await signIn(
+          form,
+        );
+
+      setSubmitting(
+        false,
+      );
+
+      if (
+        signInError
+      ) {
+        const message =
+          signInError.message
+            ?.toLowerCase() ||
+          '';
+
+        if (
+          message.includes(
+            'invalid login',
+          )
+        ) {
+          setError(
+            'The email or password you entered is incorrect.',
+          );
+        } else if (
+          message.includes(
+            'email not confirmed',
+          )
+        ) {
+          setError(
+            'Confirm your email address before signing in.',
+          );
+        } else {
+          setError(
+            signInError.message ||
+              'We could not sign you in.',
+          );
+        }
+
+        return;
+      }
+
+      const signedInEmail =
+        data?.user?.email ||
+        form.email;
+
+      if (
+        isAdminEmail(
+          signedInEmail,
+        )
+      ) {
+        navigate(
+          '/admin/access',
+          {
+            replace: true,
+          },
+        );
+
+        return;
+      }
+
+      navigate(
+        next,
+        {
+          replace: true,
+        },
+      );
+    };
 
   return (
     <main className="auth-page">
@@ -189,14 +269,16 @@ export default function Login() {
               </h2>
 
               <p>
-                Continue managing your
-                Posho Creative projects.
+                Continue to your secure
+                Posho Creative workspace.
               </p>
             </div>
 
             <form
               className="auth-form"
-              onSubmit={handleSubmit}
+              onSubmit={
+                handleSubmit
+              }
             >
               <div className="auth-field">
                 <label htmlFor="email">
@@ -204,17 +286,25 @@ export default function Login() {
                 </label>
 
                 <div className="auth-input-wrapper">
-                  <Mail size={18} />
+                  <Mail
+                    size={18}
+                  />
 
                   <input
                     id="email"
                     type="email"
                     autoComplete="email"
-                    value={form.email}
-                    onChange={(event) =>
+                    value={
+                      form.email
+                    }
+                    onChange={(
+                      event,
+                    ) =>
                       updateField(
                         'email',
-                        event.target.value,
+                        event
+                          .target
+                          .value,
                       )
                     }
                     placeholder="you@example.com"
@@ -234,7 +324,9 @@ export default function Login() {
                 </div>
 
                 <div className="auth-input-wrapper">
-                  <LockKeyhole size={18} />
+                  <LockKeyhole
+                    size={18}
+                  />
 
                   <input
                     id="password"
@@ -244,11 +336,17 @@ export default function Login() {
                         : 'password'
                     }
                     autoComplete="current-password"
-                    value={form.password}
-                    onChange={(event) =>
+                    value={
+                      form.password
+                    }
+                    onChange={(
+                      event,
+                    ) =>
                       updateField(
                         'password',
-                        event.target.value,
+                        event
+                          .target
+                          .value,
                       )
                     }
                     placeholder="Enter your password"
@@ -259,7 +357,9 @@ export default function Login() {
                     className="auth-password-toggle"
                     onClick={() =>
                       setShowPassword(
-                        (current) =>
+                        (
+                          current,
+                        ) =>
                           !current,
                       )
                     }
@@ -270,9 +370,13 @@ export default function Login() {
                     }
                   >
                     {showPassword ? (
-                      <EyeOff size={17} />
+                      <EyeOff
+                        size={17}
+                      />
                     ) : (
-                      <Eye size={17} />
+                      <Eye
+                        size={17}
+                      />
                     )}
                   </button>
                 </div>
@@ -287,14 +391,18 @@ export default function Login() {
               <button
                 type="submit"
                 className="button button-primary auth-submit-button"
-                disabled={submitting}
+                disabled={
+                  submitting
+                }
               >
                 {submitting
                   ? 'Signing in...'
                   : 'Sign in'}
 
                 {!submitting && (
-                  <ArrowRight size={18} />
+                  <ArrowRight
+                    size={18}
+                  />
                 )}
               </button>
             </form>

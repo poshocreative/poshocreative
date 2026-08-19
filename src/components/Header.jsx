@@ -10,7 +10,6 @@ import {
 } from 'react-router-dom';
 
 import {
-  ArrowUpRight,
   BriefcaseBusiness,
   CircleUserRound,
   ContactRound,
@@ -20,20 +19,29 @@ import {
   LogOut,
   Menu,
   PanelsTopLeft,
+  ShieldCheck,
   UserRound,
   X,
 } from 'lucide-react';
+
+import {
+  isAdminEmail,
+} from '../config/app';
 
 import {
   useAuth,
 } from '../context/AuthContext';
 
 export default function Header() {
-  const [menuOpen, setMenuOpen] =
-    useState(false);
+  const [
+    menuOpen,
+    setMenuOpen,
+  ] = useState(false);
 
-  const [accountOpen, setAccountOpen] =
-    useState(false);
+  const [
+    accountOpen,
+    setAccountOpen,
+  ] = useState(false);
 
   const location =
     useLocation();
@@ -45,18 +53,27 @@ export default function Header() {
     signOut,
   } = useAuth();
 
+  const adminAccount =
+    isAdminEmail(
+      user?.email,
+    );
+
   const accountName =
-    profile?.full_name ||
-    user?.email ||
-    'Account';
+    adminAccount
+      ? 'Admin'
+      : profile?.full_name ||
+        user?.email ||
+        'Account';
 
   const firstName =
-    profile?.full_name
-      ?.trim()
-      ?.split(' ')[0] ||
-    user?.email
-      ?.split('@')[0] ||
-    'Customer';
+    adminAccount
+      ? 'Admin'
+      : profile?.full_name
+          ?.trim()
+          ?.split(' ')[0] ||
+        user?.email
+          ?.split('@')[0] ||
+        'Customer';
 
   const initial =
     accountName
@@ -65,15 +82,26 @@ export default function Header() {
       .toUpperCase() ||
     'P';
 
-  const closeMenus = () => {
-    setMenuOpen(false);
-    setAccountOpen(false);
-  };
+  const accountRoute =
+    adminAccount
+      ? '/admin'
+      : '/dashboard';
 
-  const openMobileMenu = () => {
-    setAccountOpen(false);
-    setMenuOpen(true);
-  };
+  const accountLabel =
+    adminAccount
+      ? 'Admin workspace'
+      : 'Dashboard';
+
+  const closeMenus =
+    () => {
+      setMenuOpen(
+        false,
+      );
+
+      setAccountOpen(
+        false,
+      );
+    };
 
   const handleSignOut =
     async () => {
@@ -82,95 +110,109 @@ export default function Header() {
       closeMenus();
     };
 
-  /*
-   * Close the mobile sidebar whenever
-   * navigation changes.
-   */
   useEffect(() => {
-    setMenuOpen(false);
-    setAccountOpen(false);
+    closeMenus();
   }, [
     location.pathname,
     location.search,
   ]);
 
-  /*
-   * The mobile sidebar must behave
-   * independently from the website.
-   *
-   * While open:
-   * - underlying page cannot scroll
-   * - current scroll position remains intact
-   */
   useEffect(() => {
     if (!menuOpen) {
       return undefined;
     }
 
-    const currentScrollY =
+    const scrollY =
       window.scrollY;
 
-    const previousBodyOverflow =
-      document.body.style.overflow;
+    const previous = {
+      overflow:
+        document.body
+          .style
+          .overflow,
 
-    const previousBodyPosition =
-      document.body.style.position;
+      position:
+        document.body
+          .style
+          .position,
 
-    const previousBodyTop =
-      document.body.style.top;
+      top:
+        document.body
+          .style.top,
 
-    const previousBodyWidth =
-      document.body.style.width;
+      width:
+        document.body
+          .style.width,
+    };
 
-    document.body.style.overflow =
+    document.body
+      .style
+      .overflow =
       'hidden';
 
-    document.body.style.position =
+    document.body
+      .style
+      .position =
       'fixed';
 
-    document.body.style.top =
-      `-${currentScrollY}px`;
+    document.body
+      .style.top =
+      `-${scrollY}px`;
 
-    document.body.style.width =
+    document.body
+      .style.width =
       '100%';
 
-    const handleKeyDown = (
-      event,
-    ) => {
-      if (event.key === 'Escape') {
-        setMenuOpen(false);
-      }
-    };
+    const keyHandler =
+      (event) => {
+        if (
+          event.key ===
+          'Escape'
+        ) {
+          setMenuOpen(
+            false,
+          );
+        }
+      };
 
     window.addEventListener(
       'keydown',
-      handleKeyDown,
+      keyHandler,
     );
 
     return () => {
       window.removeEventListener(
         'keydown',
-        handleKeyDown,
+        keyHandler,
       );
 
-      document.body.style.overflow =
-        previousBodyOverflow;
+      document.body
+        .style
+        .overflow =
+        previous.overflow;
 
-      document.body.style.position =
-        previousBodyPosition;
+      document.body
+        .style
+        .position =
+        previous.position;
 
-      document.body.style.top =
-        previousBodyTop;
+      document.body
+        .style.top =
+        previous.top;
 
-      document.body.style.width =
-        previousBodyWidth;
+      document.body
+        .style
+        .width =
+        previous.width;
 
       window.scrollTo(
         0,
-        currentScrollY,
+        scrollY,
       );
     };
-  }, [menuOpen]);
+  }, [
+    menuOpen,
+  ]);
 
   return (
     <>
@@ -179,7 +221,9 @@ export default function Header() {
           <Link
             to="/"
             className="brand"
-            onClick={closeMenus}
+            onClick={
+              closeMenus
+            }
             aria-label="Posho Creative home"
           >
             <img
@@ -212,14 +256,25 @@ export default function Header() {
 
           <div className="header-actions">
             {!isAuthenticated && (
-              <Link
-                to="/login"
-                className="header-login-link"
-              >
-                <LogIn size={16} />
+              <>
+                <Link
+                  to="/login"
+                  className="header-login-link"
+                >
+                  <LogIn
+                    size={16}
+                  />
 
-                Sign in
-              </Link>
+                  Sign in
+                </Link>
+
+                <Link
+                  to="/order"
+                  className="button button-primary desktop-order-button"
+                >
+                  Start a project
+                </Link>
+              </>
             )}
 
             {isAuthenticated && (
@@ -229,45 +284,69 @@ export default function Header() {
                   className="header-account-button"
                   onClick={() =>
                     setAccountOpen(
-                      (current) =>
+                      (
+                        current,
+                      ) =>
                         !current,
                     )
                   }
-                  aria-label="Open account menu"
                   aria-expanded={
                     accountOpen
                   }
+                  aria-label="Open account menu"
                 >
                   <span className="header-account-avatar">
                     {initial}
                   </span>
 
-                  <UserRound
-                    size={16}
-                  />
+                  {adminAccount ? (
+                    <ShieldCheck
+                      size={16}
+                    />
+                  ) : (
+                    <UserRound
+                      size={16}
+                    />
+                  )}
                 </button>
 
                 {accountOpen && (
                   <div className="header-account-menu">
                     <div className="header-account-profile">
                       <strong>
-                        {accountName}
+                        {
+                          accountName
+                        }
                       </strong>
 
                       <span>
-                        {user?.email}
+                        {
+                          user?.email
+                        }
                       </span>
                     </div>
 
                     <Link
-                      to="/dashboard"
-                      onClick={closeMenus}
+                      to={
+                        accountRoute
+                      }
+                      onClick={
+                        closeMenus
+                      }
                     >
-                      <LayoutDashboard
-                        size={17}
-                      />
+                      {adminAccount ? (
+                        <ShieldCheck
+                          size={17}
+                        />
+                      ) : (
+                        <LayoutDashboard
+                          size={17}
+                        />
+                      )}
 
-                      Dashboard
+                      {
+                        accountLabel
+                      }
                     </Link>
 
                     <button
@@ -287,31 +366,28 @@ export default function Header() {
               </div>
             )}
 
-            <Link
-              to="/order"
-              className="button button-primary desktop-order-button"
-            >
-              Start a project
+            {!menuOpen && (
+              <button
+                type="button"
+                className="mobile-menu-button"
+                aria-label="Open navigation menu"
+                aria-expanded="false"
+                aria-controls="mobile-navigation-sidebar"
+                onClick={() => {
+                  setAccountOpen(
+                    false,
+                  );
 
-              <ArrowUpRight
-                size={17}
-              />
-            </Link>
-
-            <button
-              type="button"
-              className="mobile-menu-button"
-              aria-label="Open navigation menu"
-              aria-expanded={
-                menuOpen
-              }
-              aria-controls="mobile-navigation-sidebar"
-              onClick={
-                openMobileMenu
-              }
-            >
-              <Menu size={23} />
-            </button>
+                  setMenuOpen(
+                    true,
+                  );
+                }}
+              >
+                <Menu
+                  size={23}
+                />
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -330,7 +406,9 @@ export default function Header() {
           type="button"
           className="mobile-sidebar-backdrop"
           onClick={() =>
-            setMenuOpen(false)
+            setMenuOpen(
+              false,
+            )
           }
           aria-label="Close navigation menu"
           tabIndex={
@@ -349,7 +427,9 @@ export default function Header() {
             <Link
               to="/"
               className="mobile-sidebar-brand"
-              onClick={closeMenus}
+              onClick={
+                closeMenus
+              }
             >
               <img
                 src="/brand/posho-creative-logo.png"
@@ -361,11 +441,15 @@ export default function Header() {
               type="button"
               className="mobile-sidebar-close"
               onClick={() =>
-                setMenuOpen(false)
+                setMenuOpen(
+                  false,
+                )
               }
               aria-label="Close navigation menu"
             >
-              <X size={21} />
+              <X
+                size={21}
+              />
             </button>
           </div>
 
@@ -377,7 +461,9 @@ export default function Header() {
 
               <div className="mobile-sidebar-account-copy">
                 <span>
-                  Signed in as
+                  {adminAccount
+                    ? 'Administrator'
+                    : 'Signed in as'}
                 </span>
 
                 <strong>
@@ -490,24 +576,36 @@ export default function Header() {
             {isAuthenticated && (
               <div className="mobile-sidebar-section">
                 <span className="mobile-sidebar-label">
-                  Your account
+                  {adminAccount
+                    ? 'Administration'
+                    : 'Your account'}
                 </span>
 
                 <nav className="mobile-sidebar-navigation">
                   <NavLink
-                    to="/dashboard"
+                    to={
+                      accountRoute
+                    }
                     onClick={
                       closeMenus
                     }
                   >
                     <span className="mobile-sidebar-nav-icon">
-                      <LayoutDashboard
-                        size={18}
-                      />
+                      {adminAccount ? (
+                        <ShieldCheck
+                          size={18}
+                        />
+                      ) : (
+                        <LayoutDashboard
+                          size={18}
+                        />
+                      )}
                     </span>
 
                     <span>
-                      Dashboard
+                      {
+                        accountLabel
+                      }
                     </span>
                   </NavLink>
                 </nav>
@@ -516,21 +614,19 @@ export default function Header() {
           </div>
 
           <div className="mobile-sidebar-footer">
-            <Link
-              to="/order"
-              className="mobile-sidebar-project-button"
-              onClick={
-                closeMenus
-              }
-            >
-              <span>
-                Start a project
-              </span>
-
-              <ArrowUpRight
-                size={18}
-              />
-            </Link>
+            {!isAuthenticated && (
+              <Link
+                to="/order"
+                className="mobile-sidebar-project-button"
+                onClick={
+                  closeMenus
+                }
+              >
+                <span>
+                  Start a project
+                </span>
+              </Link>
+            )}
 
             {isAuthenticated ? (
               <button
