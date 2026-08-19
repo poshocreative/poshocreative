@@ -47,8 +47,7 @@ async function secureEqual(
 
   for (
     let index = 0;
-    index <
-    firstHash.length;
+    index < firstHash.length;
     index += 1
   ) {
     difference |=
@@ -141,22 +140,25 @@ export default {
             .toLowerCase();
 
         const configuredAccessCode =
-          Deno.env.get(
-            'POSHO_ADMIN_ACCESS_CODE',
-          );
+          (
+            Deno.env.get(
+              'POSHO_ADMIN_ACCESS_CODE',
+            ) ||
+            ''
+          ).trim();
 
         if (
           !configuredAccessCode
         ) {
           console.error(
-            'POSHO_ADMIN_ACCESS_CODE is not configured.',
+            'POSHO_ADMIN_ACCESS_CODE is missing.',
           );
 
           return json(
             {
               success: false,
               message:
-                'Administrative access is temporarily unavailable.',
+                'Administrative access is not configured yet.',
             },
             500,
           );
@@ -360,7 +362,9 @@ export default {
               },
             );
 
-          if (shouldLock) {
+          if (
+            shouldLock
+          ) {
             return json(
               {
                 success:
@@ -380,7 +384,8 @@ export default {
 
           return json(
             {
-              success: false,
+              success:
+                false,
 
               message:
                 'The administrative access code is incorrect.',
@@ -436,7 +441,9 @@ export default {
               },
             );
 
-        if (accessError) {
+        if (
+          accessError
+        ) {
           throw accessError;
         }
 
@@ -477,13 +484,14 @@ export default {
         });
       } catch (error) {
         console.error(
-          'verify-admin-access:',
+          'verify-admin-access error:',
           error,
         );
 
         return json(
           {
             success: false,
+
             message:
               'Administrative access could not be verified.',
           },

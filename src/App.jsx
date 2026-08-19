@@ -11,6 +11,7 @@ import GlobalMotion from './components/GlobalMotion';
 import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
+import SeoManager from './components/SeoManager';
 
 import About from './pages/About';
 import AdminAccess from './pages/AdminAccess';
@@ -47,6 +48,8 @@ export default function App() {
   return (
     <div className="app">
       <ScrollToTop />
+
+      <SeoManager />
 
       <GlobalMotion />
 
