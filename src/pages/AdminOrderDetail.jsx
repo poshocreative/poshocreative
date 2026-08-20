@@ -20,6 +20,7 @@ import {
   useParams,
 } from 'react-router-dom';
 
+import AdminPaymentAttempts from '../components/AdminPaymentAttempts';
 import BrandLoader from '../components/BrandLoader';
 
 import {
@@ -120,6 +121,8 @@ export default function AdminOrderDetail() {
     useCallback(
       async () => {
         try {
+          setError('');
+
           const result =
             await getAdminOrder(
               reference,
@@ -660,7 +663,7 @@ export default function AdminOrderDetail() {
             </strong>
 
             <span>
-              This project may now proceed through quoting, payment and production.
+              This project may now proceed through quotation, payment and production.
             </span>
           </div>
         </section>
@@ -678,7 +681,8 @@ export default function AdminOrderDetail() {
             </strong>
 
             <span>
-              {order.decline_reason}
+              {order.decline_reason ||
+                'No decline reason was recorded.'}
             </span>
           </div>
         </section>
@@ -734,7 +738,8 @@ export default function AdminOrderDetail() {
                     ?.replaceAll(
                       '-',
                       ' ',
-                    )}
+                    ) ||
+                    'Not specified'}
                 </strong>
               </div>
 
@@ -748,7 +753,8 @@ export default function AdminOrderDetail() {
                     ?.replaceAll(
                       '-',
                       ' ',
-                    )}
+                    ) ||
+                    'Not specified'}
                 </strong>
               </div>
             </div>
@@ -785,6 +791,12 @@ export default function AdminOrderDetail() {
               </div>
             )}
           </section>
+
+          <AdminPaymentAttempts
+            orderId={
+              order.id
+            }
+          />
 
           {approved && (
             <>
@@ -899,6 +911,10 @@ export default function AdminOrderDetail() {
                   Publish an update
                 </h2>
 
+                <p className="admin-card-description">
+                  This message will be visible to the customer inside their project workspace.
+                </p>
+
                 <form
                   onSubmit={
                     publishUpdate
@@ -918,7 +934,7 @@ export default function AdminOrderDetail() {
                           .value,
                       )
                     }
-                    placeholder="Write a concise project update for the client."
+                    placeholder="Write a clear project update for the customer."
                   />
 
                   <button
@@ -950,6 +966,10 @@ export default function AdminOrderDetail() {
               <h2>
                 Project status
               </h2>
+
+              <p className="admin-card-description">
+                Keep the project status accurate. Add a customer-facing explanation whenever the change requires context.
+              </p>
 
               <form
                 onSubmit={
@@ -1014,7 +1034,7 @@ export default function AdminOrderDetail() {
                       }),
                     )
                   }
-                  placeholder="Optional note for the client."
+                  placeholder="Optional customer-facing explanation for this status change."
                 />
 
                 <button
