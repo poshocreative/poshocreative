@@ -24,6 +24,7 @@ import './styles/admin.css';
 import './styles/commerce.css';
 import './styles/company-pages.css';
 import './styles/platform-v2.css';
+import './styles/admin-mobile-pro.css';
 
 const root =
   document.getElementById(

@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Clock3,
   FileText,
+  Info,
   XCircle,
 } from 'lucide-react';
 
@@ -102,6 +103,21 @@ export default function DashboardOrderDetail() {
       .review_decision ===
     'declined';
 
+  const awaitingClient =
+    approved &&
+    order.status ===
+      'awaiting_client';
+
+  const cancelled =
+    approved &&
+    order.status ===
+      'cancelled';
+
+  const latestUpdate =
+    order.notes?.[0]
+      ?.note ||
+    '';
+
   const outstanding =
     Math.max(
       Number(
@@ -119,6 +135,7 @@ export default function DashboardOrderDetail() {
 
   const canPay =
     approved &&
+    !cancelled &&
     outstanding > 0 &&
     ![
       'completed',
@@ -184,13 +201,14 @@ export default function DashboardOrderDetail() {
             </h3>
 
             <p>
-              We are reviewing the scope, timeline and service requirements before confirming the next step. Any decision or quote will appear here.
+              We are reviewing the scope, timeline and requirements before confirming the next step. Any decision or quotation will appear here.
             </p>
           </div>
         </section>
       )}
 
-      {approved && (
+      {approved &&
+        !cancelled && (
         <section className="project-review-banner approved">
           <CheckCircle2
             size={22}
@@ -206,7 +224,7 @@ export default function DashboardOrderDetail() {
             </h3>
 
             <p>
-              The project can now proceed through quoting, payment and production according to its requirements.
+              Your project may now progress through quotation, payment and production according to its requirements.
             </p>
           </div>
         </section>
@@ -220,7 +238,7 @@ export default function DashboardOrderDetail() {
 
           <div>
             <span>
-              REQUEST UPDATE
+              MANAGEMENT DECISION
             </span>
 
             <h3>
@@ -229,14 +247,63 @@ export default function DashboardOrderDetail() {
 
             <p>
               {order.decline_reason ||
-                'Please contact Posho Creative if you would like to discuss an alternative approach.'}
+                'Please contact Posho Creative if you would like to discuss a different approach.'}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {cancelled && (
+        <section className="project-review-banner declined">
+          <XCircle
+            size={22}
+          />
+
+          <div>
+            <span>
+              PROJECT STATUS
+            </span>
+
+            <h3>
+              This project has been closed.
+            </h3>
+
+            <p>
+              {latestUpdate ||
+                'Please contact Posho Creative if you need clarification about this project status.'}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {awaitingClient && (
+        <section className="project-review-banner pending">
+          <Info
+            size={22}
+          />
+
+          <div>
+            <span>
+              YOUR RESPONSE IS NEEDED
+            </span>
+
+            <h3>
+              {order.customer_action_label ||
+                'We need information from you.'}
+            </h3>
+
+            <p>
+              {latestUpdate ||
+                'Please review your latest project update and respond through the agreed communication channel.'}
             </p>
           </div>
         </section>
       )}
 
       {approved &&
-        order.customer_action_required && (
+        !cancelled &&
+        order
+          .customer_action_required && (
         <section className="project-action-banner">
           <div>
             <span>
@@ -247,6 +314,13 @@ export default function DashboardOrderDetail() {
               {order.customer_action_label ||
                 'Your attention is required.'}
             </h3>
+
+            {latestUpdate &&
+              !awaitingClient && (
+              <p className="project-action-reason">
+                {latestUpdate}
+              </p>
+            )}
 
             {order
               .quoted_amount_kobo && (
@@ -367,7 +441,7 @@ export default function DashboardOrderDetail() {
                 </span>
 
                 <h3>
-                  Project references
+                  Project files
                 </h3>
               </div>
 
@@ -421,7 +495,8 @@ export default function DashboardOrderDetail() {
         </div>
 
         <aside className="project-detail-sidebar">
-          {approved && (
+          {approved &&
+            !cancelled && (
             <section className="workspace-panel project-summary-panel">
               <div className="workspace-panel-heading">
                 <div>
@@ -478,6 +553,7 @@ export default function DashboardOrderDetail() {
           )}
 
           {approved &&
+            !cancelled &&
             order.quotes?.[0] && (
             <section className="workspace-panel current-quote-card">
               <span>
@@ -496,7 +572,7 @@ export default function DashboardOrderDetail() {
                 {order
                   .quotes[0]
                   .message ||
-                  'Project quote from Posho Creative.'}
+                  'Your current Posho Creative project quotation.'}
               </p>
             </section>
           )}

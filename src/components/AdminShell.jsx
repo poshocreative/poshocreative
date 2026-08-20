@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -8,9 +9,10 @@ import {
   FolderKanban,
   LayoutDashboard,
   LogOut,
-  Menu,
+  MoreHorizontal,
   ReceiptText,
   Settings2,
+  ShieldCheck,
   UsersRound,
   X,
 } from 'lucide-react';
@@ -42,7 +44,7 @@ const navigation = [
   },
   {
     to: '/admin/customers',
-    label: 'Customers',
+    label: 'Clients',
     icon:
       UsersRound,
   },
@@ -66,6 +68,37 @@ const navigation = [
   },
 ];
 
+const mobilePrimary =
+  navigation.slice(
+    0,
+    3,
+  );
+
+const mobileSecondary =
+  navigation.slice(
+    3,
+  );
+
+function routeMatches(
+  pathname,
+  route,
+) {
+  if (
+    route ===
+    '/admin'
+  ) {
+    return (
+      pathname ===
+      '/admin'
+    );
+  }
+
+  return pathname
+    .startsWith(
+      route,
+    );
+}
+
 export default function AdminShell() {
   const {
     signOut,
@@ -79,13 +112,44 @@ export default function AdminShell() {
     useLocation();
 
   const [
-    menuOpen,
-    setMenuOpen,
+    moreOpen,
+    setMoreOpen,
   ] =
     useState(false);
 
+  const currentTitle =
+    useMemo(() => {
+      const match =
+        [...navigation]
+          .reverse()
+          .find(
+            (item) =>
+              routeMatches(
+                location
+                  .pathname,
+                item.to,
+              ),
+          );
+
+      return (
+        match?.label ||
+        'Management'
+      );
+    }, [
+      location.pathname,
+    ]);
+
+  const moreActive =
+    mobileSecondary.some(
+      (item) =>
+        routeMatches(
+          location.pathname,
+          item.to,
+        ),
+    );
+
   useEffect(() => {
-    setMenuOpen(
+    setMoreOpen(
       false,
     );
   }, [
@@ -93,11 +157,11 @@ export default function AdminShell() {
   ]);
 
   useEffect(() => {
-    if (!menuOpen) {
+    if (!moreOpen) {
       return undefined;
     }
 
-    const originalOverflow =
+    const oldOverflow =
       document.body
         .style
         .overflow;
@@ -107,13 +171,13 @@ export default function AdminShell() {
       .overflow =
       'hidden';
 
-    const handleKeyDown =
+    const onKeyDown =
       (event) => {
         if (
           event.key ===
           'Escape'
         ) {
-          setMenuOpen(
+          setMoreOpen(
             false,
           );
         }
@@ -121,26 +185,30 @@ export default function AdminShell() {
 
     window.addEventListener(
       'keydown',
-      handleKeyDown,
+      onKeyDown,
     );
 
     return () => {
       document.body
         .style
         .overflow =
-        originalOverflow;
+        oldOverflow;
 
       window.removeEventListener(
         'keydown',
-        handleKeyDown,
+        onKeyDown,
       );
     };
   }, [
-    menuOpen,
+    moreOpen,
   ]);
 
   const logout =
     async () => {
+      setMoreOpen(
+        false,
+      );
+
       await signOut();
 
       navigate(
@@ -152,60 +220,24 @@ export default function AdminShell() {
     };
 
   return (
-    <main className="admin-control admin-control-v2">
-      <button
-        type="button"
-        className={`admin-mobile-backdrop ${
-          menuOpen
-            ? 'visible'
-            : ''
-        }`}
-        onClick={() =>
-          setMenuOpen(
-            false,
-          )
-        }
-        aria-label="Close admin navigation"
-      />
-
-      <aside
-        className={`admin-control-sidebar admin-control-sidebar-v2 ${
-          menuOpen
-            ? 'is-open'
-            : ''
-        }`}
-      >
-        <div className="admin-control-brand">
+    <main className="admin-pro-shell">
+      <aside className="admin-pro-sidebar">
+        <div className="admin-pro-brand">
           <img
             src="/brand/posho-creative-logo.png"
             alt="Posho Creative"
           />
 
           <span>
-            ADMIN
+            MANAGEMENT
           </span>
-
-          <button
-            type="button"
-            className="admin-sidebar-close"
-            onClick={() =>
-              setMenuOpen(
-                false,
-              )
-            }
-            aria-label="Close navigation"
-          >
-            <X
-              size={19}
-            />
-          </button>
         </div>
 
-        <div className="admin-sidebar-label">
-          MANAGEMENT
+        <div className="admin-pro-nav-label">
+          WORKSPACE
         </div>
 
-        <nav>
+        <nav className="admin-pro-navigation">
           {navigation.map(
             ({
               to,
@@ -215,31 +247,41 @@ export default function AdminShell() {
                 Icon,
             }) => (
               <NavLink
-                key={to}
+                key={
+                  to
+                }
                 to={to}
                 end={end}
               >
-                <span className="admin-nav-icon">
+                <span>
                   <Icon
                     size={18}
                   />
                 </span>
 
-                {label}
+                <strong>
+                  {label}
+                </strong>
               </NavLink>
             ),
           )}
         </nav>
 
-        <div className="admin-sidebar-footer">
-          <div>
-            <span>
-              POSHO CREATIVE
-            </span>
+        <div className="admin-pro-sidebar-footer">
+          <div className="admin-pro-security">
+            <ShieldCheck
+              size={17}
+            />
 
-            <strong>
-              Management Portal
-            </strong>
+            <div>
+              <strong>
+                Protected access
+              </strong>
+
+              <span>
+                Management session
+              </span>
+            </div>
           </div>
 
           <button
@@ -247,7 +289,7 @@ export default function AdminShell() {
             onClick={
               logout
             }
-            className="admin-control-signout"
+            className="admin-pro-signout"
           >
             <LogOut
               size={17}
@@ -258,46 +300,201 @@ export default function AdminShell() {
         </div>
       </aside>
 
-      <section className="admin-control-main">
-        <header className="admin-control-topbar admin-control-topbar-v2">
-          <div className="admin-topbar-mobile-group">
-            <button
-              type="button"
-              className="admin-mobile-menu-button"
-              onClick={() =>
-                setMenuOpen(
-                  true,
-                )
-              }
-              aria-label="Open admin navigation"
-            >
-              <Menu
-                size={20}
-              />
-            </button>
-
-            <div>
-              <span>
-                POSHO CREATIVE
-              </span>
-
-              <strong>
-                Management Portal
-              </strong>
-            </div>
+      <section className="admin-pro-main">
+        <header className="admin-pro-topbar">
+          <div className="admin-pro-mobile-brand">
+            <img
+              src="/brand/posho-creative-icon.png"
+              alt=""
+            />
           </div>
 
-          <div className="admin-online-status">
+          <div className="admin-pro-topbar-title">
+            <span>
+              POSHO CREATIVE
+            </span>
+
+            <strong>
+              {currentTitle}
+            </strong>
+          </div>
+
+          <div className="admin-pro-session">
             <span />
 
-            Protected session
+            Protected
           </div>
         </header>
 
-        <div className="admin-control-content admin-control-content-v2">
+        <div className="admin-pro-content">
           <Outlet />
         </div>
       </section>
+
+      <nav
+        className="admin-pro-mobile-tabs"
+        aria-label="Management navigation"
+      >
+        {mobilePrimary.map(
+          ({
+            to,
+            end,
+            label,
+            icon:
+              Icon,
+          }) => (
+            <NavLink
+              key={
+                to
+              }
+              to={to}
+              end={end}
+            >
+              <Icon
+                size={20}
+              />
+
+              <span>
+                {label}
+              </span>
+            </NavLink>
+          ),
+        )}
+
+        <button
+          type="button"
+          className={
+            moreActive ||
+            moreOpen
+              ? 'active'
+              : ''
+          }
+          onClick={() =>
+            setMoreOpen(
+              true,
+            )
+          }
+          aria-expanded={
+            moreOpen
+          }
+        >
+          <MoreHorizontal
+            size={21}
+          />
+
+          <span>
+            More
+          </span>
+        </button>
+      </nav>
+
+      <button
+        type="button"
+        className={`admin-pro-sheet-backdrop ${
+          moreOpen
+            ? 'visible'
+            : ''
+        }`}
+        onClick={() =>
+          setMoreOpen(
+            false,
+          )
+        }
+        aria-label="Close management menu"
+      />
+
+      <aside
+        className={`admin-pro-mobile-sheet ${
+          moreOpen
+            ? 'open'
+            : ''
+        }`}
+        aria-hidden={
+          !moreOpen
+        }
+      >
+        <div className="admin-pro-sheet-handle" />
+
+        <div className="admin-pro-sheet-heading">
+          <div>
+            <span>
+              MANAGEMENT
+            </span>
+
+            <h2>
+              More controls
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              setMoreOpen(
+                false,
+              )
+            }
+            aria-label="Close management controls"
+          >
+            <X
+              size={19}
+            />
+          </button>
+        </div>
+
+        <nav className="admin-pro-sheet-links">
+          {mobileSecondary.map(
+            ({
+              to,
+              label,
+              icon:
+                Icon,
+            }) => (
+              <NavLink
+                key={
+                  to
+                }
+                to={to}
+              >
+                <span>
+                  <Icon
+                    size={19}
+                  />
+                </span>
+
+                <div>
+                  <strong>
+                    {label}
+                  </strong>
+
+                  <small>
+                    {label ===
+                    'Quotes'
+                      ? 'Manage project quotations'
+                      : label ===
+                          'Payments'
+                        ? 'Review payment activity'
+                        : 'Manage service pricing'}
+                  </small>
+                </div>
+              </NavLink>
+            ),
+          )}
+        </nav>
+
+        <button
+          type="button"
+          className="admin-pro-mobile-signout"
+          onClick={
+            logout
+          }
+        >
+          <LogOut
+            size={18}
+          />
+
+          Sign out of Management
+        </button>
+      </aside>
     </main>
   );
 }
