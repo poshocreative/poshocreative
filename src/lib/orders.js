@@ -39,7 +39,7 @@ async function readableFunctionError(
       FunctionsFetchError
   ) {
     return new Error(
-      'We could not reach the Posho Creative server. Check your connection and try again.',
+      'We could not reach Posho Creative at the moment. Check your connection and try again.',
     );
   }
 
@@ -55,7 +55,7 @@ export async function createProjectOrder({
   onStageChange,
 }) {
   onStageChange?.(
-    'Securing your project request...',
+    'Preparing your project request...',
   );
 
   const {
@@ -111,9 +111,7 @@ export async function createProjectOrder({
 
             files:
               files.map(
-                (
-                  file,
-                ) => ({
+                (file) => ({
                   name:
                     file.name,
 
@@ -131,7 +129,7 @@ export async function createProjectOrder({
   if (error) {
     throw await readableFunctionError(
       error,
-      'Your project could not be created.',
+      'Your project request could not be submitted.',
     );
   }
 
@@ -141,7 +139,7 @@ export async function createProjectOrder({
   ) {
     throw new Error(
       data?.message ||
-        'Your project could not be created.',
+        'Your project request could not be submitted.',
     );
   }
 
@@ -174,7 +172,7 @@ export async function createProjectOrder({
     }
 
     onStageChange?.(
-      `Uploading file ${index + 1} of ${uploads.length}...`,
+      `Uploading reference ${index + 1} of ${uploads.length}...`,
     );
 
     const {
@@ -199,7 +197,7 @@ export async function createProjectOrder({
 
     if (uploadError) {
       throw new Error(
-        `Your project was created, but "${source.name}" could not be uploaded.`,
+        `Your request was created, but "${source.name}" could not be uploaded. Please contact Posho Creative with your project reference.`,
       );
     }
 
@@ -212,7 +210,7 @@ export async function createProjectOrder({
     uploadedFileIds.length
   ) {
     onStageChange?.(
-      'Confirming secure uploads...',
+      'Finalising your project request...',
     );
 
     await supabase.functions
@@ -235,7 +233,7 @@ export async function createProjectOrder({
   );
 
   onStageChange?.(
-    'Your workspace is ready.',
+    'Project request submitted.',
   );
 
   return data.order;
@@ -247,7 +245,9 @@ export async function getMyOrders() {
     error,
   } =
     await supabase
-      .from('orders')
+      .from(
+        'orders',
+      )
       .select(`
         id,
         reference,
@@ -261,6 +261,9 @@ export async function getMyOrders() {
         deadline,
         status,
         payment_status,
+        review_decision,
+        reviewed_at,
+        decline_reason,
         pricing_type,
         service_price_kobo,
         requires_quote,
@@ -275,7 +278,8 @@ export async function getMyOrders() {
       .order(
         'created_at',
         {
-          ascending: false,
+          ascending:
+            false,
         },
       );
 
@@ -291,10 +295,13 @@ export async function getOrderByReference(
 ) {
   const {
     data: order,
-    error: orderError,
+    error:
+      orderError,
   } =
     await supabase
-      .from('orders')
+      .from(
+        'orders',
+      )
       .select(`
         id,
         reference,
@@ -309,6 +316,9 @@ export async function getOrderByReference(
         deadline,
         status,
         payment_status,
+        review_decision,
+        reviewed_at,
+        decline_reason,
         pricing_type,
         service_price_kobo,
         requires_quote,
@@ -327,7 +337,9 @@ export async function getOrderByReference(
       )
       .maybeSingle();
 
-  if (orderError) {
+  if (
+    orderError
+  ) {
     throw orderError;
   }
 
@@ -525,7 +537,8 @@ export async function getMyPayments() {
       .order(
         'created_at',
         {
-          ascending: false,
+          ascending:
+            false,
         },
       );
 
@@ -608,7 +621,8 @@ export async function getMyFiles() {
       .order(
         'created_at',
         {
-          ascending: false,
+          ascending:
+            false,
         },
       );
 
@@ -671,7 +685,8 @@ export async function getMyNotifications() {
       .order(
         'created_at',
         {
-          ascending: false,
+          ascending:
+            false,
         },
       );
 
@@ -724,7 +739,8 @@ export async function updateCustomerProfile({
           phone.trim(),
 
         business_name:
-          businessName.trim() ||
+          businessName
+            .trim() ||
           null,
 
         preferred_contact_method:
@@ -772,12 +788,34 @@ export function formatOrderStatus(
     )
     .replace(
       /\b\w/g,
-      (
-        character,
-      ) =>
+      (character) =>
         character
           .toUpperCase(),
     );
+}
+
+export function formatProjectState(
+  order,
+) {
+  if (
+    order
+      ?.review_decision ===
+    'pending'
+  ) {
+    return 'Awaiting Review';
+  }
+
+  if (
+    order
+      ?.review_decision ===
+    'declined'
+  ) {
+    return 'Declined';
+  }
+
+  return formatOrderStatus(
+    order?.status,
+  );
 }
 
 export function formatMoney(

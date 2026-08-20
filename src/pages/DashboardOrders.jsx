@@ -17,10 +17,13 @@ import BrandLoader from '../components/BrandLoader';
 
 import {
   formatOrderStatus,
+  formatProjectState,
   getMyOrders,
 } from '../lib/orders';
 
-function formatDate(value) {
+function formatDate(
+  value,
+) {
   return new Intl.DateTimeFormat(
     'en-NG',
     {
@@ -34,49 +37,91 @@ function formatDate(value) {
 }
 
 const filters = [
-  'all',
-  'active',
-  'awaiting',
-  'completed',
+  {
+    id: 'all',
+    label: 'All',
+  },
+  {
+    id: 'review',
+    label: 'In review',
+  },
+  {
+    id: 'active',
+    label: 'Active',
+  },
+  {
+    id: 'awaiting',
+    label: 'Action required',
+  },
+  {
+    id: 'completed',
+    label: 'Completed',
+  },
+  {
+    id: 'declined',
+    label: 'Declined',
+  },
 ];
 
 export default function DashboardOrders() {
-  const [orders, setOrders] =
+  const [
+    orders,
+    setOrders,
+  ] =
     useState([]);
 
-  const [loading, setLoading] =
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(true);
 
-  const [search, setSearch] =
+  const [
+    search,
+    setSearch,
+  ] =
     useState('');
 
-  const [filter, setFilter] =
-    useState('all');
+  const [
+    filter,
+    setFilter,
+  ] =
+    useState(
+      'all',
+    );
 
-  const [error, setError] =
+  const [
+    error,
+    setError,
+  ] =
     useState('');
 
   useEffect(() => {
     document.title =
-      'My Orders | Posho Creative';
+      'My Projects | Posho Creative';
 
-    const load = async () => {
-      try {
-        setOrders(
-          await getMyOrders(),
-        );
-      } catch (loadError) {
-        console.error(
-          loadError,
-        );
+    const load =
+      async () => {
+        try {
+          setOrders(
+            await getMyOrders(),
+          );
+        } catch (
+          loadError
+        ) {
+          console.error(
+            loadError,
+          );
 
-        setError(
-          'We could not load your orders.',
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+          setError(
+            'Your projects could not be loaded.',
+          );
+        } finally {
+          setLoading(
+            false,
+          );
+        }
+      };
 
     load();
   }, []);
@@ -94,21 +139,41 @@ export default function DashboardOrders() {
             !query ||
             order.reference
               .toLowerCase()
-              .includes(query) ||
+              .includes(
+                query,
+              ) ||
             order.project_title
               .toLowerCase()
-              .includes(query) ||
+              .includes(
+                query,
+              ) ||
             order.service_slug
               .toLowerCase()
-              .includes(query);
+              .includes(
+                query,
+              );
 
           let matchesFilter =
             true;
 
           if (
-            filter === 'active'
+            filter ===
+            'review'
           ) {
             matchesFilter =
+              order
+                .review_decision ===
+              'pending';
+          }
+
+          if (
+            filter ===
+            'active'
+          ) {
+            matchesFilter =
+              order
+                .review_decision ===
+                'approved' &&
               ![
                 'completed',
                 'cancelled',
@@ -122,13 +187,11 @@ export default function DashboardOrders() {
             'awaiting'
           ) {
             matchesFilter =
-              [
-                'quote_sent',
-                'awaiting_payment',
-                'awaiting_client',
-              ].includes(
-                order.status,
-              );
+              order
+                .review_decision ===
+                'approved' &&
+              order
+                .customer_action_required;
           }
 
           if (
@@ -137,7 +200,20 @@ export default function DashboardOrders() {
           ) {
             matchesFilter =
               order.status ===
-              'completed';
+                'completed' &&
+              order
+                .review_decision ===
+                'approved';
+          }
+
+          if (
+            filter ===
+            'declined'
+          ) {
+            matchesFilter =
+              order
+                .review_decision ===
+              'declined';
           }
 
           return (
@@ -154,9 +230,9 @@ export default function DashboardOrders() {
 
   if (loading) {
     return (
-      <div className="workspace-loading-panel page-reveal">
-        <BrandLoader label="Loading your orders..." />
-      </div>
+      <BrandLoader
+        label="Loading your projects..."
+      />
     );
   }
 
@@ -165,17 +241,19 @@ export default function DashboardOrders() {
       <div className="workspace-view-heading">
         <div>
           <span className="workspace-kicker">
-            MY ORDERS
+            PROJECTS
           </span>
 
           <h2>
-            Every project, one place.
+            Your work with Posho Creative.
           </h2>
         </div>
 
         <span className="workspace-count-pill">
-          {orders.length}{' '}
-          {orders.length === 1
+          {orders.length}
+          {' '}
+          {orders.length ===
+          1
             ? 'project'
             : 'projects'}
         </span>
@@ -183,44 +261,51 @@ export default function DashboardOrders() {
 
       <div className="workspace-toolbar">
         <div className="workspace-search">
-          <Search size={17} />
+          <Search
+            size={17}
+          />
 
           <input
             type="search"
-            value={search}
-            onChange={(event) =>
+            value={
+              search
+            }
+            onChange={(
+              event,
+            ) =>
               setSearch(
-                event.target.value,
+                event
+                  .target
+                  .value,
               )
             }
-            placeholder="Search reference, project or service..."
+            placeholder="Search project or reference..."
           />
         </div>
 
         <div className="workspace-filter-tabs">
           {filters.map(
-            (item) => (
+            (
+              item,
+            ) => (
               <button
+                key={
+                  item.id
+                }
                 type="button"
-                key={item}
                 className={
-                  filter === item
+                  filter ===
+                  item.id
                     ? 'active'
                     : ''
                 }
                 onClick={() =>
-                  setFilter(item)
+                  setFilter(
+                    item.id,
+                  )
                 }
               >
-                {item === 'all'
-                  ? 'All'
-                  : item ===
-                      'awaiting'
-                    ? 'Awaiting action'
-                    : item
-                        .charAt(0)
-                        .toUpperCase() +
-                      item.slice(1)}
+                {item.label}
               </button>
             ),
           )}
@@ -235,10 +320,22 @@ export default function DashboardOrders() {
 
       <section className="workspace-orders-table">
         <div className="workspace-orders-table-head">
-          <span>Project</span>
-          <span>Status</span>
-          <span>Payment</span>
-          <span>Created</span>
+          <span>
+            Project
+          </span>
+
+          <span>
+            Status
+          </span>
+
+          <span>
+            Payment
+          </span>
+
+          <span>
+            Created
+          </span>
+
           <span />
         </div>
 
@@ -260,7 +357,9 @@ export default function DashboardOrders() {
               index,
             ) => (
               <Link
-                key={order.id}
+                key={
+                  order.id
+                }
                 to={`/dashboard/orders/${order.reference}`}
                 className="workspace-orders-table-row stagger-item"
                 style={{
@@ -287,19 +386,23 @@ export default function DashboardOrders() {
                 </div>
 
                 <span
-                  className={`workspace-status workspace-status-${order.status}`}
+                  className={`workspace-status project-review-status ${order.review_decision}`}
                 >
-                  {formatOrderStatus(
-                    order.status,
+                  {formatProjectState(
+                    order,
                   )}
                 </span>
 
                 <span
                   className={`workspace-status workspace-payment-${order.payment_status}`}
                 >
-                  {formatOrderStatus(
-                    order.payment_status,
-                  )}
+                  {order
+                    .review_decision ===
+                  'declined'
+                    ? 'Not applicable'
+                    : formatOrderStatus(
+                        order.payment_status,
+                      )}
                 </span>
 
                 <time>
@@ -308,7 +411,9 @@ export default function DashboardOrders() {
                   )}
                 </time>
 
-                <ArrowRight size={18} />
+                <ArrowRight
+                  size={18}
+                />
               </Link>
             ),
           )

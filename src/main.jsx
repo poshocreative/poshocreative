@@ -22,6 +22,8 @@ import './styles/mobile-nav.css';
 import './styles/system-pages.css';
 import './styles/admin.css';
 import './styles/commerce.css';
+import './styles/company-pages.css';
+import './styles/platform-v2.css';
 
 const root =
   document.getElementById(

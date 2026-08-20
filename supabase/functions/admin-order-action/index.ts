@@ -4,9 +4,7 @@ import {
 
 const allowedStatuses =
   new Set([
-    'new',
     'under_review',
-    'quote_sent',
     'awaiting_payment',
     'paid',
     'in_progress',
@@ -14,6 +12,125 @@ const allowedStatuses =
     'completed',
     'cancelled',
   ]);
+
+function clean(
+  value: unknown,
+  maxLength = 5000,
+) {
+  if (
+    typeof value !==
+    'string'
+  ) {
+    return '';
+  }
+
+  return value
+    .trim()
+    .slice(
+      0,
+      maxLength,
+    );
+}
+
+function json(
+  body: Record<
+    string,
+    unknown
+  >,
+  status = 200,
+) {
+  return Response.json(
+    body,
+    {
+      status,
+    },
+  );
+}
+
+async function createNotification(
+  admin: any,
+  {
+    order,
+    type,
+    payload,
+  }: {
+    order: any;
+    type: string;
+    payload: Record<
+      string,
+      unknown
+    >;
+  },
+) {
+  await admin
+    .from(
+      'notification_events',
+    )
+    .insert({
+      order_id:
+        order.id,
+
+      customer_id:
+        order.customer_id,
+
+      channel:
+        'internal',
+
+      event_type:
+        type,
+
+      status:
+        'pending',
+
+      payload: {
+        reference:
+          order.reference,
+
+        project_title:
+          order.project_title,
+
+        ...payload,
+      },
+    });
+}
+
+async function logAdminAction(
+  admin: any,
+  {
+    adminUserId,
+    orderId,
+    action,
+    description,
+    metadata = {},
+  }: {
+    adminUserId: string;
+    orderId: string;
+    action: string;
+    description: string;
+    metadata?: Record<
+      string,
+      unknown
+    >;
+  },
+) {
+  await admin
+    .from(
+      'admin_activity_log',
+    )
+    .insert({
+      admin_user_id:
+        adminUserId,
+
+      order_id:
+        orderId,
+
+      action,
+
+      description,
+
+      metadata,
+    });
+}
 
 export default {
   fetch: withSupabase(
@@ -29,15 +146,13 @@ export default {
         req.method !==
         'POST'
       ) {
-        return Response.json(
+        return json(
           {
             success: false,
             message:
               'Method not allowed.',
           },
-          {
-            status: 405,
-          },
+          405,
         );
       }
 
@@ -59,56 +174,63 @@ export default {
           hasAdminAccess !==
             true
         ) {
-          return Response.json(
+          return json(
             {
               success: false,
+
               message:
                 'Administrative access is required.',
             },
-            {
-              status: 403,
-            },
+            403,
           );
         }
 
         const adminUserId =
           ctx.userClaims?.id;
 
+        if (!adminUserId) {
+          return json(
+            {
+              success: false,
+
+              message:
+                'Administrative session could not be identified.',
+            },
+            401,
+          );
+        }
+
         const body =
           await req.json();
 
         const action =
-          typeof body
-            ?.action ===
-          'string'
-            ? body.action
-                .trim()
-            : '';
+          clean(
+            body?.action,
+            60,
+          );
 
         const orderId =
-          typeof body
-            ?.orderId ===
-          'string'
-            ? body.orderId
-                .trim()
-            : '';
+          clean(
+            body?.orderId,
+            100,
+          );
 
         if (!orderId) {
-          return Response.json(
+          return json(
             {
               success: false,
+
               message:
-                'Order ID is required.',
+                'Project ID is required.',
             },
-            {
-              status: 400,
-            },
+            400,
           );
         }
 
         const {
           data: order,
-          error: orderError,
+          error:
+            orderError,
         } =
           await ctx
             .supabaseAdmin
@@ -120,8 +242,17 @@ export default {
               reference,
               customer_id,
               project_title,
+              service_slug,
+              project_type,
               status,
-              payment_status
+              payment_status,
+              review_decision,
+              pricing_type,
+              service_price_kobo,
+              quoted_amount_kobo,
+              paid_amount_kobo,
+              requires_quote,
+              current_quote_id
             `)
             .eq(
               'id',
@@ -133,26 +264,534 @@ export default {
           orderError ||
           !order
         ) {
-          return Response.json(
+          return json(
             {
               success: false,
+
               message:
                 'Project could not be found.',
             },
-            {
-              status: 404,
-            },
+            404,
           );
         }
+
+        /* ====================================================
+           APPROVE PROJECT REQUEST
+           ==================================================== */
+
+        if (
+          action ===
+          'approve_order'
+        ) {
+          if (
+            order
+              .review_decision ===
+            'approved'
+          ) {
+            return json({
+              success: true,
+              alreadyApproved:
+                true,
+            });
+          }
+
+          if (
+            order
+              .review_decision ===
+            'declined'
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'A declined request cannot be approved from this workflow.',
+              },
+              409,
+            );
+          }
+
+          const priceKobo =
+            Number(
+              order
+                .service_price_kobo ||
+                0,
+            );
+
+          const fixedPrice =
+            [
+              'fixed',
+              'monthly',
+            ].includes(
+              order.pricing_type,
+            ) &&
+            priceKobo > 0;
+
+          const now =
+            new Date()
+              .toISOString();
+
+          let quoteId =
+            null;
+
+          if (fixedPrice) {
+            const validUntil =
+              new Date(
+                Date.now() +
+                  7 *
+                    24 *
+                    60 *
+                    60 *
+                    1000,
+              )
+                .toISOString();
+
+            const {
+              data: quote,
+              error:
+                quoteError,
+            } =
+              await ctx
+                .supabaseAdmin
+                .from(
+                  'order_quotes',
+                )
+                .insert({
+                  order_id:
+                    order.id,
+
+                  amount_kobo:
+                    priceKobo,
+
+                  currency:
+                    'NGN',
+
+                  status:
+                    'sent',
+
+                  message:
+                    'Your project request has been approved at the listed service price.',
+
+                  valid_until:
+                    validUntil,
+
+                  created_by:
+                    adminUserId,
+
+                  sent_at:
+                    now,
+                })
+                .select(
+                  'id',
+                )
+                .single();
+
+            if (
+              quoteError ||
+              !quote
+            ) {
+              throw (
+                quoteError ||
+                new Error(
+                  'The project could not be approved.',
+                )
+              );
+            }
+
+            quoteId =
+              quote.id;
+          }
+
+          const patch: Record<
+            string,
+            unknown
+          > = {
+            review_decision:
+              'approved',
+
+            reviewed_at:
+              now,
+
+            reviewed_by:
+              adminUserId,
+
+            decline_reason:
+              null,
+
+            last_admin_activity_at:
+              now,
+          };
+
+          if (fixedPrice) {
+            patch.current_quote_id =
+              quoteId;
+
+            patch.quoted_amount_kobo =
+              priceKobo;
+
+            patch.requires_quote =
+              false;
+
+            patch.status =
+              'awaiting_payment';
+
+            patch.customer_action_required =
+              true;
+
+            patch.customer_action_label =
+              'Project approved — payment is ready';
+          } else {
+            patch.status =
+              'under_review';
+
+            patch.customer_action_required =
+              false;
+
+            patch.customer_action_label =
+              null;
+          }
+
+          const {
+            error:
+              approvalError,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'orders',
+              )
+              .update(
+                patch,
+              )
+              .eq(
+                'id',
+                order.id,
+              );
+
+          if (
+            approvalError
+          ) {
+            throw approvalError;
+          }
+
+          await createNotification(
+            ctx.supabaseAdmin,
+            {
+              order,
+
+              type:
+                'order_approved',
+
+              payload: {
+                review_decision:
+                  'approved',
+
+                payment_ready:
+                  fixedPrice,
+
+                amount_kobo:
+                  fixedPrice
+                    ? priceKobo
+                    : null,
+              },
+            },
+          );
+
+          await logAdminAction(
+            ctx.supabaseAdmin,
+            {
+              adminUserId,
+
+              orderId:
+                order.id,
+
+              action:
+                'order_approved',
+
+              description:
+                `Project request ${order.reference} approved.`,
+
+              metadata: {
+                fixed_price:
+                  fixedPrice,
+
+                amount_kobo:
+                  fixedPrice
+                    ? priceKobo
+                    : null,
+              },
+            },
+          );
+
+          return json({
+            success: true,
+
+            decision:
+              'approved',
+
+            paymentReady:
+              fixedPrice,
+          });
+        }
+
+        /* ====================================================
+           DECLINE PROJECT REQUEST
+           ==================================================== */
+
+        if (
+          action ===
+          'decline_order'
+        ) {
+          if (
+            order
+              .review_decision ===
+            'declined'
+          ) {
+            return json({
+              success: true,
+              alreadyDeclined:
+                true,
+            });
+          }
+
+          if (
+            order
+              .review_decision ===
+            'approved'
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'This project has already been approved. Use the project cancellation workflow if it can no longer proceed.',
+              },
+              409,
+            );
+          }
+
+          if (
+            order
+              .payment_status ===
+              'successful' ||
+            Number(
+              order
+                .paid_amount_kobo ||
+                0,
+            ) > 0
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'A project with confirmed payment cannot be declined.',
+              },
+              409,
+            );
+          }
+
+          const reason =
+            clean(
+              body?.reason,
+              2000,
+            );
+
+          if (
+            reason.length <
+            10
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'Provide a clear reason before declining the project.',
+              },
+              400,
+            );
+          }
+
+          const now =
+            new Date()
+              .toISOString();
+
+          const {
+            error:
+              declineError,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'orders',
+              )
+              .update({
+                review_decision:
+                  'declined',
+
+                reviewed_at:
+                  now,
+
+                reviewed_by:
+                  adminUserId,
+
+                decline_reason:
+                  reason,
+
+                status:
+                  'cancelled',
+
+                payment_status:
+                  'cancelled',
+
+                customer_action_required:
+                  false,
+
+                customer_action_label:
+                  null,
+
+                last_admin_activity_at:
+                  now,
+              })
+              .eq(
+                'id',
+                order.id,
+              );
+
+          if (
+            declineError
+          ) {
+            throw declineError;
+          }
+
+          await ctx
+            .supabaseAdmin
+            .from(
+              'order_quotes',
+            )
+            .update({
+              status:
+                'cancelled',
+            })
+            .eq(
+              'order_id',
+              order.id,
+            )
+            .in(
+              'status',
+              [
+                'draft',
+                'sent',
+              ],
+            );
+
+          await ctx
+            .supabaseAdmin
+            .from(
+              'order_notes',
+            )
+            .insert({
+              order_id:
+                order.id,
+
+              author_id:
+                adminUserId,
+
+              note:
+                reason,
+
+              is_internal:
+                false,
+            });
+
+          await createNotification(
+            ctx.supabaseAdmin,
+            {
+              order,
+
+              type:
+                'order_declined',
+
+              payload: {
+                review_decision:
+                  'declined',
+
+                reason,
+              },
+            },
+          );
+
+          await logAdminAction(
+            ctx.supabaseAdmin,
+            {
+              adminUserId,
+
+              orderId:
+                order.id,
+
+              action:
+                'order_declined',
+
+              description:
+                `Project request ${order.reference} declined.`,
+
+              metadata: {
+                reason,
+              },
+            },
+          );
+
+          return json({
+            success: true,
+
+            decision:
+              'declined',
+          });
+        }
+
+        /* ====================================================
+           SEND / REVISE QUOTE
+           ==================================================== */
 
         if (
           action ===
           'send_quote'
         ) {
+          if (
+            order
+              .review_decision !==
+            'approved'
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'Approve the project request before sending a quote.',
+              },
+              409,
+            );
+          }
+
+          if (
+            order
+              .payment_status ===
+            'successful'
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'This project has already been paid.',
+              },
+              409,
+            );
+          }
+
           const amountKobo =
             Number(
-              body
-                ?.amountKobo,
+              body?.amountKobo,
             );
 
           if (
@@ -161,31 +800,22 @@ export default {
             ) ||
             amountKobo <= 0
           ) {
-            return Response.json(
+            return json(
               {
-                success:
-                  false,
+                success: false,
 
                 message:
                   'Enter a valid quote amount.',
               },
-              {
-                status: 400,
-              },
+              400,
             );
           }
 
           const message =
-            typeof body
-              ?.message ===
-            'string'
-              ? body.message
-                  .trim()
-                  .slice(
-                    0,
-                    5000,
-                  )
-              : '';
+            clean(
+              body?.message,
+              5000,
+            );
 
           const validUntil =
             body?.validUntil
@@ -270,7 +900,7 @@ export default {
             throw (
               quoteError ||
               new Error(
-                'Quote could not be created.',
+                'Quote could not be prepared.',
               )
             );
           }
@@ -343,35 +973,15 @@ export default {
               });
           }
 
-          await ctx
-            .supabaseAdmin
-            .from(
-              'notification_events',
-            )
-            .insert({
-              order_id:
-                order.id,
+          await createNotification(
+            ctx.supabaseAdmin,
+            {
+              order,
 
-              customer_id:
-                order.customer_id,
-
-              channel:
-                'internal',
-
-              event_type:
+              type:
                 'quote_sent',
 
-              status:
-                'pending',
-
               payload: {
-                reference:
-                  order.reference,
-
-                project_title:
-                  order
-                    .project_title,
-
                 amount_kobo:
                   quote
                     .amount_kobo,
@@ -379,25 +989,22 @@ export default {
                 quote_id:
                   quote.id,
               },
-            });
+            },
+          );
 
-          await ctx
-            .supabaseAdmin
-            .from(
-              'admin_activity_log',
-            )
-            .insert({
-              admin_user_id:
-                adminUserId,
+          await logAdminAction(
+            ctx.supabaseAdmin,
+            {
+              adminUserId,
 
-              order_id:
+              orderId:
                 order.id,
 
               action:
                 'quote_sent',
 
               description:
-                `Quote sent for ${order.reference}`,
+                `Quote issued for ${order.reference}.`,
 
               metadata: {
                 quote_id:
@@ -407,58 +1014,71 @@ export default {
                   quote
                     .amount_kobo,
               },
-            });
+            },
+          );
 
-          return Response.json({
+          return json({
             success: true,
             quote,
           });
         }
 
+        /* ====================================================
+           PROJECT STATUS
+           ==================================================== */
+
         if (
           action ===
           'update_status'
         ) {
+          if (
+            order
+              .review_decision !==
+            'approved'
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'Only approved projects can enter the production workflow.',
+              },
+              409,
+            );
+          }
+
           const status =
-            typeof body
-              ?.status ===
-            'string'
-              ? body.status
-                  .trim()
-              : '';
+            clean(
+              body?.status,
+              50,
+            );
 
           if (
             !allowedStatuses.has(
               status,
             )
           ) {
-            return Response.json(
+            return json(
               {
-                success:
-                  false,
+                success: false,
 
                 message:
                   'Choose a valid project status.',
               },
-              {
-                status: 400,
-              },
+              400,
             );
           }
 
           const note =
-            typeof body
-              ?.note ===
-            'string'
-              ? body.note
-                  .trim()
-                  .slice(
-                    0,
-                    5000,
-                  )
-              : '';
+            clean(
+              body?.note,
+              5000,
+            );
 
-          const patch: any = {
+          const patch: Record<
+            string,
+            unknown
+          > = {
             status,
 
             last_admin_activity_at:
@@ -535,60 +1155,37 @@ export default {
               });
           }
 
-          await ctx
-            .supabaseAdmin
-            .from(
-              'notification_events',
-            )
-            .insert({
-              order_id:
-                order.id,
+          await createNotification(
+            ctx.supabaseAdmin,
+            {
+              order,
 
-              customer_id:
-                order.customer_id,
-
-              channel:
-                'internal',
-
-              event_type:
+              type:
                 'status_changed',
 
-              status:
-                'pending',
-
               payload: {
-                reference:
-                  order.reference,
-
-                project_title:
-                  order
-                    .project_title,
-
                 status,
 
                 message:
                   note ||
                   null,
               },
-            });
+            },
+          );
 
-          await ctx
-            .supabaseAdmin
-            .from(
-              'admin_activity_log',
-            )
-            .insert({
-              admin_user_id:
-                adminUserId,
+          await logAdminAction(
+            ctx.supabaseAdmin,
+            {
+              adminUserId,
 
-              order_id:
+              orderId:
                 order.id,
 
               action:
                 'status_changed',
 
               description:
-                `Project status changed to ${status}.`,
+                `Project status updated to ${status}.`,
 
               metadata: {
                 previous_status:
@@ -597,46 +1194,41 @@ export default {
                 new_status:
                   status,
               },
-            });
+            },
+          );
 
-          return Response.json({
+          return json({
             success: true,
           });
         }
+
+        /* ====================================================
+           PROJECT UPDATE / NOTE
+           ==================================================== */
 
         if (
           action ===
           'add_note'
         ) {
           const note =
-            typeof body
-              ?.note ===
-            'string'
-              ? body.note
-                  .trim()
-                  .slice(
-                    0,
-                    5000,
-                  )
-              : '';
+            clean(
+              body?.note,
+              5000,
+            );
 
           const internal =
-            body
-              ?.isInternal ===
+            body?.isInternal ===
             true;
 
           if (!note) {
-            return Response.json(
+            return json(
               {
-                success:
-                  false,
+                success: false,
 
                 message:
-                  'Enter a note.',
+                  'Enter an update before publishing.',
               },
-              {
-                status: 400,
-              },
+              400,
             );
           }
 
@@ -673,57 +1265,38 @@ export default {
           }
 
           if (!internal) {
-            await ctx
-              .supabaseAdmin
-              .from(
-                'notification_events',
-              )
-              .insert({
-                order_id:
-                  order.id,
+            await createNotification(
+              ctx.supabaseAdmin,
+              {
+                order,
 
-                customer_id:
-                  order.customer_id,
-
-                channel:
-                  'internal',
-
-                event_type:
+                type:
                   'project_update',
 
-                status:
-                  'pending',
-
                 payload: {
-                  reference:
-                    order.reference,
-
-                  project_title:
-                    order
-                      .project_title,
-
                   message:
                     note,
                 },
-              });
+              },
+            );
           }
 
-          return Response.json({
+          return json({
             success: true,
+
             note:
               createdNote,
           });
         }
 
-        return Response.json(
+        return json(
           {
             success: false,
+
             message:
               'Unsupported administrative action.',
           },
-          {
-            status: 400,
-          },
+          400,
         );
       } catch (error) {
         console.error(
@@ -731,18 +1304,16 @@ export default {
           error,
         );
 
-        return Response.json(
+        return json(
           {
             success: false,
 
             message:
               error instanceof Error
                 ? error.message
-                : 'Administrative action failed.',
+                : 'Administrative action could not be completed.',
           },
-          {
-            status: 500,
-          },
+          500,
         );
       }
     },

@@ -5,100 +5,78 @@ import {
 } from 'react';
 
 import {
+  ArrowRight,
   Banknote,
+  CheckCircle2,
+  Clock3,
   FolderKanban,
-  LogOut,
   RefreshCw,
-  ShieldCheck,
   UsersRound,
+  XCircle,
 } from 'lucide-react';
 
 import {
-  useNavigate,
+  Link,
 } from 'react-router-dom';
 
 import BrandLoader from '../components/BrandLoader';
 
 import {
-  useAuth,
-} from '../context/AuthContext';
-
-import {
   getAdminOverview,
 } from '../lib/admin';
 
-function formatMoney(
-  amountKobo,
-) {
-  return new Intl.NumberFormat(
-    'en-NG',
-    {
-      style: 'currency',
-      currency: 'NGN',
-      maximumFractionDigits:
-        0,
-    },
-  ).format(
-    Number(
-      amountKobo ||
-        0,
-    ) / 100,
-  );
-}
+import {
+  formatMoney,
+  formatOrderStatus,
+} from '../lib/orders';
 
-function formatStatus(
-  value,
+function displayState(
+  order,
 ) {
-  return value
-    ?.replaceAll(
-      '_',
-      ' ',
-    )
-    ?.replace(
-      /\b\w/g,
-      (character) =>
-        character.toUpperCase(),
-    );
-}
+  if (
+    order
+      .review_decision ===
+    'pending'
+  ) {
+    return 'Awaiting Review';
+  }
 
-function formatDate(
-  value,
-) {
-  return new Intl.DateTimeFormat(
-    'en-NG',
-    {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    },
-  ).format(
-    new Date(value),
+  if (
+    order
+      .review_decision ===
+    'declined'
+  ) {
+    return 'Declined';
+  }
+
+  return formatOrderStatus(
+    order.status,
   );
 }
 
 export default function AdminDashboard() {
-  const navigate =
-    useNavigate();
-
-  const {
-    user,
-    signOut,
-  } = useAuth();
-
   const [
     overview,
     setOverview,
-  ] = useState(null);
+  ] =
+    useState(null);
 
-  const [loading, setLoading] =
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(true);
 
   const [
     refreshing,
     setRefreshing,
-  ] = useState(false);
+  ] =
+    useState(false);
 
-  const [error, setError] =
+  const [
+    error,
+    setError,
+  ] =
     useState('');
 
   const load =
@@ -109,10 +87,6 @@ export default function AdminDashboard() {
         try {
           if (refresh) {
             setRefreshing(
-              true,
-            );
-          } else {
-            setLoading(
               true,
             );
           }
@@ -133,7 +107,7 @@ export default function AdminDashboard() {
           );
 
           setError(
-            'The administrative overview could not be loaded.',
+            'The management overview could not be loaded.',
           );
         } finally {
           setLoading(
@@ -150,240 +124,255 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     document.title =
-      'Admin Workspace | Posho Creative';
+      'Management Portal | Posho Creative';
 
     load();
-  }, [load]);
-
-  const logout =
-    async () => {
-      await signOut();
-
-      navigate(
-        '/login',
-        {
-          replace: true,
-        },
-      );
-    };
+  }, [
+    load,
+  ]);
 
   if (loading) {
     return (
-      <main className="admin-loading-page">
-        <BrandLoader
-          fullscreen
-          label="Opening Posho Creative administration..."
-        />
-      </main>
+      <BrandLoader
+        label="Preparing management overview..."
+      />
     );
   }
 
   return (
-    <main className="admin-page">
-      <header className="admin-topbar">
-        <div className="admin-topbar-brand">
-          <img
-            src="/brand/posho-creative-logo.png"
-            alt="Posho Creative"
+    <div className="admin-view admin-dashboard-v2 page-reveal">
+      <div className="admin-view-heading admin-dashboard-heading">
+        <div>
+          <span>
+            OPERATIONS
+          </span>
+
+          <h1>
+            Management
+            <br />
+            overview.
+          </h1>
+
+          <p>
+            Review incoming work, monitor active projects and keep commercial activity organised.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="admin-refresh-button"
+          onClick={() =>
+            load(true)
+          }
+          disabled={
+            refreshing
+          }
+        >
+          <RefreshCw
+            size={17}
+            className={
+              refreshing
+                ? 'admin-spin'
+                : ''
+            }
           />
 
+          Refresh
+        </button>
+      </div>
+
+      {error && (
+        <div className="admin-error">
+          {error}
+        </div>
+      )}
+
+      <div className="admin-dashboard-stat-grid">
+        <article className="admin-dashboard-stat admin-dashboard-stat-priority">
           <div>
-            <strong>
-              Administration
-            </strong>
-
-            <span>
-              Protected workspace
-            </span>
-          </div>
-        </div>
-
-        <div className="admin-topbar-actions">
-          <div className="admin-secure-badge">
-            <ShieldCheck
-              size={15}
+            <Clock3
+              size={20}
             />
-
-            Secure session
           </div>
 
-          <button
-            type="button"
-            onClick={() =>
-              load(true)
-            }
-            disabled={
-              refreshing
-            }
-            className="admin-icon-button"
-            aria-label="Refresh dashboard"
-          >
-            <RefreshCw
-              size={17}
-              className={
-                refreshing
-                  ? 'admin-spin'
-                  : ''
-              }
-            />
-          </button>
+          <span>
+            Awaiting review
+          </span>
 
-          <button
-            type="button"
-            onClick={logout}
-            className="admin-signout-button"
-          >
-            <LogOut
-              size={16}
-            />
+          <strong>
+            {overview
+              ?.pendingReview ||
+              0}
+          </strong>
 
-            Sign out
-          </button>
-        </div>
-      </header>
+          <small>
+            New project requests
+          </small>
+        </article>
 
-      <section className="admin-page-content">
-        <div className="admin-heading">
+        <article className="admin-dashboard-stat">
           <div>
-            <span>
-              POSHO CREATIVE
-              ADMIN
-            </span>
-
-            <h1>
-              Operations
-              overview.
-            </h1>
-
-            <p>
-              Signed in as{' '}
-              {user?.email}
-            </p>
+            <FolderKanban
+              size={20}
+            />
           </div>
-        </div>
 
-        {error && (
-          <div className="admin-error">
-            {error}
+          <span>
+            Active projects
+          </span>
+
+          <strong>
+            {overview
+              ?.activeProjects ||
+              0}
+          </strong>
+
+          <small>
+            Approved and ongoing
+          </small>
+        </article>
+
+        <article className="admin-dashboard-stat">
+          <div>
+            <Banknote
+              size={20}
+            />
           </div>
-        )}
 
-        <div className="admin-stat-grid">
-          <article className="admin-stat-card">
-            <div>
-              <UsersRound
-                size={20}
-              />
-            </div>
+          <span>
+            Awaiting payment
+          </span>
 
-            <span>
-              Customers
-            </span>
+          <strong>
+            {overview
+              ?.awaitingPayment ||
+              0}
+          </strong>
 
-            <strong>
-              {overview
-                ?.customers ||
-                0}
-            </strong>
-          </article>
+          <small>
+            Quotes ready for payment
+          </small>
+        </article>
 
-          <article className="admin-stat-card">
-            <div>
-              <FolderKanban
-                size={20}
-              />
-            </div>
+        <article className="admin-dashboard-stat">
+          <div>
+            <UsersRound
+              size={20}
+            />
+          </div>
 
-            <span>
-              Total orders
-            </span>
+          <span>
+            Customers
+          </span>
 
-            <strong>
-              {overview
-                ?.totalOrders ||
-                0}
-            </strong>
-          </article>
+          <strong>
+            {overview
+              ?.customers ||
+              0}
+          </strong>
 
-          <article className="admin-stat-card">
-            <div>
-              <FolderKanban
-                size={20}
-              />
-            </div>
+          <small>
+            Registered client accounts
+          </small>
+        </article>
 
-            <span>
-              Active projects
-            </span>
+        <article className="admin-dashboard-stat admin-dashboard-stat-money">
+          <div>
+            <CheckCircle2
+              size={20}
+            />
+          </div>
 
-            <strong>
-              {overview
-                ?.activeOrders ||
-                0}
-            </strong>
-          </article>
+          <span>
+            Confirmed revenue
+          </span>
 
-          <article className="admin-stat-card admin-stat-card-accent">
-            <div>
-              <Banknote
-                size={20}
-              />
-            </div>
+          <strong>
+            {formatMoney(
+              overview
+                ?.revenue ||
+                0,
+            )}
+          </strong>
 
-            <span>
-              Verified revenue
-            </span>
+          <small>
+            Successfully verified payments
+          </small>
+        </article>
 
-            <strong>
-              {formatMoney(
-                overview
-                  ?.successfulRevenue ||
-                  0,
-              )}
-            </strong>
-          </article>
-        </div>
+        <article className="admin-dashboard-stat admin-dashboard-stat-money">
+          <div>
+            <Banknote
+              size={20}
+            />
+          </div>
 
-        <section className="admin-panel">
-          <div className="admin-panel-heading">
+          <span>
+            Outstanding
+          </span>
+
+          <strong>
+            {formatMoney(
+              overview
+                ?.outstanding ||
+                0,
+            )}
+          </strong>
+
+          <small>
+            Approved unpaid balances
+          </small>
+        </article>
+      </div>
+
+      <div className="admin-dashboard-grid">
+        <section className="admin-dashboard-panel admin-review-queue">
+          <div className="admin-dashboard-panel-heading">
             <div>
               <span>
-                ACTIVITY
+                REVIEW QUEUE
               </span>
 
               <h2>
-                Recent projects
+                New project requests
               </h2>
             </div>
+
+            <Link
+              to="/admin/orders"
+            >
+              View all
+
+              <ArrowRight
+                size={16}
+              />
+            </Link>
           </div>
 
           {overview
-            ?.recentOrders
+            ?.pendingOrders
             ?.length ? (
-            <div className="admin-order-list">
+            <div className="admin-dashboard-list">
               {overview
-                .recentOrders
+                .pendingOrders
                 .map(
                   (
                     order,
                   ) => (
-                    <article
+                    <Link
                       key={
                         order.id
                       }
-                      className="admin-order-row"
+                      to={`/admin/orders/${order.reference}`}
+                      className="admin-dashboard-list-row"
                     >
-                      <div className="admin-order-main">
+                      <div>
                         <small>
-                          {
-                            order.reference
-                          }
+                          {order.reference}
                         </small>
 
                         <strong>
-                          {
-                            order.project_title
-                          }
+                          {order.project_title}
                         </strong>
 
                         <span>
@@ -392,44 +381,150 @@ export default function AdminDashboard() {
                             ?.full_name ||
                             order
                               .customers
-                              ?.email ||
-                            'Customer'}
+                              ?.email}
                         </span>
                       </div>
 
-                      <div className="admin-order-service">
-                        {order.service_slug
-                          ?.replaceAll(
-                            '-',
-                            ' ',
-                          )}
-                      </div>
-
-                      <span
-                        className={`workspace-status workspace-status-${order.status}`}
-                      >
-                        {formatStatus(
-                          order.status,
-                        )}
+                      <span className="admin-decision-pill pending">
+                        Review
                       </span>
 
-                      <time>
-                        {formatDate(
-                          order.created_at,
-                        )}
-                      </time>
-                    </article>
+                      <ArrowRight
+                        size={17}
+                      />
+                    </Link>
                   ),
                 )}
             </div>
           ) : (
-            <div className="admin-empty">
-              No project orders have
-              been submitted yet.
+            <div className="admin-clean-state">
+              <CheckCircle2
+                size={24}
+              />
+
+              <strong>
+                Review queue clear
+              </strong>
+
+              <span>
+                There are no new project requests awaiting a decision.
+              </span>
             </div>
           )}
         </section>
+
+        <aside className="admin-dashboard-panel admin-dashboard-summary">
+          <div className="admin-dashboard-panel-heading">
+            <div>
+              <span>
+                DECISIONS
+              </span>
+
+              <h2>
+                Order review
+              </h2>
+            </div>
+          </div>
+
+          <div className="admin-decision-summary-row">
+            <div className="decision-icon approved">
+              <CheckCircle2
+                size={17}
+              />
+            </div>
+
+            <span>
+              Approved
+            </span>
+
+            <strong>
+              {overview
+                ?.approved ||
+                0}
+            </strong>
+          </div>
+
+          <div className="admin-decision-summary-row">
+            <div className="decision-icon declined">
+              <XCircle
+                size={17}
+              />
+            </div>
+
+            <span>
+              Declined
+            </span>
+
+            <strong>
+              {overview
+                ?.declined ||
+                0}
+            </strong>
+          </div>
+        </aside>
+      </div>
+
+      <section className="admin-dashboard-panel admin-recent-panel">
+        <div className="admin-dashboard-panel-heading">
+          <div>
+            <span>
+              RECENT ACTIVITY
+            </span>
+
+            <h2>
+              Latest projects
+            </h2>
+          </div>
+        </div>
+
+        <div className="admin-dashboard-list">
+          {(overview
+            ?.recentOrders ||
+            []).map(
+            (
+              order,
+            ) => (
+              <Link
+                key={
+                  order.id
+                }
+                to={`/admin/orders/${order.reference}`}
+                className="admin-dashboard-list-row"
+              >
+                <div>
+                  <small>
+                    {order.reference}
+                  </small>
+
+                  <strong>
+                    {order.project_title}
+                  </strong>
+
+                  <span>
+                    {order.service_slug
+                      ?.replaceAll(
+                        '-',
+                        ' ',
+                      )}
+                  </span>
+                </div>
+
+                <span
+                  className={`admin-decision-pill ${order.review_decision}`}
+                >
+                  {displayState(
+                    order,
+                  )}
+                </span>
+
+                <ArrowRight
+                  size={17}
+                />
+              </Link>
+            ),
+          )}
+        </div>
       </section>
-    </main>
+    </div>
   );
 }

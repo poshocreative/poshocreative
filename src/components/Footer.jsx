@@ -1,14 +1,27 @@
-import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Mail,
+  MessageCircle,
+  Phone,
+} from 'lucide-react';
+
+import {
+  Link,
+} from 'react-router-dom';
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const currentYear =
+    new Date()
+      .getFullYear();
 
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <Link to="/" className="footer-brand-link">
+          <Link
+            to="/"
+            className="footer-brand-link"
+          >
             <img
               src="/brand/posho-creative-logo.png"
               alt="Posho Creative"
@@ -17,8 +30,7 @@ export default function Footer() {
           </Link>
 
           <p>
-            Creative, digital and business solutions built to turn
-            ideas into meaningful results.
+            Creative, digital and business solutions built to turn ideas into professional results.
           </p>
 
           <p className="footer-motto">
@@ -27,11 +39,13 @@ export default function Footer() {
         </div>
 
         <div className="footer-column">
-          <h3>Company</h3>
+          <h3>
+            Company
+          </h3>
 
           <div className="footer-links">
             <Link to="/about">
-              About us
+              About
             </Link>
 
             <Link to="/services">
@@ -42,14 +56,16 @@ export default function Footer() {
               Contact
             </Link>
 
-            <Link to="/order">
-              Start a project
+            <Link to="/login">
+              Client sign in
             </Link>
           </div>
         </div>
 
         <div className="footer-column">
-          <h3>Services</h3>
+          <h3>
+            Services
+          </h3>
 
           <div className="footer-links">
             <Link to="/services/website-development">
@@ -57,37 +73,67 @@ export default function Footer() {
             </Link>
 
             <Link to="/services/graphic-design">
-              Graphic Design
+              Graphic Design & Branding
             </Link>
 
             <Link to="/services/social-media-management">
               Social Media
             </Link>
 
-            <Link to="/services/business-services">
-              Business Services
-            </Link>
-
             <Link to="/services/advertising">
               Advertising
+            </Link>
+
+            <Link to="/services/business-services">
+              Business Services
             </Link>
           </div>
         </div>
 
         <div className="footer-column">
-          <h3>Get started</h3>
+          <h3>
+            Contact
+          </h3>
 
-          <p className="footer-small">
-            Have an idea, business or project you want Posho Creative
-            to work on?
-          </p>
+          <div className="footer-contact-links">
+            <a href="mailto:poshocreative@gmail.com">
+              <Mail
+                size={15}
+              />
+
+              poshocreative@gmail.com
+            </a>
+
+            <a href="tel:+2347060833927">
+              <Phone
+                size={15}
+              />
+
+              +234 706 083 3927
+            </a>
+
+            <a
+              href="https://wa.me/2347060833927"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MessageCircle
+                size={15}
+              />
+
+              WhatsApp
+            </a>
+          </div>
 
           <Link
             to="/order"
             className="footer-project-link"
           >
-            Start your project
-            <ArrowUpRight size={18} />
+            Start a project
+
+            <ArrowUpRight
+              size={18}
+            />
           </Link>
         </div>
       </div>

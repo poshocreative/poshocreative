@@ -7,8 +7,12 @@ import {
 import {
   ArrowLeft,
   BadgeDollarSign,
+  CheckCircle2,
   MessageSquareText,
   Save,
+  ShieldCheck,
+  X,
+  XCircle,
 } from 'lucide-react';
 
 import {
@@ -19,51 +23,17 @@ import {
 import BrandLoader from '../components/BrandLoader';
 
 import {
-  supabase,
-} from '../lib/supabase';
+  getAdminOrder,
+  runAdminOrderAction,
+} from '../lib/admin';
 
-function formatMoney(
-  amountKobo,
-) {
-  if (
-    amountKobo === null ||
-    amountKobo === undefined
-  ) {
-    return 'Not quoted';
-  }
+import {
+  formatMoney,
+  formatOrderStatus,
+} from '../lib/orders';
 
-  return new Intl.NumberFormat(
-    'en-NG',
-    {
-      style: 'currency',
-      currency: 'NGN',
-      maximumFractionDigits: 0,
-    },
-  ).format(
-    Number(amountKobo) / 100,
-  );
-}
-
-function formatStatus(
-  value,
-) {
-  if (!value) {
-    return '';
-  }
-
-  return value
-    .replaceAll('_', ' ')
-    .replace(
-      /\b\w/g,
-      (letter) =>
-        letter.toUpperCase(),
-    );
-}
-
-const statusOptions = [
-  'new',
+const workflowStatuses = [
   'under_review',
-  'quote_sent',
   'awaiting_payment',
   'paid',
   'in_progress',
@@ -71,84 +41,6 @@ const statusOptions = [
   'completed',
   'cancelled',
 ];
-
-async function fetchOrder(
-  reference,
-) {
-  const {
-    data,
-    error,
-  } =
-    await supabase
-      .from('orders')
-      .select(`
-        *,
-        customers (
-          id,
-          full_name,
-          email,
-          phone,
-          business_name
-        )
-      `)
-      .eq(
-        'reference',
-        reference,
-      )
-      .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-async function runAdminAction(
-  payload,
-) {
-  const {
-    data,
-    error,
-  } =
-    await supabase.functions
-      .invoke(
-        'admin-order-action',
-        {
-          body: payload,
-        },
-      );
-
-  if (error) {
-    let message =
-      'Administrative action failed.';
-
-    try {
-      const body =
-        await error.context?.json();
-
-      if (body?.message) {
-        message =
-          body.message;
-      }
-    } catch {
-      // Keep fallback message.
-    }
-
-    throw new Error(
-      message,
-    );
-  }
-
-  if (!data?.success) {
-    throw new Error(
-      data?.message ||
-        'Administrative action failed.',
-    );
-  }
-
-  return data;
-}
 
 export default function AdminOrderDetail() {
   const {
@@ -187,30 +79,36 @@ export default function AdminOrderDetail() {
     useState('');
 
   const [
-    quoteAmount,
-    setQuoteAmount,
+    declineOpen,
+    setDeclineOpen,
+  ] =
+    useState(false);
+
+  const [
+    declineReason,
+    setDeclineReason,
   ] =
     useState('');
 
   const [
-    quoteMessage,
-    setQuoteMessage,
+    quote,
+    setQuote,
   ] =
-    useState('');
+    useState({
+      amount: '',
+      message: '',
+    });
 
   const [
-    projectStatus,
-    setProjectStatus,
+    statusForm,
+    setStatusForm,
   ] =
-    useState(
-      'under_review',
-    );
+    useState({
+      status:
+        'under_review',
 
-  const [
-    statusNote,
-    setStatusNote,
-  ] =
-    useState('');
+      note: '',
+    });
 
   const [
     customerUpdate,
@@ -218,14 +116,12 @@ export default function AdminOrderDetail() {
   ] =
     useState('');
 
-  const loadOrder =
+  const load =
     useCallback(
       async () => {
         try {
-          setError('');
-
           const result =
-            await fetchOrder(
+            await getAdminOrder(
               reference,
             );
 
@@ -233,21 +129,29 @@ export default function AdminOrderDetail() {
             result,
           );
 
-          if (result?.status) {
-            setProjectStatus(
-              result.status,
+          if (result) {
+            setStatusForm(
+              (current) => ({
+                ...current,
+
+                status:
+                  workflowStatuses.includes(
+                    result.status,
+                  )
+                    ? result.status
+                    : 'under_review',
+              }),
             );
           }
         } catch (
           loadError
         ) {
           console.error(
-            'Admin project loading failed:',
             loadError,
           );
 
           setError(
-            'The project could not be loaded.',
+            'This project could not be loaded.',
           );
         } finally {
           setLoading(
@@ -262,12 +166,12 @@ export default function AdminOrderDetail() {
 
   useEffect(() => {
     document.title =
-      `${reference} | Posho Creative Admin`;
+      `${reference} | Posho Creative Management`;
 
-    loadOrder();
+    load();
   }, [
     reference,
-    loadOrder,
+    load,
   ]);
 
   const execute =
@@ -276,26 +180,31 @@ export default function AdminOrderDetail() {
       successMessage,
     ) => {
       if (!order) {
-        return;
+        return false;
       }
 
       try {
-        setBusy(true);
+        setBusy(
+          true,
+        );
+
         setError('');
         setSuccess('');
 
-        await runAdminAction({
+        await runAdminOrderAction({
           orderId:
             order.id,
 
           ...payload,
         });
 
-        await loadOrder();
+        await load();
 
         setSuccess(
           successMessage,
         );
+
+        return true;
       } catch (
         actionError
       ) {
@@ -306,27 +215,86 @@ export default function AdminOrderDetail() {
         setError(
           actionError.message,
         );
+
+        return false;
       } finally {
-        setBusy(false);
+        setBusy(
+          false,
+        );
       }
     };
 
-  const handleQuote =
+  const approve =
+    async () => {
+      await execute(
+        {
+          action:
+            'approve_order',
+        },
+
+        'Project request approved successfully.',
+      );
+    };
+
+  const decline =
     async (
       event,
     ) => {
       event.preventDefault();
 
-      const amount =
+      if (
+        declineReason
+          .trim()
+          .length <
+        10
+      ) {
+        setError(
+          'Provide a clear reason before declining this request.',
+        );
+
+        return;
+      }
+
+      const completed =
+        await execute(
+          {
+            action:
+              'decline_order',
+
+            reason:
+              declineReason,
+          },
+
+          'Project request declined and the customer has been informed.',
+        );
+
+      if (completed) {
+        setDeclineOpen(
+          false,
+        );
+
+        setDeclineReason(
+          '',
+        );
+      }
+    };
+
+  const sendQuote =
+    async (
+      event,
+    ) => {
+      event.preventDefault();
+
+      const naira =
         Number(
-          quoteAmount,
+          quote.amount,
         );
 
       if (
         !Number.isFinite(
-          amount,
+          naira,
         ) ||
-        amount <= 0
+        naira <= 0
       ) {
         setError(
           'Enter a valid quote amount.',
@@ -335,50 +303,66 @@ export default function AdminOrderDetail() {
         return;
       }
 
-      await execute(
-        {
-          action:
-            'send_quote',
+      const completed =
+        await execute(
+          {
+            action:
+              'send_quote',
 
-          amountKobo:
-            Math.round(
-              amount * 100,
-            ),
+            amountKobo:
+              Math.round(
+                naira *
+                  100,
+              ),
 
-          message:
-            quoteMessage.trim(),
-        },
-        'Quote sent successfully.',
-      );
+            message:
+              quote.message,
+          },
 
-      setQuoteAmount('');
-      setQuoteMessage('');
+          'Quote issued successfully.',
+        );
+
+      if (completed) {
+        setQuote({
+          amount: '',
+          message: '',
+        });
+      }
     };
 
-  const handleStatus =
+  const updateStatus =
     async (
       event,
     ) => {
       event.preventDefault();
 
-      await execute(
-        {
-          action:
-            'update_status',
+      const completed =
+        await execute(
+          {
+            action:
+              'update_status',
 
-          status:
-            projectStatus,
+            status:
+              statusForm.status,
 
-          note:
-            statusNote.trim(),
-        },
-        'Project status updated.',
-      );
+            note:
+              statusForm.note,
+          },
 
-      setStatusNote('');
+          'Project status updated.',
+        );
+
+      if (completed) {
+        setStatusForm(
+          (current) => ({
+            ...current,
+            note: '',
+          }),
+        );
+      }
     };
 
-  const handleUpdate =
+  const publishUpdate =
     async (
       event,
     ) => {
@@ -389,44 +373,65 @@ export default function AdminOrderDetail() {
           .trim()
       ) {
         setError(
-          'Write an update before sending.',
+          'Write an update before publishing.',
         );
 
         return;
       }
 
-      await execute(
-        {
-          action:
-            'add_note',
+      const completed =
+        await execute(
+          {
+            action:
+              'add_note',
 
-          note:
-            customerUpdate.trim(),
+            note:
+              customerUpdate,
 
-          isInternal:
-            false,
-        },
-        'Customer update published.',
-      );
+            isInternal:
+              false,
+          },
 
-      setCustomerUpdate('');
+          'Project update published.',
+        );
+
+      if (completed) {
+        setCustomerUpdate(
+          '',
+        );
+      }
     };
 
   if (loading) {
     return (
       <BrandLoader
-        label="Opening project..."
+        label="Opening project request..."
       />
     );
   }
 
   if (!order) {
     return (
-      <div className="admin-empty">
-        Project not found.
+      <div className="admin-clean-state">
+        Project request not found.
       </div>
     );
   }
+
+  const pending =
+    order
+      .review_decision ===
+    'pending';
+
+  const approved =
+    order
+      .review_decision ===
+    'approved';
+
+  const declined =
+    order
+      .review_decision ===
+    'declined';
 
   const quoted =
     Number(
@@ -444,7 +449,8 @@ export default function AdminOrderDetail() {
 
   const balance =
     Math.max(
-      quoted - paid,
+      quoted -
+        paid,
       0,
     );
 
@@ -458,10 +464,10 @@ export default function AdminOrderDetail() {
           size={17}
         />
 
-        Orders
+        Project requests
       </Link>
 
-      <div className="admin-project-hero">
+      <div className="admin-project-hero admin-project-hero-v2">
         <div>
           <span>
             {order.reference}
@@ -486,11 +492,15 @@ export default function AdminOrderDetail() {
         </div>
 
         <span
-          className={`workspace-status workspace-status-${order.status}`}
+          className={`admin-decision-pill ${order.review_decision}`}
         >
-          {formatStatus(
-            order.status,
-          )}
+          {pending
+            ? 'Awaiting Review'
+            : declined
+              ? 'Declined'
+              : formatOrderStatus(
+                  order.status,
+                )}
         </span>
       </div>
 
@@ -506,6 +516,174 @@ export default function AdminOrderDetail() {
         </div>
       )}
 
+      {pending && (
+        <section className="admin-review-decision-card">
+          <div>
+            <span>
+              MANAGEMENT DECISION REQUIRED
+            </span>
+
+            <h2>
+              Review this request before it proceeds.
+            </h2>
+
+            <p>
+              Approval moves the project into the commercial workflow. Declining requires a clear customer-facing reason.
+            </p>
+          </div>
+
+          <div className="admin-review-buttons">
+            <button
+              type="button"
+              className="admin-approve-button"
+              onClick={
+                approve
+              }
+              disabled={
+                busy
+              }
+            >
+              <CheckCircle2
+                size={18}
+              />
+
+              Approve request
+            </button>
+
+            <button
+              type="button"
+              className="admin-decline-button"
+              onClick={() =>
+                setDeclineOpen(
+                  true,
+                )
+              }
+              disabled={
+                busy
+              }
+            >
+              <XCircle
+                size={18}
+              />
+
+              Decline request
+            </button>
+          </div>
+        </section>
+      )}
+
+      {declineOpen && (
+        <section className="admin-decline-panel">
+          <div className="admin-decline-panel-heading">
+            <div>
+              <span>
+                DECLINE REQUEST
+              </span>
+
+              <h3>
+                Give the customer a clear reason.
+              </h3>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setDeclineOpen(
+                  false,
+                )
+              }
+              aria-label="Close decline form"
+            >
+              <X
+                size={18}
+              />
+            </button>
+          </div>
+
+          <form
+            onSubmit={
+              decline
+            }
+          >
+            <textarea
+              value={
+                declineReason
+              }
+              onChange={(
+                event,
+              ) =>
+                setDeclineReason(
+                  event
+                    .target
+                    .value,
+                )
+              }
+              placeholder="Example: We are unable to accept this project at the requested timeline because the scope requires a longer production period."
+            />
+
+            <div>
+              <button
+                type="button"
+                className="button button-secondary"
+                onClick={() =>
+                  setDeclineOpen(
+                    false,
+                  )
+                }
+              >
+                Keep request
+              </button>
+
+              <button
+                type="submit"
+                className="admin-decline-confirm"
+                disabled={
+                  busy
+                }
+              >
+                Confirm decline
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+
+      {approved && (
+        <section className="admin-approved-banner">
+          <ShieldCheck
+            size={21}
+          />
+
+          <div>
+            <strong>
+              Approved project
+            </strong>
+
+            <span>
+              This project may now proceed through quoting, payment and production.
+            </span>
+          </div>
+        </section>
+      )}
+
+      {declined && (
+        <section className="admin-declined-banner">
+          <XCircle
+            size={21}
+          />
+
+          <div>
+            <strong>
+              Request declined
+            </strong>
+
+            <span>
+              {order.decline_reason}
+            </span>
+          </div>
+        </section>
+      )}
+
       <div className="admin-project-grid">
         <div className="admin-project-main">
           <section className="admin-control-card">
@@ -517,32 +695,62 @@ export default function AdminOrderDetail() {
               Customer requirements
             </h2>
 
-            <div className="admin-brief-block">
-              <strong>
-                Service
-              </strong>
+            <div className="admin-brief-grid">
+              <div>
+                <span>
+                  Service
+                </span>
 
-              <p>
-                {order.service_slug
-                  ?.replaceAll(
-                    '-',
-                    ' ',
-                  )}
-              </p>
-            </div>
+                <strong>
+                  {order.service_slug
+                    ?.replaceAll(
+                      '-',
+                      ' ',
+                    )}
+                </strong>
+              </div>
 
-            <div className="admin-brief-block">
-              <strong>
-                Project type
-              </strong>
+              <div>
+                <span>
+                  Project type
+                </span>
 
-              <p>
-                {order.project_type
-                  ?.replaceAll(
-                    '-',
-                    ' ',
-                  )}
-              </p>
+                <strong>
+                  {order.project_type
+                    ?.replaceAll(
+                      '-',
+                      ' ',
+                    )}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Budget
+                </span>
+
+                <strong>
+                  {order.budget
+                    ?.replaceAll(
+                      '-',
+                      ' ',
+                    )}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Timeline
+                </span>
+
+                <strong>
+                  {order.timeline
+                    ?.replaceAll(
+                      '-',
+                      ' ',
+                    )}
+                </strong>
+              </div>
             </div>
 
             <div className="admin-brief-block">
@@ -568,7 +776,7 @@ export default function AdminOrderDetail() {
             {order.reference_links && (
               <div className="admin-brief-block">
                 <strong>
-                  Reference links
+                  References
                 </strong>
 
                 <p>
@@ -578,269 +786,249 @@ export default function AdminOrderDetail() {
             )}
           </section>
 
-          <section className="admin-control-card">
-            <BadgeDollarSign
-              size={22}
-            />
+          {approved && (
+            <>
+              <section className="admin-control-card">
+                <BadgeDollarSign
+                  size={22}
+                />
 
-            <span>
-              QUOTE
-            </span>
-
-            <h2>
-              Send final price
-            </h2>
-
-            <p>
-              Current quote:{' '}
-
-              <strong>
-                {formatMoney(
-                  order
-                    .quoted_amount_kobo,
-                )}
-              </strong>
-            </p>
-
-            <form
-              className="admin-form-stack"
-              onSubmit={
-                handleQuote
-              }
-            >
-              <label>
                 <span>
-                  Quote amount in Naira
+                  COMMERCIAL
                 </span>
 
-                <input
-                  type="number"
-                  min="1"
-                  value={
-                    quoteAmount
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    setQuoteAmount(
-                      event
-                        .target
-                        .value,
-                    )
-                  }
-                  placeholder="180000"
-                />
-              </label>
+                <h2>
+                  Quote management
+                </h2>
 
-              <label>
+                <p className="admin-card-description">
+                  Current project value:{' '}
+
+                  <strong>
+                    {formatMoney(
+                      order
+                        .quoted_amount_kobo,
+                    )}
+                  </strong>
+                </p>
+
+                <form
+                  onSubmit={
+                    sendQuote
+                  }
+                  className="admin-form-stack"
+                >
+                  <label>
+                    <span>
+                      Final amount in Naira
+                    </span>
+
+                    <input
+                      type="number"
+                      min="1"
+                      value={
+                        quote.amount
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        setQuote(
+                          (current) => ({
+                            ...current,
+
+                            amount:
+                              event
+                                .target
+                                .value,
+                          }),
+                        )
+                      }
+                      placeholder="180000"
+                    />
+                  </label>
+
+                  <label>
+                    <span>
+                      Quote note
+                    </span>
+
+                    <textarea
+                      value={
+                        quote.message
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        setQuote(
+                          (current) => ({
+                            ...current,
+
+                            message:
+                              event
+                                .target
+                                .value,
+                          }),
+                        )
+                      }
+                      placeholder="Briefly explain what the quoted amount covers."
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    className="button button-primary"
+                    disabled={
+                      busy
+                    }
+                  >
+                    Issue quote
+                  </button>
+                </form>
+              </section>
+
+              <section className="admin-control-card">
+                <MessageSquareText
+                  size={22}
+                />
+
                 <span>
-                  Message to customer
+                  CLIENT COMMUNICATION
                 </span>
 
-                <textarea
-                  value={
-                    quoteMessage
+                <h2>
+                  Publish an update
+                </h2>
+
+                <form
+                  onSubmit={
+                    publishUpdate
                   }
-                  onChange={(
-                    event,
-                  ) =>
-                    setQuoteMessage(
-                      event
-                        .target
-                        .value,
-                    )
-                  }
-                  placeholder="Explain what is included in the quote..."
-                />
-              </label>
+                  className="admin-form-stack"
+                >
+                  <textarea
+                    value={
+                      customerUpdate
+                    }
+                    onChange={(
+                      event,
+                    ) =>
+                      setCustomerUpdate(
+                        event
+                          .target
+                          .value,
+                      )
+                    }
+                    placeholder="Write a concise project update for the client."
+                  />
 
-              <button
-                type="submit"
-                className="button button-primary"
-                disabled={
-                  busy
-                }
-              >
-                Send quote
-              </button>
-            </form>
-          </section>
-
-          <section className="admin-control-card">
-            <MessageSquareText
-              size={22}
-            />
-
-            <span>
-              CUSTOMER UPDATE
-            </span>
-
-            <h2>
-              Send project update
-            </h2>
-
-            <form
-              className="admin-form-stack"
-              onSubmit={
-                handleUpdate
-              }
-            >
-              <textarea
-                value={
-                  customerUpdate
-                }
-                onChange={(
-                  event,
-                ) =>
-                  setCustomerUpdate(
-                    event
-                      .target
-                      .value,
-                  )
-                }
-                placeholder="Write an update the customer can see..."
-              />
-
-              <button
-                type="submit"
-                className="button button-primary"
-                disabled={
-                  busy
-                }
-              >
-                Send update
-              </button>
-            </form>
-          </section>
+                  <button
+                    type="submit"
+                    className="button button-primary"
+                    disabled={
+                      busy
+                    }
+                  >
+                    Publish update
+                  </button>
+                </form>
+              </section>
+            </>
+          )}
         </div>
 
         <aside className="admin-project-sidebar">
-          <section className="admin-control-card">
-            <Save
-              size={22}
-            />
-
-            <span>
-              PROJECT STATUS
-            </span>
-
-            <h2>
-              Update workflow
-            </h2>
-
-            <form
-              className="admin-form-stack"
-              onSubmit={
-                handleStatus
-              }
-            >
-              <select
-                value={
-                  projectStatus
-                }
-                onChange={(
-                  event,
-                ) =>
-                  setProjectStatus(
-                    event
-                      .target
-                      .value,
-                  )
-                }
-              >
-                {statusOptions.map(
-                  (
-                    status,
-                  ) => (
-                    <option
-                      key={
-                        status
-                      }
-                      value={
-                        status
-                      }
-                    >
-                      {formatStatus(
-                        status,
-                      )}
-                    </option>
-                  ),
-                )}
-              </select>
-
-              <textarea
-                value={
-                  statusNote
-                }
-                onChange={(
-                  event,
-                ) =>
-                  setStatusNote(
-                    event
-                      .target
-                      .value,
-                  )
-                }
-                placeholder="Optional customer-facing message..."
+          {approved && (
+            <section className="admin-control-card">
+              <Save
+                size={22}
               />
 
-              <button
-                type="submit"
-                className="button button-primary"
-                disabled={
-                  busy
+              <span>
+                WORKFLOW
+              </span>
+
+              <h2>
+                Project status
+              </h2>
+
+              <form
+                onSubmit={
+                  updateStatus
                 }
+                className="admin-form-stack"
               >
-                Save status
-              </button>
-            </form>
-          </section>
+                <select
+                  value={
+                    statusForm.status
+                  }
+                  onChange={(
+                    event,
+                  ) =>
+                    setStatusForm(
+                      (current) => ({
+                        ...current,
 
-          <section className="admin-control-card">
-            <span>
-              PAYMENT
-            </span>
+                        status:
+                          event
+                            .target
+                            .value,
+                      }),
+                    )
+                  }
+                >
+                  {workflowStatuses.map(
+                    (
+                      status,
+                    ) => (
+                      <option
+                        key={
+                          status
+                        }
+                        value={
+                          status
+                        }
+                      >
+                        {formatOrderStatus(
+                          status,
+                        )}
+                      </option>
+                    ),
+                  )}
+                </select>
 
-            <h2>
-              Financial state
-            </h2>
+                <textarea
+                  value={
+                    statusForm.note
+                  }
+                  onChange={(
+                    event,
+                  ) =>
+                    setStatusForm(
+                      (current) => ({
+                        ...current,
 
-            <div className="admin-money-row">
-              <span>
-                Quoted
-              </span>
+                        note:
+                          event
+                            .target
+                            .value,
+                      }),
+                    )
+                  }
+                  placeholder="Optional note for the client."
+                />
 
-              <strong>
-                {formatMoney(
-                  quoted,
-                )}
-              </strong>
-            </div>
-
-            <div className="admin-money-row">
-              <span>
-                Paid
-              </span>
-
-              <strong>
-                {formatMoney(
-                  paid,
-                )}
-              </strong>
-            </div>
-
-            <div className="admin-money-row">
-              <span>
-                Balance
-              </span>
-
-              <strong>
-                {formatMoney(
-                  balance,
-                )}
-              </strong>
-            </div>
-          </section>
+                <button
+                  type="submit"
+                  className="button button-primary"
+                  disabled={
+                    busy
+                  }
+                >
+                  Save status
+                </button>
+              </form>
+            </section>
+          )}
 
           <section className="admin-control-card">
             <span>
@@ -851,58 +1039,108 @@ export default function AdminOrderDetail() {
               Contact details
             </h2>
 
-            <div className="admin-brief-block">
-              <strong>
-                Name
-              </strong>
+            <div className="admin-contact-list">
+              <div>
+                <span>
+                  Name
+                </span>
 
-              <p>
-                {order
-                  .customers
-                  ?.full_name ||
-                  'Not provided'}
-              </p>
-            </div>
+                <strong>
+                  {order
+                    .customers
+                    ?.full_name ||
+                    'Not provided'}
+                </strong>
+              </div>
 
-            <div className="admin-brief-block">
-              <strong>
-                Email
-              </strong>
+              <div>
+                <span>
+                  Email
+                </span>
 
-              <p>
-                {order
-                  .customers
-                  ?.email ||
-                  'Not provided'}
-              </p>
-            </div>
+                <strong>
+                  {order
+                    .customers
+                    ?.email ||
+                    'Not provided'}
+                </strong>
+              </div>
 
-            <div className="admin-brief-block">
-              <strong>
-                Phone
-              </strong>
+              <div>
+                <span>
+                  Phone
+                </span>
 
-              <p>
-                {order
-                  .customers
-                  ?.phone ||
-                  'Not provided'}
-              </p>
-            </div>
+                <strong>
+                  {order
+                    .customers
+                    ?.phone ||
+                    'Not provided'}
+                </strong>
+              </div>
 
-            <div className="admin-brief-block">
-              <strong>
-                Business
-              </strong>
+              <div>
+                <span>
+                  Business
+                </span>
 
-              <p>
-                {order
-                  .customers
-                  ?.business_name ||
-                  'Not provided'}
-              </p>
+                <strong>
+                  {order
+                    .customers
+                    ?.business_name ||
+                    'Not provided'}
+                </strong>
+              </div>
             </div>
           </section>
+
+          {approved && (
+            <section className="admin-control-card">
+              <span>
+                FINANCIALS
+              </span>
+
+              <h2>
+                Payment position
+              </h2>
+
+              <div className="admin-money-row">
+                <span>
+                  Quoted
+                </span>
+
+                <strong>
+                  {formatMoney(
+                    quoted,
+                  )}
+                </strong>
+              </div>
+
+              <div className="admin-money-row">
+                <span>
+                  Paid
+                </span>
+
+                <strong>
+                  {formatMoney(
+                    paid,
+                  )}
+                </strong>
+              </div>
+
+              <div className="admin-money-row">
+                <span>
+                  Balance
+                </span>
+
+                <strong>
+                  {formatMoney(
+                    balance,
+                  )}
+                </strong>
+              </div>
+            </section>
+          )}
         </aside>
       </div>
     </div>

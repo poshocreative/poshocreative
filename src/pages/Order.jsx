@@ -1101,7 +1101,7 @@ export default function Order() {
             </div>
 
             <span className="section-kicker">
-              PROJECT CREATED
+              REQUEST SUBMITTED
             </span>
 
             <h1>
@@ -2343,7 +2343,7 @@ export default function Order() {
               />
 
               <p>
-                Submitted projects are stored in Supabase and linked to your authenticated Posho Creative account. Reference files are uploaded to private storage.
+                Your project information and reference files are protected within your Posho Creative workspace and remain connected to the appropriate project account.
               </p>
             </div>
           </aside>

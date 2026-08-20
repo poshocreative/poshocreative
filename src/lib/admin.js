@@ -112,10 +112,9 @@ export async function verifyAdminAccessCode(
 
 export async function getAdminOverview() {
   const [
-    customers,
-    orders,
-    payments,
-    quotes,
+    customersResult,
+    ordersResult,
+    paymentsResult,
   ] =
     await Promise.all([
       supabase
@@ -139,8 +138,11 @@ export async function getAdminOverview() {
           reference,
           project_title,
           service_slug,
+          project_type,
           status,
           payment_status,
+          review_decision,
+          decline_reason,
           quoted_amount_kobo,
           paid_amount_kobo,
           customer_action_required,
@@ -167,48 +169,86 @@ export async function getAdminOverview() {
           amount_kobo,
           status
         `),
-
-      supabase
-        .from(
-          'order_quotes',
-        )
-        .select(`
-          id,
-          status,
-          amount_kobo
-        `),
     ]);
 
-  if (customers.error) {
-    throw customers.error;
+  if (
+    customersResult.error
+  ) {
+    throw customersResult.error;
   }
 
-  if (orders.error) {
-    throw orders.error;
+  if (
+    ordersResult.error
+  ) {
+    throw ordersResult.error;
   }
 
-  if (payments.error) {
-    throw payments.error;
+  if (
+    paymentsResult.error
+  ) {
+    throw paymentsResult.error;
   }
 
-  if (quotes.error) {
-    throw quotes.error;
-  }
-
-  const orderRows =
-    orders.data ||
+  const orders =
+    ordersResult.data ||
     [];
 
-  const paymentRows =
-    payments.data ||
+  const payments =
+    paymentsResult.data ||
     [];
+
+  const pendingReview =
+    orders.filter(
+      (order) =>
+        order
+          .review_decision ===
+        'pending',
+    ).length;
+
+  const approved =
+    orders.filter(
+      (order) =>
+        order
+          .review_decision ===
+        'approved',
+    ).length;
+
+  const declined =
+    orders.filter(
+      (order) =>
+        order
+          .review_decision ===
+        'declined',
+    ).length;
+
+  const activeProjects =
+    orders.filter(
+      (order) =>
+        order
+          .review_decision ===
+          'approved' &&
+        ![
+          'completed',
+          'cancelled',
+        ].includes(
+          order.status,
+        ),
+    ).length;
+
+  const awaitingPayment =
+    orders.filter(
+      (order) =>
+        order
+          .review_decision ===
+          'approved' &&
+        order.status ===
+          'awaiting_payment',
+    ).length;
 
   const revenue =
-    paymentRows
+    payments
       .filter(
-        (
-          payment,
-        ) =>
+        (payment) =>
           payment.status ===
           'successful',
       )
@@ -227,85 +267,69 @@ export async function getAdminOverview() {
       );
 
   const outstanding =
-    orderRows.reduce(
-      (
-        total,
-        order,
-      ) =>
-        total +
-        Math.max(
-          Number(
-            order
-              .quoted_amount_kobo ||
-              0,
-          ) -
+    orders
+      .filter(
+        (order) =>
+          order
+            .review_decision ===
+          'approved',
+      )
+      .reduce(
+        (
+          total,
+          order,
+        ) =>
+          total +
+          Math.max(
             Number(
               order
-                .paid_amount_kobo ||
+                .quoted_amount_kobo ||
                 0,
-            ),
-          0,
-        ),
-      0,
-    );
+            ) -
+              Number(
+                order
+                  .paid_amount_kobo ||
+                  0,
+              ),
+            0,
+          ),
+        0,
+      );
 
   return {
     customers:
-      customers.count ||
+      customersResult.count ||
       0,
 
     totalOrders:
-      orderRows.length,
+      orders.length,
 
-    activeOrders:
-      orderRows.filter(
-        (
-          order,
-        ) =>
-          ![
-            'completed',
-            'cancelled',
-          ].includes(
-            order.status,
-          ),
-      ).length,
-
-    awaitingQuote:
-      orderRows.filter(
-        (
-          order,
-        ) =>
-          order.status ===
-          'under_review',
-      ).length,
-
-    awaitingPayment:
-      orderRows.filter(
-        (
-          order,
-        ) =>
-          order.status ===
-          'awaiting_payment',
-      ).length,
-
-    customerActions:
-      orderRows.filter(
-        (
-          order,
-        ) =>
-          order
-            .customer_action_required,
-      ).length,
-
+    pendingReview,
+    approved,
+    declined,
+    activeProjects,
+    awaitingPayment,
     revenue,
-
     outstanding,
 
     recentOrders:
-      orderRows.slice(
+      orders.slice(
         0,
-        8,
+        10,
       ),
+
+    pendingOrders:
+      orders
+        .filter(
+          (order) =>
+            order
+              .review_decision ===
+            'pending',
+        )
+        .slice(
+          0,
+          6,
+        ),
   };
 }
 
@@ -326,6 +350,9 @@ export async function getAdminOrders() {
         project_type,
         status,
         payment_status,
+        review_decision,
+        decline_reason,
+        reviewed_at,
         requires_quote,
         quoted_amount_kobo,
         paid_amount_kobo,
@@ -335,13 +362,15 @@ export async function getAdminOrders() {
           id,
           full_name,
           email,
-          phone
+          phone,
+          business_name
         )
       `)
       .order(
         'created_at',
         {
-          ascending: false,
+          ascending:
+            false,
         },
       );
 
@@ -370,7 +399,8 @@ export async function getAdminOrder(
           full_name,
           email,
           phone,
-          business_name
+          business_name,
+          preferred_contact_method
         )
       `)
       .eq(
@@ -483,18 +513,23 @@ export async function getAdminOrder(
 
   return {
     ...order,
+
     quotes:
       quotes.data ||
       [],
+
     notes:
       notes.data ||
       [],
+
     files:
       files.data ||
       [],
+
     payments:
       payments.data ||
       [],
+
     history:
       history.data ||
       [],
@@ -519,14 +554,14 @@ export async function runAdminOrderAction(
   if (error) {
     throw await actionError(
       error,
-      'Administrative action failed.',
+      'The requested action could not be completed.',
     );
   }
 
   if (!data?.success) {
     throw new Error(
       data?.message ||
-        'Administrative action failed.',
+        'The requested action could not be completed.',
     );
   }
 
@@ -552,6 +587,7 @@ export async function getAdminCustomers() {
         orders (
           id,
           status,
+          review_decision,
           quoted_amount_kobo,
           paid_amount_kobo
         )
@@ -559,7 +595,8 @@ export async function getAdminCustomers() {
       .order(
         'created_at',
         {
-          ascending: false,
+          ascending:
+            false,
         },
       );
 
@@ -598,7 +635,8 @@ export async function getAdminPayments() {
       .order(
         'created_at',
         {
-          ascending: false,
+          ascending:
+            false,
         },
       );
 
@@ -639,7 +677,8 @@ export async function getAdminQuotes() {
       .order(
         'created_at',
         {
-          ascending: false,
+          ascending:
+            false,
         },
       );
 
@@ -663,7 +702,8 @@ export async function getAdminCatalog() {
       .order(
         'sort_order',
         {
-          ascending: true,
+          ascending:
+            true,
         },
       );
 
