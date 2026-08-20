@@ -10,16 +10,27 @@ import {
   reconcilePayment,
 } from '../_shared/reconcile-payment.ts';
 
+function json(
+  body:
+    Record<
+      string,
+      unknown
+    >,
+  status = 200,
+) {
+  return Response.json(
+    body,
+    {
+      status,
+    },
+  );
+}
+
 async function diagnostic(
   admin: any,
   paymentId: string,
   eventType: string,
-  internalMessage: string,
-  payload:
-    Record<
-      string,
-      unknown
-    > = {},
+  message: string,
 ) {
   await admin
     .from(
@@ -33,12 +44,10 @@ async function diagnostic(
         eventType,
 
       stage:
-        'verifying',
+        'admin_recheck',
 
       internal_message:
-        internalMessage,
-
-      payload,
+        message,
     });
 }
 
@@ -56,20 +65,46 @@ export default {
         req.method !==
         'POST'
       ) {
-        return Response.json(
+        return json(
           {
             success: false,
 
             message:
               'Method not allowed.',
           },
-          {
-            status: 405,
-          },
+          405,
         );
       }
 
       try {
+        const {
+          data:
+            allowed,
+          error:
+            accessError,
+        } =
+          await ctx
+            .supabase
+            .rpc(
+              'has_admin_access',
+            );
+
+        if (
+          accessError ||
+          allowed !==
+            true
+        ) {
+          return json(
+            {
+              success: false,
+
+              message:
+                'Administrative access is required.',
+            },
+            403,
+          );
+        }
+
         const body =
           await req.json();
 
@@ -82,16 +117,14 @@ export default {
             : '';
 
         if (!paymentId) {
-          return Response.json(
+          return json(
             {
               success: false,
 
               message:
-                'Payment reference is required.',
+                'Payment attempt is required.',
             },
-            {
-              status: 400,
-            },
+            400,
           );
         }
 
@@ -102,7 +135,7 @@ export default {
             paymentError,
         } =
           await ctx
-            .supabase
+            .supabaseAdmin
             .from(
               'payment_transactions',
             )
@@ -128,16 +161,14 @@ export default {
           paymentError ||
           !payment
         ) {
-          return Response.json(
+          return json(
             {
               success: false,
 
               message:
                 'Payment attempt could not be found.',
             },
-            {
-              status: 404,
-            },
+            404,
           );
         }
 
@@ -145,20 +176,23 @@ export default {
           payment.status ===
           'successful'
         ) {
-          return Response.json({
+          return json({
             success: true,
 
             status:
               'successful',
 
             message:
-              'Payment has been confirmed.',
+              'This payment is already confirmed.',
           });
         }
 
-        const now =
-          new Date()
-            .toISOString();
+        await diagnostic(
+          ctx.supabaseAdmin,
+          payment.id,
+          'admin_recheck_requested',
+          'Management requested an independent provider status check.',
+        );
 
         await ctx
           .supabaseAdmin
@@ -166,23 +200,17 @@ export default {
             'payment_transactions',
           )
           .update({
+            last_checked_at:
+              new Date()
+                .toISOString(),
+
             attempt_stage:
               'verifying',
-
-            last_checked_at:
-              now,
           })
           .eq(
             'id',
             payment.id,
           );
-
-        await diagnostic(
-          ctx.supabaseAdmin,
-          payment.id,
-          'verification_requested',
-          'Payment verification requested.',
-        );
 
         let charge =
           null;
@@ -252,10 +280,7 @@ export default {
                 'awaiting_confirmation',
 
               customer_message:
-                'Flutterwave has not confirmed this payment yet. Please allow a little more time and check again.',
-
-              last_checked_at:
-                now,
+                'This payment is still awaiting confirmation from the payment provider.',
             })
             .eq(
               'id',
@@ -265,18 +290,18 @@ export default {
           await diagnostic(
             ctx.supabaseAdmin,
             payment.id,
-            'provider_charge_not_found',
-            'No matching Flutterwave charge was returned during verification.',
+            'admin_recheck_no_charge',
+            'Management recheck did not return a matching provider charge.',
           );
 
-          return Response.json({
-            success: false,
+          return json({
+            success: true,
 
             status:
               'pending',
 
             message:
-              'Flutterwave has not confirmed this payment yet. Please allow a little more time and check again.',
+              'No completed Flutterwave charge has been found yet.',
           });
         }
 
@@ -287,29 +312,36 @@ export default {
             charge,
           );
 
-        return Response.json(
-          result,
+        await diagnostic(
+          ctx.supabaseAdmin,
+          payment.id,
+          'admin_recheck_completed',
+          `Management recheck completed with status ${result.status}.`,
         );
+
+        return json({
+          success: true,
+
+          ...result,
+        });
       } catch (
         error
       ) {
         console.error(
-          'verify-payment:',
+          'admin-payment-action:',
           error,
         );
 
-        return Response.json(
+        return json(
           {
             success: false,
 
             message:
               error instanceof Error
                 ? error.message
-                : 'Payment verification could not be completed.',
+                : 'Payment status could not be checked.',
           },
-          {
-            status: 500,
-          },
+          500,
         );
       }
     },

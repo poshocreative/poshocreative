@@ -39,7 +39,7 @@ async function getFunctionError(
       FunctionsRelayError
   ) {
     return new Error(
-      'We could not reach the Posho Creative payment server. Check your connection and try again.',
+      'The payment service could not be reached. No charge was confirmed. Please try again shortly.',
     );
   }
 
@@ -49,17 +49,6 @@ async function getFunctionError(
   );
 }
 
-/**
- * Creates a real server-side payment session.
- *
- * Supported methods:
- * - bank_transfer
- * - opay
- *
- * The amount is NOT supplied by the browser.
- * The Edge Function determines the amount from
- * the authenticated customer's real order.
- */
 export async function createPaymentSession({
   orderId,
   method,
@@ -116,13 +105,6 @@ export async function createPaymentSession({
   return data.payment;
 }
 
-/**
- * Re-checks a payment directly through our
- * Supabase backend.
- *
- * The browser does not decide whether a
- * payment succeeded.
- */
 export async function verifyPayment(
   paymentId,
 ) {
@@ -155,20 +137,57 @@ export async function verifyPayment(
 
   if (!data) {
     throw new Error(
-      'The payment server returned an invalid response.',
+      'Payment verification returned an invalid response.',
     );
   }
 
   return data;
 }
 
-/**
- * Fetch one customer's payment record.
- *
- * RLS ensures authenticated customers can only
- * access payment records belonging to their
- * own orders.
- */
+export async function getMyPaymentAttempts() {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'payment_transactions',
+      )
+      .select(`
+        id,
+        order_id,
+        provider_reference,
+        payment_method,
+        amount_kobo,
+        currency,
+        status,
+        provider_status,
+        attempt_stage,
+        customer_message,
+        verified_at,
+        last_checked_at,
+        completed_at,
+        created_at,
+        orders (
+          reference,
+          project_title
+        )
+      `)
+      .order(
+        'created_at',
+        {
+          ascending:
+            false,
+        },
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
 export async function getPaymentById(
   paymentId,
 ) {
@@ -187,17 +206,21 @@ export async function getPaymentById(
       .select(`
         id,
         order_id,
-        provider,
         provider_reference,
         provider_transaction_id,
         payment_method,
         amount_kobo,
         currency,
         status,
+        provider_status,
+        attempt_stage,
+        customer_message,
         checkout_url,
         virtual_account_id,
         expires_at,
         verified_at,
+        last_checked_at,
+        completed_at,
         created_at,
         orders (
           reference,
@@ -220,9 +243,6 @@ export async function getPaymentById(
   return data || null;
 }
 
-/**
- * Formats payment status text for display.
- */
 export function formatPaymentStatus(
   status,
 ) {
@@ -237,7 +257,10 @@ export function formatPaymentStatus(
     )
     .replace(
       /\b\w/g,
-      (character) =>
-        character.toUpperCase(),
+      (
+        character,
+      ) =>
+        character
+          .toUpperCase(),
     );
 }

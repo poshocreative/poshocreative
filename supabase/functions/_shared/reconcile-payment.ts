@@ -1,3 +1,143 @@
+function providerCustomerId(
+  charge: any,
+) {
+  if (
+    typeof charge
+      ?.customer ===
+    'string'
+  ) {
+    return charge.customer;
+  }
+
+  return (
+    charge?.customer
+      ?.id ||
+    charge
+      ?.customer_id ||
+    ''
+  );
+}
+
+function providerCode(
+  charge: any,
+) {
+  return (
+    charge
+      ?.processor_response
+      ?.code ||
+    charge
+      ?.issuer_response
+      ?.code ||
+    null
+  );
+}
+
+function safeProviderSummary(
+  charge: any,
+) {
+  return {
+    id:
+      charge?.id ||
+      null,
+
+    reference:
+      charge
+        ?.reference ||
+      null,
+
+    amount:
+      charge?.amount ??
+      null,
+
+    currency:
+      charge
+        ?.currency ||
+      null,
+
+    status:
+      charge?.status ||
+      null,
+
+    customer_id:
+      providerCustomerId(
+        charge,
+      ) ||
+      null,
+
+    processor_code:
+      providerCode(
+        charge,
+      ),
+
+    payment_method_type:
+      charge
+        ?.payment_method
+        ?.type ||
+      charge
+        ?.payment_method_details
+        ?.type ||
+      null,
+  };
+}
+
+async function diagnostic(
+  admin: any,
+  paymentId: string,
+  {
+    eventType,
+    stage,
+    providerStatus = null,
+    providerCodeValue = null,
+    internalMessage = null,
+    payload = {},
+  }: {
+    eventType: string;
+    stage: string;
+    providerStatus?: string | null;
+    providerCodeValue?: string | null;
+    internalMessage?: string | null;
+    payload?: Record<
+      string,
+      unknown
+    >;
+  },
+) {
+  const {
+    error,
+  } =
+    await admin
+      .from(
+        'payment_attempt_diagnostics',
+      )
+      .insert({
+        payment_id:
+          paymentId,
+
+        event_type:
+          eventType,
+
+        stage,
+
+        provider_status:
+          providerStatus,
+
+        provider_code:
+          providerCodeValue,
+
+        internal_message:
+          internalMessage,
+
+        payload,
+      });
+
+  if (error) {
+    console.error(
+      'Payment diagnostic write failed:',
+      error,
+    );
+  }
+}
+
 export async function reconcilePayment(
   admin: any,
   payment: any,
@@ -41,31 +181,168 @@ export async function reconcilePayment(
       Number(
         charge.amount ||
           0,
-      ) * 100,
+      ) *
+        100,
     );
+
+  const expectedCustomerId =
+    payment
+      .provider_customer_id ||
+    '';
+
+  const actualCustomerId =
+    providerCustomerId(
+      charge,
+    );
+
+  const mismatches:
+    string[] = [];
 
   if (
     actualReference !==
-      expectedReference ||
-    actualCurrency !==
-      expectedCurrency ||
-    actualAmount !==
-      expectedAmount
+    expectedReference
   ) {
+    mismatches.push(
+      'reference',
+    );
+  }
+
+  if (
+    actualCurrency !==
+    expectedCurrency
+  ) {
+    mismatches.push(
+      'currency',
+    );
+  }
+
+  if (
+    actualAmount !==
+    expectedAmount
+  ) {
+    mismatches.push(
+      'amount',
+    );
+  }
+
+  if (
+    expectedCustomerId &&
+    actualCustomerId !==
+      expectedCustomerId
+  ) {
+    mismatches.push(
+      'customer',
+    );
+  }
+
+  if (
+    mismatches.length >
+    0
+  ) {
+    const now =
+      new Date()
+        .toISOString();
+
     console.error(
-      'Payment verification mismatch',
+      'Payment verification mismatch:',
       {
+        paymentId:
+          payment.id,
+
+        mismatches,
+
         expectedReference,
         actualReference,
+
         expectedCurrency,
         actualCurrency,
+
         expectedAmount,
         actualAmount,
+
+        expectedCustomerId,
+        actualCustomerId,
+      },
+    );
+
+    await admin
+      .from(
+        'payment_transactions',
+      )
+      .update({
+        attempt_stage:
+          'verification_attention_required',
+
+        failure_code:
+          'VERIFICATION_MISMATCH',
+
+        customer_message:
+          'We could not verify this payment automatically. Posho Creative has been notified.',
+
+        last_checked_at:
+          now,
+      })
+      .eq(
+        'id',
+        payment.id,
+      );
+
+    await diagnostic(
+      admin,
+      payment.id,
+      {
+        eventType:
+          'verification_mismatch',
+
+        stage:
+          'verification_attention_required',
+
+        providerStatus:
+          charge.status ||
+          null,
+
+        providerCodeValue:
+          providerCode(
+            charge,
+          ),
+
+        internalMessage:
+          `Verification mismatch: ${mismatches.join(', ')}.`,
+
+        payload: {
+          expected: {
+            reference:
+              expectedReference,
+
+            currency:
+              expectedCurrency,
+
+            amount_kobo:
+              expectedAmount,
+
+            customer_id:
+              expectedCustomerId,
+          },
+
+          actual: {
+            reference:
+              actualReference,
+
+            currency:
+              actualCurrency,
+
+            amount_kobo:
+              actualAmount,
+
+            customer_id:
+              actualCustomerId,
+          },
+        },
       },
     );
 
     throw new Error(
-      'The payment details did not match the expected transaction.',
+      'We could not verify this payment automatically. Posho Creative has been notified.',
     );
   }
 
@@ -73,14 +350,31 @@ export async function reconcilePayment(
     (
       charge.status ||
       ''
-    ).toLowerCase();
+    )
+      .trim()
+      .toLowerCase();
+
+  const code =
+    providerCode(
+      charge,
+    );
+
+  const now =
+    new Date()
+      .toISOString();
 
   if (
     providerStatus !==
     'succeeded'
   ) {
     let localStatus =
-      'processing';
+      'pending';
+
+    let stage =
+      'awaiting_confirmation';
+
+    let customerMessage =
+      'This payment is still awaiting confirmation.';
 
     if (
       providerStatus ===
@@ -88,14 +382,30 @@ export async function reconcilePayment(
     ) {
       localStatus =
         'failed';
+
+      stage =
+        'failed';
+
+      customerMessage =
+        'This payment attempt was not completed. You can try again or choose another payment method.';
     }
 
     if (
-      providerStatus ===
-      'voided'
+      [
+        'voided',
+        'cancelled',
+      ].includes(
+        providerStatus,
+      )
     ) {
       localStatus =
         'cancelled';
+
+      stage =
+        'cancelled';
+
+      customerMessage =
+        'This payment attempt was cancelled. No successful payment was recorded.';
     }
 
     await admin
@@ -106,23 +416,81 @@ export async function reconcilePayment(
         status:
           localStatus,
 
+        provider_status:
+          providerStatus ||
+          null,
+
+        provider_response_code:
+          code,
+
         provider_transaction_id:
           charge.id ||
           payment
             .provider_transaction_id,
 
         provider_payload:
-          charge,
+          safeProviderSummary(
+            charge,
+          ),
+
+        attempt_stage:
+          stage,
+
+        customer_message:
+          customerMessage,
+
+        last_checked_at:
+          now,
+
+        completed_at:
+          [
+            'failed',
+            'cancelled',
+          ].includes(
+            localStatus,
+          )
+            ? now
+            : null,
       })
       .eq(
         'id',
         payment.id,
       );
 
+    await diagnostic(
+      admin,
+      payment.id,
+      {
+        eventType:
+          'provider_status_checked',
+
+        stage,
+
+        providerStatus:
+          providerStatus ||
+          null,
+
+        providerCodeValue:
+          code,
+
+        internalMessage:
+          `Provider returned ${providerStatus || 'unknown'} status.`,
+
+        payload:
+          charge,
+      },
+    );
+
     return {
       success: false,
+
       status:
         localStatus,
+
+      providerStatus,
+
+      message:
+        customerMessage,
     };
   }
 
@@ -130,16 +498,38 @@ export async function reconcilePayment(
     payment.status ===
     'successful'
   ) {
+    await admin
+      .from(
+        'payment_transactions',
+      )
+      .update({
+        provider_status:
+          'succeeded',
+
+        provider_response_code:
+          code,
+
+        last_checked_at:
+          now,
+
+        attempt_stage:
+          'completed',
+
+        customer_message:
+          null,
+      })
+      .eq(
+        'id',
+        payment.id,
+      );
+
     return {
       success: true,
+
       status:
         'successful',
     };
   }
-
-  const now =
-    new Date()
-      .toISOString();
 
   const {
     error:
@@ -153,13 +543,36 @@ export async function reconcilePayment(
         status:
           'successful',
 
+        provider_status:
+          'succeeded',
+
+        provider_response_code:
+          code,
+
         provider_transaction_id:
           charge.id,
 
         provider_payload:
-          charge,
+          safeProviderSummary(
+            charge,
+          ),
+
+        attempt_stage:
+          'completed',
+
+        customer_message:
+          null,
+
+        failure_code:
+          null,
 
         verified_at:
+          now,
+
+        last_checked_at:
+          now,
+
+        completed_at:
           now,
       })
       .eq(
@@ -172,6 +585,30 @@ export async function reconcilePayment(
   ) {
     throw paymentUpdateError;
   }
+
+  await diagnostic(
+    admin,
+    payment.id,
+    {
+      eventType:
+        'payment_verified',
+
+      stage:
+        'completed',
+
+      providerStatus:
+        'succeeded',
+
+      providerCodeValue:
+        code,
+
+      internalMessage:
+        'Flutterwave payment independently verified successfully.',
+
+      payload:
+        charge,
+    },
+  );
 
   const {
     data:
@@ -195,7 +632,9 @@ export async function reconcilePayment(
         'successful',
       );
 
-  if (totalError) {
+  if (
+    totalError
+  ) {
     throw totalError;
   }
 
@@ -205,7 +644,8 @@ export async function reconcilePayment(
       []
     ).reduce(
       (
-        sum: number,
+        sum:
+          number,
         row: any,
       ) =>
         sum +
@@ -218,7 +658,8 @@ export async function reconcilePayment(
 
   const {
     data: order,
-    error: orderError,
+    error:
+      orderError,
   } =
     await admin
       .from(
@@ -236,7 +677,9 @@ export async function reconcilePayment(
       )
       .single();
 
-  if (orderError) {
+  if (
+    orderError
+  ) {
     throw orderError;
   }
 
@@ -248,11 +691,13 @@ export async function reconcilePayment(
     );
 
   const fullyPaid =
-    quoteAmount > 0 &&
+    quoteAmount >
+      0 &&
     totalPaid >=
       quoteAmount;
 
-  const orderPatch: any = {
+  const orderPatch:
+    any = {
     paid_amount_kobo:
       totalPaid,
 
@@ -324,6 +769,9 @@ export async function reconcilePayment(
 
           reference:
             expectedReference,
+
+          provider_transaction_id:
+            charge.id,
         },
       });
   }
