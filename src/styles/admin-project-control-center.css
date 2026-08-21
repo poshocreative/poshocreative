@@ -1,0 +1,1416 @@
+/* ==========================================================
+   POSHO CREATIVE
+   ADMIN PROJECT CONTROL CENTER
+   ========================================================== */
+
+.admin-pcc-project-context {
+  margin-bottom: 12px;
+  padding: 18px;
+
+  border:
+    1px solid
+    var(--brand-primary-border);
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--brand-primary-faint),
+      #fff
+    );
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.admin-pcc-project-context > div:first-child {
+  min-width: 0;
+}
+
+.admin-pcc-project-context > div:first-child > span,
+.admin-pcc-section-heading > div:nth-child(2) > span,
+.admin-pcc-form-heading span,
+.admin-pcc-history-heading span {
+  color:
+    var(--brand-primary);
+
+  font-size: 0.62rem;
+  font-weight: 850;
+
+  letter-spacing:
+    0.09em;
+}
+
+.admin-pcc-project-context h2 {
+  margin:
+    4px 0;
+
+  font-size: 1.15rem;
+}
+
+.admin-pcc-project-context p {
+  margin: 0;
+
+  color:
+    var(--text-soft);
+
+  font-size: 0.74rem;
+  line-height: 1.6;
+}
+
+.admin-pcc-context-meta {
+  flex: 0 0 auto;
+
+  display: flex;
+
+  gap: 7px;
+}
+
+.admin-pcc-context-meta > div {
+  min-width: 100px;
+
+  padding: 10px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 13px;
+
+  background: #fff;
+
+  display: grid;
+
+  grid-template-columns:
+    auto 1fr;
+
+  align-items: center;
+
+  gap:
+    2px 7px;
+}
+
+.admin-pcc-context-meta svg {
+  grid-row:
+    1 / 3;
+
+  color:
+    var(--brand-primary);
+}
+
+.admin-pcc-context-meta span {
+  color:
+    var(--text-muted);
+
+  font-size: 0.62rem;
+}
+
+.admin-pcc-context-meta strong {
+  font-size: 0.85rem;
+}
+
+/* ==========================================================
+   SECTION HEADING
+   ========================================================== */
+
+.admin-pcc-section-heading {
+  display: grid;
+
+  grid-template-columns:
+    auto
+    minmax(0, 1fr)
+    auto;
+
+  align-items: flex-start;
+
+  gap: 11px;
+}
+
+.admin-pcc-heading-icon {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 12px;
+
+  background:
+    var(--brand-primary-soft);
+
+  color:
+    var(--brand-primary);
+
+  display: grid;
+  place-items: center;
+}
+
+.admin-pcc-section-heading h2 {
+  margin:
+    3px 0;
+
+  font-size: 1rem;
+}
+
+.admin-pcc-section-heading p {
+  margin: 0;
+
+  color:
+    var(--text-soft);
+
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.admin-pcc-count {
+  padding:
+    7px 10px;
+
+  border-radius: 999px;
+
+  background:
+    var(--surface-soft);
+
+  color:
+    var(--text-soft);
+
+  font-size: 0.64rem;
+}
+
+.admin-pcc-progress-number {
+  color:
+    var(--brand-primary);
+
+  font-family:
+    'Manrope',
+    sans-serif;
+
+  font-size: 1.45rem;
+}
+
+/* ==========================================================
+   SECURITY
+   ========================================================== */
+
+.admin-pcc-security-note {
+  margin-top: 14px;
+
+  padding:
+    10px 11px;
+
+  border:
+    1px solid
+    var(--brand-primary-border);
+
+  border-radius: 11px;
+
+  background:
+    var(--brand-primary-faint);
+
+  color:
+    var(--brand-primary);
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 7px;
+}
+
+.admin-pcc-security-note svg {
+  flex: 0 0 auto;
+}
+
+.admin-pcc-security-note span {
+  font-size: 0.67rem;
+  line-height: 1.5;
+}
+
+/* ==========================================================
+   FILES
+   ========================================================== */
+
+.admin-pcc-file-list {
+  margin-top: 14px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.admin-pcc-file {
+  padding: 12px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 14px;
+
+  background: #fff;
+
+  display: grid;
+
+  grid-template-columns:
+    auto
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 11px;
+}
+
+.admin-pcc-file-icon {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 12px;
+
+  background:
+    var(--surface-soft);
+
+  color:
+    var(--brand-primary);
+
+  display: grid;
+  place-items: center;
+}
+
+.admin-pcc-file-copy {
+  min-width: 0;
+}
+
+.admin-pcc-file-name {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.admin-pcc-file-name > strong {
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.78rem;
+}
+
+.admin-pcc-file-name > span {
+  padding:
+    4px 7px;
+
+  flex: 0 0 auto;
+
+  border-radius: 999px;
+
+  background:
+    var(--brand-primary-soft);
+
+  color:
+    var(--brand-primary);
+
+  font-size: 0.56rem;
+  font-weight: 800;
+}
+
+.admin-pcc-file-meta {
+  margin-top: 5px;
+
+  display: flex;
+  flex-wrap: wrap;
+
+  gap:
+    4px
+    9px;
+
+  color:
+    var(--text-muted);
+
+  font-size: 0.62rem;
+}
+
+.admin-pcc-file-actions {
+  display: flex;
+
+  gap: 6px;
+}
+
+.admin-pcc-file-actions button,
+.admin-pcc-preview-dialog footer a,
+.admin-pcc-preview-dialog footer button {
+  min-height: 36px;
+
+  padding:
+    0 10px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 9px;
+
+  background: #fff;
+
+  color:
+    var(--text-soft);
+
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.admin-pcc-file-actions button.primary,
+.admin-pcc-preview-dialog footer button {
+  border-color:
+    var(--brand-primary);
+
+  background:
+    var(--brand-primary);
+
+  color: #fff;
+}
+
+.admin-pcc-file-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-pcc-empty {
+  min-height: 150px;
+
+  margin-top: 14px;
+
+  padding: 20px;
+
+  border:
+    1px dashed
+    var(--border-strong);
+
+  border-radius: 14px;
+
+  color:
+    var(--text-soft);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  text-align: center;
+}
+
+.admin-pcc-empty svg {
+  color:
+    var(--brand-primary);
+}
+
+.admin-pcc-empty strong {
+  font-size: 0.78rem;
+}
+
+.admin-pcc-empty p {
+  max-width: 420px;
+
+  margin: 0;
+
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.admin-pcc-pending-files {
+  margin-top: 10px;
+
+  padding: 9px 10px;
+
+  border-radius: 10px;
+
+  background: #fff7e8;
+
+  color: #80601c;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 6px;
+
+  font-size: 0.64rem;
+}
+
+/* ==========================================================
+   CURRENT PROGRESS
+   ========================================================== */
+
+.admin-pcc-progress {
+  overflow: hidden;
+}
+
+.admin-pcc-current {
+  margin-top: 15px;
+
+  padding: 16px;
+
+  border:
+    1px solid
+    var(--brand-primary-border);
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--brand-primary-faint),
+      rgba(255, 255, 255, 0.86)
+    );
+}
+
+.admin-pcc-current-top {
+  margin-bottom: 11px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.admin-pcc-current-top > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.admin-pcc-current-top span {
+  color:
+    var(--brand-primary);
+
+  font-size: 0.57rem;
+  font-weight: 850;
+
+  letter-spacing:
+    0.08em;
+}
+
+.admin-pcc-current-top > div strong {
+  font-size: 0.8rem;
+}
+
+.admin-pcc-current-top > strong {
+  color:
+    var(--brand-primary);
+
+  font-family:
+    'Manrope',
+    sans-serif;
+
+  font-size: 1.3rem;
+}
+
+.admin-pcc-progress-track {
+  width: 100%;
+  height: 9px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background:
+    rgba(108, 43, 217, 0.1);
+}
+
+.admin-pcc-progress-track > div {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--brand-primary),
+      var(--brand-primary-light)
+    );
+
+  transition:
+    width 450ms ease;
+}
+
+.admin-pcc-current p {
+  margin:
+    12px 0 4px;
+
+  color:
+    var(--text-soft);
+
+  font-size: 0.72rem;
+  line-height: 1.65;
+}
+
+.admin-pcc-current small {
+  color:
+    var(--text-muted);
+
+  font-size: 0.61rem;
+}
+
+/* ==========================================================
+   PROGRESS FORM
+   ========================================================== */
+
+.admin-pcc-progress-form {
+  margin-top: 16px;
+
+  padding-top: 16px;
+
+  border-top:
+    1px solid
+    var(--border);
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.admin-pcc-form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.admin-pcc-form-heading > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.admin-pcc-form-heading > div strong {
+  font-size: 0.78rem;
+}
+
+.admin-pcc-form-heading > strong {
+  color:
+    var(--brand-primary);
+
+  font-family:
+    'Manrope',
+    sans-serif;
+
+  font-size: 1.25rem;
+}
+
+.admin-pcc-presets {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      7,
+      minmax(0, 1fr)
+    );
+
+  gap: 5px;
+}
+
+.admin-pcc-presets button {
+  min-height: 57px;
+
+  padding:
+    7px 5px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 11px;
+
+  background: #fff;
+
+  color:
+    var(--text-soft);
+
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 3px;
+}
+
+.admin-pcc-presets button > span {
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.admin-pcc-presets button > small {
+  max-width: 90px;
+
+  color:
+    var(--text-muted);
+
+  font-size: 0.52rem;
+
+  text-align: center;
+}
+
+.admin-pcc-presets button.active {
+  border-color:
+    var(--brand-primary);
+
+  background:
+    var(--brand-primary);
+
+  color: #fff;
+}
+
+.admin-pcc-presets button.active small {
+  color:
+    rgba(255, 255, 255, 0.68);
+}
+
+.admin-pcc-progress-form label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.admin-pcc-progress-form label > span {
+  color:
+    var(--text-soft);
+
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+
+.admin-pcc-progress-form input[type='text'],
+.admin-pcc-progress-form input[type='number'],
+.admin-pcc-progress-form textarea {
+  width: 100%;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 10px;
+
+  background: #fff;
+
+  color:
+    var(--text);
+
+  outline: none;
+
+  font: inherit;
+}
+
+.admin-pcc-progress-form input[type='text'],
+.admin-pcc-progress-form input[type='number'] {
+  min-height: 42px;
+
+  padding:
+    0 11px;
+}
+
+.admin-pcc-progress-form textarea {
+  min-height: 115px;
+
+  padding: 11px;
+
+  resize: vertical;
+}
+
+.admin-pcc-progress-form input:focus,
+.admin-pcc-progress-form textarea:focus {
+  border-color:
+    var(--brand-primary);
+
+  box-shadow:
+    0 0 0 3px
+    var(--brand-primary-faint);
+}
+
+.admin-pcc-range > div {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    88px;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+.admin-pcc-range input[type='range'] {
+  width: 100%;
+
+  accent-color:
+    var(--brand-primary);
+}
+
+.admin-pcc-percent-input {
+  position: relative;
+}
+
+.admin-pcc-percent-input input {
+  padding-right: 27px !important;
+}
+
+.admin-pcc-percent-input > span {
+  position: absolute;
+
+  top: 50%;
+  right: 10px;
+
+  transform:
+    translateY(-50%);
+
+  color:
+    var(--text-muted);
+
+  font-size: 0.68rem;
+}
+
+/* ==========================================================
+   CUSTOMER PREVIEW
+   ========================================================== */
+
+.admin-pcc-customer-preview {
+  padding: 14px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 15px;
+
+  background:
+    var(--surface-soft);
+}
+
+.admin-pcc-preview-heading {
+  margin-bottom: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.admin-pcc-preview-heading span {
+  color:
+    var(--brand-primary);
+
+  font-size: 0.57rem;
+  font-weight: 850;
+
+  letter-spacing:
+    0.08em;
+}
+
+.admin-pcc-preview-heading strong {
+  color:
+    var(--text-muted);
+
+  font-size: 0.62rem;
+}
+
+.admin-pcc-preview-progress {
+  padding: 13px;
+
+  border-radius: 12px;
+
+  background: #fff;
+}
+
+.admin-pcc-preview-progress > div:first-child {
+  margin-bottom: 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.admin-pcc-preview-progress > div:first-child strong {
+  font-size: 0.76rem;
+}
+
+.admin-pcc-preview-progress > div:first-child span {
+  color:
+    var(--brand-primary);
+
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.admin-pcc-preview-progress p {
+  margin:
+    10px 0 0;
+
+  color:
+    var(--text-soft);
+
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+
+.admin-pcc-completion-warning {
+  padding: 10px 11px;
+
+  border-radius: 11px;
+
+  background: #edf9f3;
+
+  color: #14764b;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 8px;
+}
+
+.admin-pcc-completion-warning > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.admin-pcc-completion-warning strong {
+  font-size: 0.7rem;
+}
+
+.admin-pcc-completion-warning span {
+  font-size: 0.62rem;
+}
+
+.admin-pcc-publish {
+  align-self: flex-start;
+
+  min-width: 210px;
+}
+
+/* ==========================================================
+   HISTORY
+   ========================================================== */
+
+.admin-pcc-history {
+  margin-top: 18px;
+
+  padding-top: 16px;
+
+  border-top:
+    1px solid
+    var(--border);
+}
+
+.admin-pcc-history-heading {
+  margin-bottom: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.admin-pcc-history-heading > div {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.admin-pcc-history-heading svg {
+  color:
+    var(--brand-primary);
+}
+
+.admin-pcc-history-heading > div > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.admin-pcc-history-heading > div > div strong {
+  font-size: 0.72rem;
+}
+
+.admin-pcc-history-heading > span {
+  color:
+    var(--text-muted);
+
+  font-size: 0.62rem;
+}
+
+.admin-pcc-history-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-pcc-history-list article {
+  padding:
+    11px 0;
+
+  border-bottom:
+    1px solid
+    var(--border);
+
+  display: grid;
+
+  grid-template-columns:
+    45px
+    minmax(0, 1fr);
+
+  gap: 10px;
+}
+
+.admin-pcc-history-list article:last-child {
+  border-bottom: 0;
+}
+
+.admin-pcc-history-percent {
+  width: 45px;
+  height: 45px;
+
+  border-radius: 12px;
+
+  background:
+    var(--brand-primary-soft);
+
+  color:
+    var(--brand-primary);
+
+  display: grid;
+  place-items: center;
+
+  font-size: 0.66rem;
+  font-weight: 850;
+}
+
+.admin-pcc-history-list article > div:last-child {
+  min-width: 0;
+}
+
+.admin-pcc-history-list strong {
+  font-size: 0.72rem;
+}
+
+.admin-pcc-history-list p {
+  margin:
+    3px 0;
+
+  color:
+    var(--text-soft);
+
+  font-size: 0.66rem;
+  line-height: 1.55;
+}
+
+.admin-pcc-history-list span {
+  color:
+    var(--text-muted);
+
+  font-size: 0.57rem;
+}
+
+.admin-pcc-history-empty {
+  padding: 16px;
+
+  border-radius: 11px;
+
+  background:
+    var(--surface-soft);
+
+  color:
+    var(--text-muted);
+
+  font-size: 0.66rem;
+
+  text-align: center;
+}
+
+/* ==========================================================
+   FILE PREVIEW MODAL
+   ========================================================== */
+
+.admin-pcc-preview-modal {
+  position: fixed;
+  inset: 0;
+
+  z-index: 9999;
+
+  padding: 24px;
+
+  display: grid;
+  place-items: center;
+}
+
+.admin-pcc-preview-backdrop {
+  position: absolute;
+  inset: 0;
+
+  border: 0;
+
+  background:
+    rgba(13, 11, 17, 0.72);
+
+  backdrop-filter:
+    blur(10px);
+
+  cursor: pointer;
+}
+
+.admin-pcc-preview-dialog {
+  position: relative;
+
+  width:
+    min(
+      100%,
+      980px
+    );
+
+  max-height:
+    calc(
+      100vh - 48px
+    );
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.15);
+
+  border-radius: 20px;
+
+  background: #fff;
+
+  box-shadow:
+    0 30px 100px
+    rgba(0, 0, 0, 0.3);
+
+  display: grid;
+
+  grid-template-rows:
+    auto
+    minmax(0, 1fr)
+    auto;
+}
+
+.admin-pcc-preview-dialog header {
+  padding:
+    14px 16px;
+
+  border-bottom:
+    1px solid
+    var(--border);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.admin-pcc-preview-dialog header > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.admin-pcc-preview-dialog header span {
+  color:
+    var(--brand-primary);
+
+  font-size: 0.56rem;
+  font-weight: 850;
+
+  letter-spacing:
+    0.08em;
+}
+
+.admin-pcc-preview-dialog header strong {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.78rem;
+}
+
+.admin-pcc-preview-dialog header small {
+  color:
+    var(--text-muted);
+
+  font-size: 0.6rem;
+}
+
+.admin-pcc-preview-dialog header > button {
+  width: 36px;
+  height: 36px;
+
+  flex: 0 0 auto;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 10px;
+
+  background: #fff;
+
+  cursor: pointer;
+
+  display: grid;
+  place-items: center;
+}
+
+.admin-pcc-preview-body {
+  min-height: 460px;
+
+  overflow: auto;
+
+  background:
+    #f0eef3;
+
+  display: grid;
+  place-items: center;
+}
+
+.admin-pcc-preview-body img {
+  display: block;
+
+  max-width: 100%;
+  max-height:
+    calc(
+      100vh - 190px
+    );
+
+  object-fit: contain;
+}
+
+.admin-pcc-preview-body iframe {
+  width: 100%;
+  height:
+    min(
+      70vh,
+      720px
+    );
+
+  border: 0;
+
+  background: #fff;
+}
+
+.admin-pcc-preview-message {
+  max-width: 480px;
+
+  padding: 30px;
+
+  color:
+    var(--text-soft);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 7px;
+
+  text-align: center;
+}
+
+.admin-pcc-preview-message svg {
+  color:
+    var(--brand-primary);
+}
+
+.admin-pcc-preview-message p {
+  margin: 0;
+
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.admin-pcc-preview-dialog footer {
+  padding:
+    11px 14px;
+
+  border-top:
+    1px solid
+    var(--border);
+
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 7px;
+}
+
+/* ==========================================================
+   TABLET / MOBILE
+   ========================================================== */
+
+@media (
+  max-width: 900px
+) {
+  .admin-pcc-presets {
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+  }
+}
+
+@media (
+  max-width: 700px
+) {
+  .admin-pcc-project-context {
+    padding: 14px;
+
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .admin-pcc-context-meta {
+    width: 100%;
+  }
+
+  .admin-pcc-context-meta > div {
+    flex: 1;
+  }
+
+  .admin-pcc-section-heading {
+    grid-template-columns:
+      auto
+      minmax(0, 1fr);
+  }
+
+  .admin-pcc-section-heading >
+  .admin-pcc-count,
+  .admin-pcc-section-heading >
+  .admin-pcc-progress-number {
+    grid-column:
+      1 / -1;
+
+    justify-self:
+      start;
+  }
+
+  .admin-pcc-file {
+    grid-template-columns:
+      auto
+      minmax(0, 1fr);
+  }
+
+  .admin-pcc-file-actions {
+    grid-column:
+      1 / -1;
+
+    width: 100%;
+  }
+
+  .admin-pcc-file-actions button {
+    flex: 1;
+  }
+
+  .admin-pcc-presets {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .admin-pcc-range > div {
+    grid-template-columns:
+      1fr;
+  }
+
+  .admin-pcc-publish {
+    width: 100%;
+  }
+
+  .admin-pcc-preview-modal {
+    padding: 10px;
+  }
+
+  .admin-pcc-preview-dialog {
+    max-height:
+      calc(
+        100vh - 20px
+      );
+
+    border-radius: 15px;
+  }
+
+  .admin-pcc-preview-body {
+    min-height: 360px;
+  }
+}
+
+@media (
+  max-width: 430px
+) {
+  .admin-pcc-context-meta {
+    flex-direction: column;
+  }
+
+  .admin-pcc-file-name {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .admin-pcc-current-top,
+  .admin-pcc-form-heading,
+  .admin-pcc-preview-heading,
+  .admin-pcc-history-heading {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .admin-pcc-preview-dialog footer {
+    flex-direction: column;
+  }
+
+  .admin-pcc-preview-dialog footer a,
+  .admin-pcc-preview-dialog footer button {
+    width: 100%;
+  }
+}
+
+@media (
+  prefers-reduced-motion:
+    reduce
+) {
+  .admin-pcc-progress-track > div {
+    transition: none;
+  }
+}

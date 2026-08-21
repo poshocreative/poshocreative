@@ -33,6 +33,7 @@ import './styles/workspace-projects.css';
 import './styles/workspace-payments.css';
 import './styles/workspace-files.css';
 import './styles/workspace-updates.css';
+import './styles/admin-project-control-center.css';
 
 const root =
   document.getElementById(
