@@ -31,6 +31,7 @@ import './styles/project-operations.css';
 import './styles/workspace-polish.css';
 import './styles/workspace-projects.css';
 import './styles/workspace-payments.css';
+import './styles/workspace-files.css';
 
 const root =
   document.getElementById(
