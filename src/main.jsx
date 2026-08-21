@@ -29,6 +29,7 @@ import './styles/payment-operations.css';
 import './styles/payment-checkout-v2.css';
 import './styles/project-operations.css';
 import './styles/workspace-polish.css';
+import './styles/workspace-projects.css';
 
 const root =
   document.getElementById(
