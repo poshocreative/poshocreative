@@ -1,4 +1,10 @@
 import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+
+import {
   ArrowRight,
   Bell,
   FileText,
@@ -13,11 +19,16 @@ import {
   Link,
   NavLink,
   Outlet,
+  useLocation,
 } from 'react-router-dom';
 
 import {
   useAuth,
 } from '../context/AuthContext';
+
+import {
+  getUnreadNotificationCount,
+} from '../lib/notificationCenter';
 
 export default function DashboardShell() {
   const {
@@ -25,6 +36,15 @@ export default function DashboardShell() {
     user,
   } =
     useAuth();
+
+  const location =
+    useLocation();
+
+  const [
+    unreadCount,
+    setUnreadCount,
+  ] =
+    useState(0);
 
   const fullName =
     profile?.full_name ||
@@ -36,6 +56,84 @@ export default function DashboardShell() {
     fullName
       .trim()
       .split(' ')[0];
+
+  const loadUnreadCount =
+    useCallback(
+      async () => {
+        if (
+          !user?.id
+        ) {
+          setUnreadCount(
+            0,
+          );
+
+          return;
+        }
+
+        try {
+          const count =
+            await getUnreadNotificationCount();
+
+          setUnreadCount(
+            count,
+          );
+        } catch (
+          error
+        ) {
+          console.error(
+            'Unable to load unread update count:',
+            error,
+          );
+        }
+      },
+      [
+        user?.id,
+      ],
+    );
+
+  useEffect(() => {
+    loadUnreadCount();
+  }, [
+    location.pathname,
+    loadUnreadCount,
+  ]);
+
+  useEffect(() => {
+    const refresh =
+      () => {
+        loadUnreadCount();
+      };
+
+    window.addEventListener(
+      'focus',
+      refresh,
+    );
+
+    window.addEventListener(
+      'posho:notifications-changed',
+      refresh,
+    );
+
+    return () => {
+      window.removeEventListener(
+        'focus',
+        refresh,
+      );
+
+      window.removeEventListener(
+        'posho:notifications-changed',
+        refresh,
+      );
+    };
+  }, [
+    loadUnreadCount,
+  ]);
+
+  const unreadLabel =
+    unreadCount >
+    99
+      ? '99+'
+      : unreadCount;
 
   return (
     <main className="workspace-page workspace-page-v3">
@@ -141,7 +239,10 @@ export default function DashboardShell() {
               </span>
             </NavLink>
 
-            <NavLink to="/dashboard/notifications">
+            <NavLink
+              to="/dashboard/notifications"
+              className="workspace-updates-nav-link"
+            >
               <Bell
                 size={17}
               />
@@ -149,6 +250,13 @@ export default function DashboardShell() {
               <span>
                 Updates
               </span>
+
+              {unreadCount >
+                0 && (
+                <strong className="workspace-nav-unread-badge">
+                  {unreadLabel}
+                </strong>
+              )}
             </NavLink>
 
             <NavLink to="/dashboard/profile">
