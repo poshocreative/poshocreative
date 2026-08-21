@@ -213,7 +213,12 @@ export async function getMyPaymentAttempts() {
         created_at,
         orders (
           reference,
-          project_title
+          project_title,
+          service_slug,
+          status,
+          payment_status,
+          quoted_amount_kobo,
+          paid_amount_kobo
         )
       `)
       .order(
