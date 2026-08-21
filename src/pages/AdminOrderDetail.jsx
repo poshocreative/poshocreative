@@ -7,7 +7,12 @@ import {
 import {
   ArrowLeft,
   BadgeDollarSign,
+  CalendarDays,
   CheckCircle2,
+  Download,
+  Eye,
+  FileText,
+  Gauge,
   MessageSquareText,
   Save,
   ShieldCheck,
@@ -33,6 +38,15 @@ import {
   formatOrderStatus,
 } from '../lib/orders';
 
+import {
+  describeFileType,
+  formatFileRole,
+  formatFileSize,
+  getProjectProgress,
+  openProjectFile,
+  updateAdminProjectProgress,
+} from '../lib/projectOperations';
+
 const workflowStatuses = [
   'under_review',
   'awaiting_payment',
@@ -42,6 +56,85 @@ const workflowStatuses = [
   'completed',
   'cancelled',
 ];
+
+const progressPresets = [
+  {
+    value: 0,
+    label:
+      'Not started',
+  },
+  {
+    value: 10,
+    label:
+      'Planning',
+  },
+  {
+    value: 25,
+    label:
+      'Foundation complete',
+  },
+  {
+    value: 50,
+    label:
+      'Production in progress',
+  },
+  {
+    value: 75,
+    label:
+      'Review and refinement',
+  },
+  {
+    value: 90,
+    label:
+      'Final checks',
+  },
+  {
+    value: 100,
+    label:
+      'Completed',
+  },
+];
+
+function formatDateTime(
+  value,
+) {
+  if (!value) {
+    return 'Not yet';
+  }
+
+  return new Intl.DateTimeFormat(
+    'en-NG',
+    {
+      dateStyle:
+        'medium',
+
+      timeStyle:
+        'short',
+    },
+  ).format(
+    new Date(value),
+  );
+}
+
+function formatDateOnly(
+  value,
+) {
+  if (!value) {
+    return 'Not specified';
+  }
+
+  return new Intl.DateTimeFormat(
+    'en-NG',
+    {
+      dateStyle:
+        'medium',
+    },
+  ).format(
+    new Date(
+      `${value}T12:00:00`,
+    ),
+  );
+}
 
 export default function AdminOrderDetail() {
   const {
@@ -56,6 +149,12 @@ export default function AdminOrderDetail() {
     useState(null);
 
   const [
+    progressHistory,
+    setProgressHistory,
+  ] =
+    useState([]);
+
+  const [
     loading,
     setLoading,
   ] =
@@ -66,6 +165,18 @@ export default function AdminOrderDetail() {
     setBusy,
   ] =
     useState(false);
+
+  const [
+    progressBusy,
+    setProgressBusy,
+  ] =
+    useState(false);
+
+  const [
+    fileBusy,
+    setFileBusy,
+  ] =
+    useState('');
 
   const [
     error,
@@ -117,6 +228,21 @@ export default function AdminOrderDetail() {
   ] =
     useState('');
 
+  const [
+    progressForm,
+    setProgressForm,
+  ] =
+    useState({
+      percent:
+        '0',
+
+      label:
+        'Not started',
+
+      message:
+        '',
+    });
+
   const load =
     useCallback(
       async () => {
@@ -128,24 +254,62 @@ export default function AdminOrderDetail() {
               reference,
             );
 
+          if (!result) {
+            setOrder(
+              null,
+            );
+
+            return;
+          }
+
+          const progress =
+            await getProjectProgress(
+              result.id,
+            );
+
+          const hydrated =
+            {
+              ...result,
+              ...progress.current,
+            };
+
           setOrder(
-            result,
+            hydrated,
           );
 
-          if (result) {
-            setStatusForm(
-              (current) => ({
-                ...current,
+          setProgressHistory(
+            progress.updates,
+          );
 
-                status:
-                  workflowStatuses.includes(
-                    result.status,
-                  )
-                    ? result.status
-                    : 'under_review',
-              }),
-            );
-          }
+          setStatusForm(
+            (current) => ({
+              ...current,
+
+              status:
+                workflowStatuses.includes(
+                  hydrated.status,
+                )
+                  ? hydrated.status
+                  : 'under_review',
+            }),
+          );
+
+          setProgressForm({
+            percent:
+              String(
+                hydrated
+                  .progress_percent ??
+                  0,
+              ),
+
+            label:
+              hydrated
+                .progress_label ||
+              'Not started',
+
+            message:
+              '',
+          });
         } catch (
           loadError
         ) {
@@ -405,6 +569,117 @@ export default function AdminOrderDetail() {
       }
     };
 
+  const publishProgress =
+    async (
+      event,
+    ) => {
+      event.preventDefault();
+
+      if (!order) {
+        return;
+      }
+
+      try {
+        setProgressBusy(
+          true,
+        );
+
+        setError('');
+        setSuccess('');
+
+        await updateAdminProjectProgress({
+          orderId:
+            order.id,
+
+          progressPercent:
+            Number(
+              progressForm.percent,
+            ),
+
+          progressLabel:
+            progressForm.label,
+
+          message:
+            progressForm.message,
+        });
+
+        await load();
+
+        setSuccess(
+          'Project progress published successfully. The customer can now see the update.',
+        );
+      } catch (
+        progressError
+      ) {
+        console.error(
+          progressError,
+        );
+
+        setError(
+          progressError.message,
+        );
+      } finally {
+        setProgressBusy(
+          false,
+        );
+      }
+    };
+
+  const chooseProgressPreset =
+    (
+      preset,
+    ) => {
+      setProgressForm(
+        (current) => ({
+          ...current,
+
+          percent:
+            String(
+              preset.value,
+            ),
+
+          label:
+            preset.label,
+        }),
+      );
+    };
+
+  const handleProjectFile =
+    async (
+      file,
+      download,
+    ) => {
+      const key =
+        `${file.id}-${download ? 'download' : 'view'}`;
+
+      try {
+        setFileBusy(
+          key,
+        );
+
+        setError('');
+
+        await openProjectFile(
+          file,
+          {
+            download,
+          },
+        );
+      } catch (
+        fileError
+      ) {
+        console.error(
+          fileError,
+        );
+
+        setError(
+          'This project file could not be opened securely.',
+        );
+      } finally {
+        setFileBusy('');
+      }
+    };
+
   if (loading) {
     return (
       <BrandLoader
@@ -456,6 +731,17 @@ export default function AdminOrderDetail() {
         paid,
       0,
     );
+
+  const currentProgress =
+    Number(
+      order
+        .progress_percent ??
+        0,
+    );
+
+  const projectFiles =
+    order.files ||
+    [];
 
   return (
     <div className="admin-view page-reveal">
@@ -621,7 +907,7 @@ export default function AdminOrderDetail() {
                     .value,
                 )
               }
-              placeholder="Example: We are unable to accept this project at the requested timeline because the scope requires a longer production period."
+              placeholder="Clearly explain why Posho Creative cannot proceed with this request."
             />
 
             <div>
@@ -690,7 +976,7 @@ export default function AdminOrderDetail() {
 
       <div className="admin-project-grid">
         <div className="admin-project-main">
-          <section className="admin-control-card">
+          <section className="admin-control-card admin-project-overview-card">
             <span>
               PROJECT BRIEF
             </span>
@@ -699,7 +985,7 @@ export default function AdminOrderDetail() {
               Customer requirements
             </h2>
 
-            <div className="admin-brief-grid">
+            <div className="admin-project-facts-grid">
               <div>
                 <span>
                   Service
@@ -757,6 +1043,31 @@ export default function AdminOrderDetail() {
                     'Not specified'}
                 </strong>
               </div>
+
+              <div>
+                <span>
+                  Deadline
+                </span>
+
+                <strong>
+                  {formatDateOnly(
+                    order.deadline,
+                  )}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Submitted
+                </span>
+
+                <strong>
+                  {formatDateTime(
+                    order.submitted_at ||
+                      order.created_at,
+                  )}
+                </strong>
+              </div>
             </div>
 
             <div className="admin-brief-block">
@@ -782,15 +1093,516 @@ export default function AdminOrderDetail() {
             {order.reference_links && (
               <div className="admin-brief-block">
                 <strong>
-                  References
+                  Reference links
                 </strong>
 
-                <p>
+                <p className="admin-reference-links">
                   {order.reference_links}
                 </p>
               </div>
             )}
           </section>
+
+          <section className="admin-control-card admin-project-files-card">
+            <div className="admin-project-section-heading">
+              <div>
+                <FileText
+                  size={22}
+                />
+
+                <div>
+                  <span>
+                    CUSTOMER FILES
+                  </span>
+
+                  <h2>
+                    Uploaded references
+                  </h2>
+                </div>
+              </div>
+
+              <strong className="admin-project-count-pill">
+                {projectFiles.length}
+                {' '}
+                {projectFiles.length ===
+                1
+                  ? 'file'
+                  : 'files'}
+              </strong>
+            </div>
+
+            <p className="admin-card-description">
+              Review the files supplied with this project request. Files are accessed through temporary private links.
+            </p>
+
+            {projectFiles.length ===
+            0 ? (
+              <div className="admin-project-empty-state">
+                <FileText
+                  size={24}
+                />
+
+                <strong>
+                  No files were uploaded.
+                </strong>
+
+                <span>
+                  This customer submitted the project without an attachment.
+                </span>
+              </div>
+            ) : (
+              <div className="admin-project-file-list">
+                {projectFiles.map(
+                  (
+                    file,
+                  ) => {
+                    const uploaded =
+                      file.upload_status ===
+                      'uploaded';
+
+                    const viewKey =
+                      `${file.id}-view`;
+
+                    const downloadKey =
+                      `${file.id}-download`;
+
+                    return (
+                      <article
+                        key={
+                          file.id
+                        }
+                        className="admin-project-file"
+                      >
+                        <div className="admin-project-file-icon">
+                          <FileText
+                            size={21}
+                          />
+                        </div>
+
+                        <div className="admin-project-file-info">
+                          <div className="admin-project-file-title">
+                            <strong>
+                              {file.original_name}
+                            </strong>
+
+                            <span
+                              className={`admin-file-state admin-file-state-${file.upload_status}`}
+                            >
+                              {formatOrderStatus(
+                                file.upload_status,
+                              )}
+                            </span>
+                          </div>
+
+                          <div className="admin-project-file-meta">
+                            <span>
+                              {describeFileType(
+                                file.mime_type,
+                                file.original_name,
+                              )}
+                            </span>
+
+                            <span>
+                              {formatFileSize(
+                                file.size_bytes,
+                              )}
+                            </span>
+
+                            <span>
+                              {formatFileRole(
+                                file.file_role,
+                              )}
+                            </span>
+
+                            <span>
+                              {file.uploaded_at
+                                ? `Uploaded ${formatDateTime(
+                                    file.uploaded_at,
+                                  )}`
+                                : `Created ${formatDateTime(
+                                    file.created_at,
+                                  )}`}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="admin-project-file-actions">
+                          <button
+                            type="button"
+                            disabled={
+                              !uploaded ||
+                              fileBusy ===
+                                viewKey
+                            }
+                            onClick={() =>
+                              handleProjectFile(
+                                file,
+                                false,
+                              )
+                            }
+                          >
+                            <Eye
+                              size={16}
+                            />
+
+                            {fileBusy ===
+                            viewKey
+                              ? 'Opening...'
+                              : 'View'}
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={
+                              !uploaded ||
+                              fileBusy ===
+                                downloadKey
+                            }
+                            onClick={() =>
+                              handleProjectFile(
+                                file,
+                                true,
+                              )
+                            }
+                          >
+                            <Download
+                              size={16}
+                            />
+
+                            {fileBusy ===
+                            downloadKey
+                              ? 'Preparing...'
+                              : 'Download'}
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  },
+                )}
+              </div>
+            )}
+          </section>
+
+          {approved && (
+            <section className="admin-control-card admin-progress-management">
+              <div className="admin-project-section-heading">
+                <div>
+                  <Gauge
+                    size={22}
+                  />
+
+                  <div>
+                    <span>
+                      PROJECT PROGRESS
+                    </span>
+
+                    <h2>
+                      Production tracking
+                    </h2>
+                  </div>
+                </div>
+
+                <strong className="admin-progress-percentage">
+                  {currentProgress}%
+                </strong>
+              </div>
+
+              <div className="admin-current-progress-card">
+                <div className="admin-current-progress-top">
+                  <div>
+                    <span>
+                      CURRENT MILESTONE
+                    </span>
+
+                    <strong>
+                      {order.progress_label ||
+                        'Awaiting project start'}
+                    </strong>
+                  </div>
+
+                  <span>
+                    {currentProgress}%
+                  </span>
+                </div>
+
+                <div
+                  className="project-progress-track"
+                  role="progressbar"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow={
+                    currentProgress
+                  }
+                >
+                  <div
+                    className="project-progress-fill"
+                    style={{
+                      width:
+                        `${currentProgress}%`,
+                    }}
+                  />
+                </div>
+
+                {order.progress_message && (
+                  <p>
+                    {order.progress_message}
+                  </p>
+                )}
+
+                <small>
+                  {order.progress_updated_at
+                    ? `Last published ${formatDateTime(
+                        order.progress_updated_at,
+                      )}`
+                    : 'No production progress has been published yet.'}
+                </small>
+              </div>
+
+              <form
+                onSubmit={
+                  publishProgress
+                }
+                className="admin-progress-form"
+              >
+                <div className="admin-progress-form-heading">
+                  <div>
+                    <strong>
+                      Publish progress update
+                    </strong>
+
+                    <span>
+                      This is visible to the customer immediately.
+                    </span>
+                  </div>
+
+                  <strong>
+                    {progressForm.percent}%
+                  </strong>
+                </div>
+
+                <div className="admin-progress-presets">
+                  {progressPresets.map(
+                    (
+                      preset,
+                    ) => (
+                      <button
+                        type="button"
+                        key={
+                          preset.value
+                        }
+                        className={
+                          Number(
+                            progressForm.percent,
+                          ) ===
+                          preset.value
+                            ? 'active'
+                            : ''
+                        }
+                        onClick={() =>
+                          chooseProgressPreset(
+                            preset,
+                          )
+                        }
+                      >
+                        {preset.value}%
+                      </button>
+                    ),
+                  )}
+                </div>
+
+                <label className="admin-progress-range-field">
+                  <span>
+                    Completion percentage
+                  </span>
+
+                  <div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={
+                        progressForm.percent
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        setProgressForm(
+                          (
+                            current,
+                          ) => ({
+                            ...current,
+
+                            percent:
+                              event
+                                .target
+                                .value,
+                          }),
+                        )
+                      }
+                    />
+
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={
+                        progressForm.percent
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        setProgressForm(
+                          (
+                            current,
+                          ) => ({
+                            ...current,
+
+                            percent:
+                              event
+                                .target
+                                .value,
+                          }),
+                        )
+                      }
+                    />
+                  </div>
+                </label>
+
+                <label>
+                  <span>
+                    Milestone
+                  </span>
+
+                  <input
+                    type="text"
+                    maxLength="120"
+                    value={
+                      progressForm.label
+                    }
+                    onChange={(
+                      event,
+                    ) =>
+                      setProgressForm(
+                        (
+                          current,
+                        ) => ({
+                          ...current,
+
+                          label:
+                            event
+                              .target
+                              .value,
+                        }),
+                      )
+                    }
+                    placeholder="e.g. Design and development"
+                  />
+                </label>
+
+                <label>
+                  <span>
+                    Customer progress update
+                  </span>
+
+                  <textarea
+                    value={
+                      progressForm.message
+                    }
+                    onChange={(
+                      event,
+                    ) =>
+                      setProgressForm(
+                        (
+                          current,
+                        ) => ({
+                          ...current,
+
+                          message:
+                            event
+                              .target
+                              .value,
+                        }),
+                      )
+                    }
+                    placeholder="Explain what has been completed, what is currently being worked on, and what happens next."
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  className="button button-primary"
+                  disabled={
+                    progressBusy
+                  }
+                >
+                  <Gauge
+                    size={17}
+                  />
+
+                  {progressBusy
+                    ? 'Publishing progress...'
+                    : 'Publish progress update'}
+                </button>
+              </form>
+
+              <div className="admin-progress-history">
+                <div className="admin-progress-history-heading">
+                  <strong>
+                    Progress history
+                  </strong>
+
+                  <span>
+                    {progressHistory.length}
+                    {' '}
+                    updates
+                  </span>
+                </div>
+
+                {progressHistory.length ===
+                0 ? (
+                  <div className="admin-project-empty-state admin-project-empty-state-small">
+                    <span>
+                      No progress updates have been published yet.
+                    </span>
+                  </div>
+                ) : (
+                  progressHistory.map(
+                    (
+                      update,
+                    ) => (
+                      <article
+                        key={
+                          update.id
+                        }
+                        className="admin-progress-history-item"
+                      >
+                        <div className="admin-progress-history-percent">
+                          {update.progress_percent}%
+                        </div>
+
+                        <div>
+                          <strong>
+                            {update.progress_label}
+                          </strong>
+
+                          <p>
+                            {update.message}
+                          </p>
+
+                          <span>
+                            {formatDateTime(
+                              update.created_at,
+                            )}
+                          </span>
+                        </div>
+                      </article>
+                    ),
+                  )
+                )}
+              </div>
+            </section>
+          )}
 
           <AdminPaymentAttempts
             orderId={
@@ -845,7 +1657,9 @@ export default function AdminOrderDetail() {
                         event,
                       ) =>
                         setQuote(
-                          (current) => ({
+                          (
+                            current,
+                          ) => ({
                             ...current,
 
                             amount:
@@ -872,7 +1686,9 @@ export default function AdminOrderDetail() {
                         event,
                       ) =>
                         setQuote(
-                          (current) => ({
+                          (
+                            current,
+                          ) => ({
                             ...current,
 
                             message:
@@ -912,7 +1728,7 @@ export default function AdminOrderDetail() {
                 </h2>
 
                 <p className="admin-card-description">
-                  This message will be visible to the customer inside their project workspace.
+                  Use this for general communication that is separate from production progress.
                 </p>
 
                 <form
@@ -968,7 +1784,7 @@ export default function AdminOrderDetail() {
               </h2>
 
               <p className="admin-card-description">
-                Keep the project status accurate. Add a customer-facing explanation whenever the change requires context.
+                Keep the operational state aligned with the actual position of the project.
               </p>
 
               <form
@@ -985,7 +1801,9 @@ export default function AdminOrderDetail() {
                     event,
                   ) =>
                     setStatusForm(
-                      (current) => ({
+                      (
+                        current,
+                      ) => ({
                         ...current,
 
                         status:
@@ -1024,7 +1842,9 @@ export default function AdminOrderDetail() {
                     event,
                   ) =>
                     setStatusForm(
-                      (current) => ({
+                      (
+                        current,
+                      ) => ({
                         ...current,
 
                         note:
@@ -1111,8 +1931,60 @@ export default function AdminOrderDetail() {
                     'Not provided'}
                 </strong>
               </div>
+
+              <div>
+                <span>
+                  Preferred contact
+                </span>
+
+                <strong>
+                  {formatOrderStatus(
+                    order
+                      .customers
+                      ?.preferred_contact_method ||
+                      'not specified',
+                  )}
+                </strong>
+              </div>
             </div>
           </section>
+
+          {approved && (
+            <section className="admin-control-card">
+              <Gauge
+                size={22}
+              />
+
+              <span>
+                DELIVERY
+              </span>
+
+              <h2>
+                Current progress
+              </h2>
+
+              <div className="admin-sidebar-progress">
+                <strong>
+                  {currentProgress}%
+                </strong>
+
+                <span>
+                  {order.progress_label ||
+                    'Awaiting project start'}
+                </span>
+
+                <div className="project-progress-track">
+                  <div
+                    className="project-progress-fill"
+                    style={{
+                      width:
+                        `${currentProgress}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </section>
+          )}
 
           {approved && (
             <section className="admin-control-card">
@@ -1161,6 +2033,59 @@ export default function AdminOrderDetail() {
               </div>
             </section>
           )}
+
+          <section className="admin-control-card">
+            <CalendarDays
+              size={22}
+            />
+
+            <span>
+              PROJECT RECORD
+            </span>
+
+            <h2>
+              Key dates
+            </h2>
+
+            <div className="admin-contact-list">
+              <div>
+                <span>
+                  Submitted
+                </span>
+
+                <strong>
+                  {formatDateTime(
+                    order.submitted_at ||
+                      order.created_at,
+                  )}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Deadline
+                </span>
+
+                <strong>
+                  {formatDateOnly(
+                    order.deadline,
+                  )}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Last updated
+                </span>
+
+                <strong>
+                  {formatDateTime(
+                    order.updated_at,
+                  )}
+                </strong>
+              </div>
+            </div>
+          </section>
         </aside>
       </div>
     </div>
