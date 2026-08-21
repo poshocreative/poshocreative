@@ -16,14 +16,30 @@ on public.notification_events (
 );
 
 -- ============================================================
+-- UPGRADE EXISTING NOTIFICATION READ FUNCTION
+--
+-- An older migration created:
+--
+-- public.mark_my_notification_read(uuid)
+-- returns void
+--
+-- PostgreSQL cannot change a function return type with
+-- CREATE OR REPLACE FUNCTION, so the old signature must first
+-- be removed before recreating it as RETURNS jsonb.
+-- ============================================================
+
+drop function if exists
+public.mark_my_notification_read(uuid);
+
+-- ============================================================
 -- MARK ONE CUSTOMER NOTIFICATION AS READ
 --
 -- SECURITY:
--- The caller may only update a notification belonging to
--- their own authenticated customer account.
+-- The authenticated customer may only change a notification
+-- that belongs to their own customer account.
 -- ============================================================
 
-create or replace function
+create function
 public.mark_my_notification_read(
   p_notification_id uuid
 )
@@ -37,8 +53,16 @@ declare
 
   v_order_id uuid;
 
+  v_existing_read_at timestamptz;
+
+  v_final_read_at timestamptz;
+
   v_already_read boolean;
 begin
+  -- ----------------------------------------------------------
+  -- AUTHENTICATION
+  -- ----------------------------------------------------------
+
   if auth.uid() is null then
     raise exception
       'Authentication is required.'
@@ -50,20 +74,26 @@ begin
       'Notification ID is required.';
   end if;
 
+  -- ----------------------------------------------------------
+  -- OWNERSHIP CHECK
+  -- ----------------------------------------------------------
+
   select
     n.order_id,
-    n.read_at is not null
+    n.read_at
   into
     v_order_id,
-    v_already_read
+    v_existing_read_at
   from public.notification_events n
   where n.id =
     p_notification_id
+
     and exists (
       select 1
       from public.customers c
       where c.id =
         n.customer_id
+
         and c.user_id =
           auth.uid()
     );
@@ -74,8 +104,16 @@ begin
       using errcode = '42501';
   end if;
 
+  v_already_read :=
+    v_existing_read_at
+      is not null;
+
   v_now :=
     now();
+
+  -- ----------------------------------------------------------
+  -- READ STATE
+  -- ----------------------------------------------------------
 
   update public.notification_events
   set
@@ -83,9 +121,18 @@ begin
       coalesce(
         read_at,
         v_now
-      )
+      ),
+
+    updated_at =
+      v_now
   where id =
-    p_notification_id;
+    p_notification_id
+  returning read_at
+  into v_final_read_at;
+
+  -- ----------------------------------------------------------
+  -- CUSTOMER ACTIVITY
+  -- ----------------------------------------------------------
 
   if v_order_id is not null then
     update public.orders
@@ -94,9 +141,14 @@ begin
         v_now
     where id =
       v_order_id
+
       and user_id =
         auth.uid();
   end if;
+
+  -- ----------------------------------------------------------
+  -- RESULT
+  -- ----------------------------------------------------------
 
   return jsonb_build_object(
     'success',
@@ -109,10 +161,14 @@ begin
       v_already_read,
 
     'read_at',
-      v_now
+      v_final_read_at
   );
 end;
 $$;
+
+-- ============================================================
+-- PERMISSIONS
+-- ============================================================
 
 revoke all
 on function
@@ -133,7 +189,10 @@ to authenticated;
 -- MARK ALL CUSTOMER NOTIFICATIONS AS READ
 -- ============================================================
 
-create or replace function
+drop function if exists
+public.mark_all_my_notifications_read();
+
+create function
 public.mark_all_my_notifications_read()
 returns jsonb
 language plpgsql
@@ -145,6 +204,10 @@ declare
 
   v_count integer;
 begin
+  -- ----------------------------------------------------------
+  -- AUTHENTICATION
+  -- ----------------------------------------------------------
+
   if auth.uid() is null then
     raise exception
       'Authentication is required.'
@@ -154,23 +217,39 @@ begin
   v_now :=
     now();
 
+  -- ----------------------------------------------------------
+  -- UPDATE ONLY THE AUTHENTICATED CUSTOMER'S UNREAD EVENTS
+  -- ----------------------------------------------------------
+
   with updated as (
     update public.notification_events n
     set
       read_at =
+        v_now,
+
+      updated_at =
         v_now
     where n.read_at is null
+
       and n.customer_id in (
         select c.id
         from public.customers c
         where c.user_id =
           auth.uid()
       )
+
     returning n.id
   )
-  select count(*)
-  into v_count
+
+  select
+    count(*)
+  into
+    v_count
   from updated;
+
+  -- ----------------------------------------------------------
+  -- RESULT
+  -- ----------------------------------------------------------
 
   return jsonb_build_object(
     'success',
@@ -188,6 +267,10 @@ begin
 end;
 $$;
 
+-- ============================================================
+-- PERMISSIONS
+-- ============================================================
+
 revoke all
 on function
 public.mark_all_my_notifications_read()
@@ -204,15 +287,15 @@ public.mark_all_my_notifications_read()
 to authenticated;
 
 -- ============================================================
--- COMMENTS
+-- DOCUMENTATION
 -- ============================================================
 
 comment on function
 public.mark_my_notification_read(uuid)
 is
-'Securely marks one notification belonging to the authenticated customer as read.';
+'Securely marks one notification belonging to the authenticated Posho Creative customer as read and returns the resulting read state.';
 
 comment on function
 public.mark_all_my_notifications_read()
 is
-'Securely marks all unread notifications belonging to the authenticated customer as read.';
+'Securely marks every unread notification belonging to the authenticated Posho Creative customer as read.';
