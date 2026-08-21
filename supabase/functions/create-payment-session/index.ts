@@ -25,6 +25,38 @@ function generatePaymentReference() {
     .toUpperCase()}`;
 }
 
+function moneyToKobo(
+  value: unknown,
+) {
+  if (
+    value ===
+      null ||
+    value ===
+      undefined ||
+    value ===
+      ''
+  ) {
+    return null;
+  }
+
+  const amount =
+    Number(value);
+
+  if (
+    !Number.isFinite(
+      amount,
+    ) ||
+    amount < 0
+  ) {
+    return null;
+  }
+
+  return Math.round(
+    amount *
+      100,
+  );
+}
+
 function nameParts(
   fullName: string,
 ) {
@@ -302,7 +334,8 @@ async function ensureFlutterwaveCustomer(
             search?.data
               ?.customers,
           )
-        ? search.data
+        ? search
+            .data
             .customers
         : [];
 
@@ -398,6 +431,43 @@ async function ensureFlutterwaveCustomer(
   return providerCustomer.id;
 }
 
+async function safeFeeQuote({
+  method,
+  amountKobo,
+  currency,
+}: {
+  method: string;
+  amountKobo: number;
+  currency: string;
+}) {
+  try {
+    return await getPaymentFeeQuote({
+      method,
+      amountKobo,
+      currency,
+    });
+  } catch (
+    error
+  ) {
+    console.warn(
+      'Continuing payment without pre-payment fee quote:',
+      {
+        method,
+
+        message:
+          error instanceof
+          Error
+            ? error.message
+            : String(
+                error,
+              ),
+      },
+    );
+
+    return null;
+  }
+}
+
 export default {
   fetch: withSupabase(
     {
@@ -456,7 +526,8 @@ export default {
           typeof body
             ?.orderId ===
           'string'
-            ? body.orderId
+            ? body
+                .orderId
                 .trim()
             : '';
 
@@ -464,7 +535,8 @@ export default {
           typeof body
             ?.method ===
           'string'
-            ? body.method
+            ? body
+                .method
                 .trim()
                 .toLowerCase()
             : '';
@@ -535,7 +607,8 @@ export default {
         }
 
         const {
-          data: order,
+          data:
+            order,
           error:
             orderError,
         } =
@@ -622,7 +695,9 @@ export default {
           (
             order.currency ||
             'NGN'
-          ).toUpperCase();
+          )
+            .trim()
+            .toUpperCase();
 
         if (
           methodSetting
@@ -682,8 +757,12 @@ export default {
           );
         }
 
+        /*
+         * Fee quotation is useful for transparency
+         * but is NOT allowed to block a payment.
+         */
         const feeQuote =
-          await getPaymentFeeQuote({
+          await safeFeeQuote({
             method:
               requestedMethod,
 
@@ -768,14 +847,18 @@ export default {
 
               estimated_fee_kobo:
                 feeQuote
-                  .feeKobo,
+                  ?.feeKobo ??
+                null,
 
               estimated_customer_total_kobo:
                 feeQuote
-                  .totalKobo,
+                  ?.totalKobo ??
+                null,
 
               fee_quoted_at:
-                now,
+                feeQuote
+                  ? now
+                  : null,
 
               customer_bears_fee:
                 true,
@@ -804,21 +887,29 @@ export default {
                 order_reference:
                   order.reference,
 
-                fee_quote: {
-                  base_amount_kobo:
-                    outstanding,
+                fee_quote: feeQuote
+                  ? {
+                      available:
+                        true,
 
-                  processing_fee_kobo:
-                    feeQuote
-                      .feeKobo,
+                      base_amount_kobo:
+                        outstanding,
 
-                  customer_total_kobo:
-                    feeQuote
-                      .totalKobo,
+                      processing_fee_kobo:
+                        feeQuote
+                          .feeKobo,
 
-                  quoted_at:
-                    now,
-                },
+                      customer_total_kobo:
+                        feeQuote
+                          .totalKobo,
+
+                      quoted_at:
+                        now,
+                    }
+                  : {
+                      available:
+                        false,
+                    },
               },
 
               provider_payload:
@@ -855,7 +946,9 @@ export default {
               'initializing',
 
             internalMessage:
-              `Payment attempt created for ${order.reference}. Provider fee quote: ${feeQuote.feeKobo} kobo.`,
+              feeQuote
+                ? `Payment attempt created. Fee quote: ${feeQuote.feeKobo} kobo.`
+                : 'Payment attempt created. Pre-payment fee quote was unavailable; payment processing continued.',
           },
         );
 
@@ -895,7 +988,7 @@ export default {
               'customer_ready',
 
             internalMessage:
-              'Flutterwave customer profile prepared.',
+              'Payment customer profile prepared.',
           },
         );
 
@@ -904,8 +997,16 @@ export default {
             (
               outstanding /
               100
-            ).toFixed(2),
+            ).toFixed(
+              2,
+            ),
           );
+
+        /*
+         * =====================================================
+         * BANK TRANSFER
+         * =====================================================
+         */
 
         if (
           requestedMethod ===
@@ -972,19 +1073,26 @@ export default {
             );
           }
 
-          const providerTransferAmountKobo =
-            Number.isFinite(
-              Number(
-                details.amount,
-              ),
-            )
-              ? Math.round(
-                  Number(
-                    details.amount,
-                  ) *
-                    100,
-                )
-              : null;
+          /*
+           * Flutterwave's dynamic virtual-account
+           * response gives us the exact amount the
+           * customer must send.
+           *
+           * When customer fees are enabled this may
+           * be greater than the project/base amount.
+           */
+          const providerTotalKobo =
+            moneyToKobo(
+              details.amount,
+            ) ??
+            outstanding;
+
+          const exactFeeKobo =
+            Math.max(
+              providerTotalKobo -
+                outstanding,
+              0,
+            );
 
           await ctx
             .supabaseAdmin
@@ -996,6 +1104,7 @@ export default {
                 'pending',
 
               provider_status:
+                details.status ||
                 'pending',
 
               provider_transaction_id:
@@ -1012,6 +1121,16 @@ export default {
               attempt_stage:
                 'awaiting_transfer',
 
+              estimated_fee_kobo:
+                exactFeeKobo,
+
+              estimated_customer_total_kobo:
+                providerTotalKobo,
+
+              fee_quoted_at:
+                new Date()
+                  .toISOString(),
+
               customer_message:
                 'Transfer the exact amount displayed to the temporary account. Confirmation may take a few moments.',
 
@@ -1025,7 +1144,13 @@ export default {
                 amount:
                   details.amount,
 
-                currency,
+                currency:
+                  details.currency ||
+                  currency,
+
+                status:
+                  details.status ||
+                  null,
 
                 account_bank_name:
                   details
@@ -1041,16 +1166,17 @@ export default {
                   order.reference,
 
                 fee_quote: {
+                  source:
+                    'virtual_account',
+
                   base_amount_kobo:
                     outstanding,
 
                   processing_fee_kobo:
-                    feeQuote
-                      .feeKobo,
+                    exactFeeKobo,
 
                   customer_total_kobo:
-                    feeQuote
-                      .totalKobo,
+                    providerTotalKobo,
                 },
 
                 virtual_account: {
@@ -1062,8 +1188,8 @@ export default {
                     details
                       .account_bank_name,
 
-                  provider_transfer_amount_kobo:
-                    providerTransferAmountKobo,
+                  exact_transfer_amount_kobo:
+                    providerTotalKobo,
 
                   note:
                     details.note,
@@ -1092,21 +1218,24 @@ export default {
                 'awaiting_transfer',
 
               providerStatus:
+                details.status ||
                 'pending',
 
               internalMessage:
-                'Dynamic virtual account created successfully.',
+                `Dynamic virtual account created. Exact customer transfer amount: ${providerTotalKobo} kobo; processing fee: ${exactFeeKobo} kobo.`,
 
               payload: {
                 virtual_account_id:
                   details.id,
 
-                provider_transfer_amount_kobo:
-                  providerTransferAmountKobo,
+                base_amount_kobo:
+                  outstanding,
 
-                estimated_fee_kobo:
-                  feeQuote
-                    .feeKobo,
+                processing_fee_kobo:
+                  exactFeeKobo,
+
+                customer_total_kobo:
+                  providerTotalKobo,
               },
             },
           );
@@ -1128,12 +1257,10 @@ export default {
                 outstanding,
 
               processingFeeKobo:
-                feeQuote
-                  .feeKobo,
+                exactFeeKobo,
 
               estimatedCustomerTotalKobo:
-                feeQuote
-                  .totalKobo,
+                providerTotalKobo,
 
               currency,
 
@@ -1150,7 +1277,7 @@ export default {
                   details.note,
 
                 amountKobo:
-                  providerTransferAmountKobo,
+                  providerTotalKobo,
 
                 expiresAt:
                   details
@@ -1159,6 +1286,12 @@ export default {
             },
           });
         }
+
+        /*
+         * =====================================================
+         * OPAY
+         * =====================================================
+         */
 
         if (
           requestedMethod !==
@@ -1231,7 +1364,7 @@ export default {
               'payment_method_ready',
 
             internalMessage:
-              'Flutterwave OPay payment method created.',
+              'OPay payment method created successfully.',
           },
         );
 
@@ -1316,10 +1449,22 @@ export default {
             chargeData,
           );
 
-        const actualFee =
+        const chargeFeeKobo =
           providerFeeKobo(
             chargeData,
           );
+
+        const finalFeeKobo =
+          chargeFeeKobo >
+          0
+            ? chargeFeeKobo
+            : feeQuote
+                ?.feeKobo ??
+              0;
+
+        const customerTotalKobo =
+          outstanding +
+          finalFeeKobo;
 
         await ctx
           .supabaseAdmin
@@ -1346,12 +1491,11 @@ export default {
             attempt_stage:
               'awaiting_authorization',
 
-            actual_provider_fee_kobo:
-              actualFee,
+            estimated_fee_kobo:
+              finalFeeKobo,
 
-            actual_customer_total_kobo:
-              outstanding +
-              actualFee,
+            estimated_customer_total_kobo:
+              customerTotalKobo,
 
             provider_fees:
               providerFees(
@@ -1391,7 +1535,7 @@ export default {
               code,
 
             internalMessage:
-              'OPay charge created and redirect returned.',
+              'OPay charge created and customer authorization URL returned.',
 
             payload:
               safeChargeSummary(
@@ -1417,16 +1561,10 @@ export default {
               outstanding,
 
             processingFeeKobo:
-              actualFee ||
-              feeQuote
-                .feeKobo,
+              finalFeeKobo,
 
             estimatedCustomerTotalKobo:
-              actualFee
-                ? outstanding +
-                  actualFee
-                : feeQuote
-                    .totalKobo,
+              customerTotalKobo,
 
             currency,
 
@@ -1441,10 +1579,6 @@ export default {
             error,
           );
 
-        const internalMessage =
-          providerDiagnostic
-            .technicalMessage;
-
         console.error(
           'create-payment-session:',
           {
@@ -1455,7 +1589,9 @@ export default {
               providerDiagnostic
                 .code,
 
-            internalMessage,
+            internalMessage:
+              providerDiagnostic
+                .technicalMessage,
           },
         );
 
@@ -1516,7 +1652,9 @@ export default {
                 providerDiagnostic
                   .code,
 
-              internalMessage,
+              internalMessage:
+                providerDiagnostic
+                  .technicalMessage,
 
               payload: {
                 method:

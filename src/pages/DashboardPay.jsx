@@ -215,7 +215,8 @@ export default function DashboardPay() {
       if (
         !order ||
         !selected ||
-        !selected.available
+        !selected
+          .available
       ) {
         return;
       }
@@ -366,25 +367,37 @@ export default function DashboardPay() {
       ?.baseAmountKobo ??
     0;
 
+  const feeKnown =
+    payment
+      ?.processingFeeKobo !==
+      undefined &&
+    payment
+      ?.processingFeeKobo !==
+      null
+      ? true
+      : selected
+          ?.feeAvailable ===
+        true;
+
   const feeAmount =
     payment
       ?.processingFeeKobo ??
     selected
       ?.processingFeeKobo ??
-    0;
+    null;
 
-  const estimatedTotal =
+  const customerTotal =
     payment
       ?.estimatedCustomerTotalKobo ??
     selected
       ?.customerTotalKobo ??
-    baseAmount +
-      feeAmount;
+    null;
 
   const exactTransferAmount =
     payment
       ?.account
-      ?.amountKobo;
+      ?.amountKobo ??
+    customerTotal;
 
   return (
     <div className="commerce-page page-reveal">
@@ -450,25 +463,30 @@ export default function DashboardPay() {
               </span>
 
               <strong>
-                {selected
-                  ?.feeAvailable ===
-                false
-                  ? 'Unavailable'
-                  : formatMoney(
+                {feeKnown &&
+                feeAmount !==
+                  null
+                  ? formatMoney(
                       feeAmount,
-                    )}
+                    )
+                  : 'Confirmed before payment'}
               </strong>
             </div>
 
             <div className="payment-cost-total">
               <span>
-                Estimated total
+                {payment
+                  ? 'Total to pay'
+                  : 'Estimated total'}
               </span>
 
               <strong>
-                {formatMoney(
-                  estimatedTotal,
-                )}
+                {customerTotal !==
+                null
+                  ? formatMoney(
+                      customerTotal,
+                    )
+                  : 'Confirmed next'}
               </strong>
             </div>
 
@@ -478,7 +496,7 @@ export default function DashboardPay() {
               />
 
               <span>
-                Processing fees are calculated securely using the current payment-provider rate. The final payable amount is confirmed when payment details are created.
+                Processing fees are obtained from the active payment provider. If a fee cannot be quoted in advance, the exact amount is confirmed before you transfer any money.
               </span>
             </div>
           </div>
@@ -503,10 +521,12 @@ export default function DashboardPay() {
                         }
                         className={[
                           'payment-method',
+
                           method ===
                           item.key
                             ? 'selected'
                             : '',
+
                           !item.available
                             ? 'payment-method-disabled'
                             : '',
@@ -538,18 +558,19 @@ export default function DashboardPay() {
                         </strong>
 
                         <span>
-                          {item.available
-                            ? item.description
-                            : item.message ||
-                              'Temporarily unavailable'}
+                          {item.description}
                         </span>
 
-                        {item.available && (
+                        {item.feeAvailable ? (
                           <small>
-                            Total:{' '}
+                            Estimated total:{' '}
                             {formatMoney(
                               item.customerTotalKobo,
                             )}
+                          </small>
+                        ) : (
+                          <small>
+                            Exact fee confirmed before payment
                           </small>
                         )}
                       </button>
@@ -654,19 +675,44 @@ export default function DashboardPay() {
 
               <div className="bank-account-detail">
                 <span>
+                  Project amount
+                </span>
+
+                <strong>
+                  {formatMoney(
+                    payment
+                      .baseAmountKobo,
+                  )}
+                </strong>
+              </div>
+
+              <div className="bank-account-detail">
+                <span>
+                  Processing fee
+                </span>
+
+                <strong>
+                  {formatMoney(
+                    payment
+                      .processingFeeKobo,
+                  )}
+                </strong>
+              </div>
+
+              <div className="bank-account-detail">
+                <span>
                   Exact transfer amount
                 </span>
 
                 <strong>
                   {formatMoney(
-                    exactTransferAmount ??
-                      estimatedTotal,
+                    exactTransferAmount,
                   )}
                 </strong>
               </div>
 
               <div className="payment-transfer-warning">
-                Transfer the exact amount shown above. Do not round the figure or send a different amount.
+                Transfer exactly the amount shown above. Do not round the figure or send a different amount.
               </div>
 
               <button
@@ -703,11 +749,11 @@ export default function DashboardPay() {
           </span>
 
           <h3>
-            Payments are confirmed before your project status changes.
+            Your transaction is independently confirmed.
           </h3>
 
           <p>
-            A payment is recorded as successful only after the transaction details have been independently confirmed.
+            Your project status changes only after the payment provider confirms the transaction details and amount.
           </p>
         </aside>
       </div>

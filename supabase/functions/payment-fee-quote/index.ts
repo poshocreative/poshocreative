@@ -55,7 +55,8 @@ export default {
           typeof body
             ?.orderId ===
           'string'
-            ? body.orderId
+            ? body
+                .orderId
                 .trim()
             : '';
 
@@ -72,7 +73,8 @@ export default {
         }
 
         const {
-          data: order,
+          data:
+            order,
           error:
             orderError,
         } =
@@ -188,7 +190,9 @@ export default {
           (
             order.currency ||
             'NGN'
-          ).toUpperCase();
+          )
+            .trim()
+            .toUpperCase();
 
         const {
           data:
@@ -231,12 +235,16 @@ export default {
           throw methodsError;
         }
 
-        const methods =
-          [];
+        const methods:
+          Record<
+            string,
+            unknown
+          >[] = [];
 
         for (
           const setting of
-          methodRows || []
+          methodRows ||
+          []
         ) {
           try {
             const fee =
@@ -264,6 +272,11 @@ export default {
                 setting
                   .description,
 
+              /*
+               * Payment-method availability and
+               * fee quotation are deliberately
+               * separate concerns.
+               */
               available:
                 true,
 
@@ -279,23 +292,41 @@ export default {
               customerTotalKobo:
                 fee.totalKobo,
 
+              feeBreakdown:
+                fee.breakdown,
+
               currency,
             });
           } catch (
             feeError
           ) {
             console.error(
-              'Fee quotation failed:',
+              'Payment fee quotation failed:',
               {
                 method:
                   setting
                     .method_key,
 
                 error:
-                  feeError,
+                  feeError instanceof
+                  Error
+                    ? feeError
+                        .message
+                    : feeError,
               },
             );
 
+            /*
+             * IMPORTANT:
+             *
+             * A temporary fee-quote problem must
+             * NEVER disable a payment method that
+             * Management has enabled.
+             *
+             * For bank transfer, Flutterwave will
+             * return the exact transfer amount when
+             * the virtual account is created.
+             */
             methods.push({
               key:
                 setting
@@ -310,7 +341,7 @@ export default {
                   .description,
 
               available:
-                false,
+                true,
 
               feeAvailable:
                 false,
@@ -324,10 +355,13 @@ export default {
               customerTotalKobo:
                 null,
 
+              feeBreakdown:
+                [],
+
               currency,
 
               message:
-                'This payment option is temporarily unavailable.',
+                'The exact processing fee will be confirmed before you make the payment.',
             });
           }
         }
@@ -367,7 +401,7 @@ export default {
             success: false,
 
             message:
-              'Payment pricing could not be prepared. Please try again shortly.',
+              'Payment details could not be prepared. Please try again shortly.',
           },
           500,
         );

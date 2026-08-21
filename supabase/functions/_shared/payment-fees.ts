@@ -3,7 +3,10 @@ import {
 } from './flutterwave.ts';
 
 const supportedMethods:
-  Record<string, string> = {
+  Record<
+    string,
+    string
+  > = {
     bank_transfer:
       'bank_transfer',
 
@@ -11,9 +14,25 @@ const supportedMethods:
       'opay',
   };
 
+type FeeBreakdown = {
+  type: string;
+  amountKobo: number;
+};
+
 function moneyToKobo(
   value: unknown,
 ) {
+  if (
+    value ===
+      null ||
+    value ===
+      undefined ||
+    value ===
+      ''
+  ) {
+    return null;
+  }
+
   const amount =
     Number(value);
 
@@ -27,134 +46,205 @@ function moneyToKobo(
   }
 
   return Math.round(
-    amount * 100,
+    amount *
+      100,
   );
 }
 
-function sumFeeRows(
+function normaliseFeeRows(
   rows: unknown,
-) {
+): FeeBreakdown[] {
   if (
     !Array.isArray(
       rows,
     )
   ) {
-    return null;
+    return [];
   }
 
-  let total = 0;
+  return rows
+    .map(
+      (
+        row: any,
+      ) => {
+        const amountKobo =
+          moneyToKobo(
+            row
+              ?.amount,
+          );
 
-  let found =
-    false;
+        if (
+          amountKobo ===
+          null
+        ) {
+          return null;
+        }
 
-  for (
-    const row of
-    rows
-  ) {
-    const amount =
-      moneyToKobo(
-        row?.amount,
-      );
+        return {
+          type:
+            String(
+              row
+                ?.type ||
+                row
+                  ?.fee_type ||
+                'provider_fee',
+            ),
 
-    if (
-      amount !==
-      null
-    ) {
-      total +=
-        amount;
-
-      found =
-        true;
-    }
-  }
-
-  return found
-    ? total
-    : null;
+          amountKobo,
+        };
+      },
+    )
+    .filter(
+      Boolean,
+    ) as FeeBreakdown[];
 }
 
-function extractFeeKobo(
+function findFeeRows(
   response: any,
 ) {
   const data =
     response?.data ??
     response;
 
-  if (
-    typeof data ===
-      'number' ||
-    typeof data ===
-      'string'
-  ) {
-    const direct =
-      moneyToKobo(
-        data,
-      );
-
-    if (
-      direct !==
-      null
-    ) {
-      return direct;
-    }
-  }
-
-  const rowTotal =
-    sumFeeRows(
-      data,
-    );
-
-  if (
-    rowTotal !==
-    null
-  ) {
-    return rowTotal;
-  }
-
-  const nestedRows =
-    sumFeeRows(
+  const candidates =
+    [
+      data?.fee,
       data?.fees,
-    );
-
-  if (
-    nestedRows !==
-    null
-  ) {
-    return nestedRows;
-  }
-
-  const candidates = [
-    data?.fee,
-    data?.fees,
-    data?.total_fee,
-    data?.total_fees,
-    data?.transaction_fee,
-    data?.charge,
-    data?.amount,
-    response?.fee,
-    response?.total_fee,
-    response?.transaction_fee,
-  ];
+      response?.fee,
+      response?.fees,
+    ];
 
   for (
     const candidate of
     candidates
   ) {
-    const parsed =
+    const rows =
+      normaliseFeeRows(
+        candidate,
+      );
+
+    if (
+      rows.length >
+      0
+    ) {
+      return rows;
+    }
+  }
+
+  return [];
+}
+
+function findScalarFeeKobo(
+  response: any,
+) {
+  const data =
+    response?.data ??
+    response;
+
+  const candidates =
+    [
+      data?.fee,
+      data
+        ?.total_fee,
+      data
+        ?.total_fees,
+      data
+        ?.transaction_fee,
+      data
+        ?.flutterwave_fee,
+      data
+        ?.ravefee,
+      response?.fee,
+      response
+        ?.total_fee,
+      response
+        ?.transaction_fee,
+    ];
+
+  for (
+    const candidate of
+    candidates
+  ) {
+    if (
+      Array.isArray(
+        candidate,
+      )
+    ) {
+      continue;
+    }
+
+    const value =
       moneyToKobo(
         candidate,
       );
 
     if (
-      parsed !==
+      value !==
       null
     ) {
-      return parsed;
+      return value;
     }
   }
 
-  throw new Error(
-    'Flutterwave returned a fee response that could not be interpreted.',
+  return null;
+}
+
+function findChargeAmountKobo(
+  response: any,
+) {
+  const data =
+    response?.data ??
+    response;
+
+  const candidates =
+    [
+      data
+        ?.charge_amount,
+      data
+        ?.charged_amount,
+      data
+        ?.customer_amount,
+      data
+        ?.total_amount,
+      response
+        ?.charge_amount,
+      response
+        ?.charged_amount,
+    ];
+
+  for (
+    const candidate of
+    candidates
+  ) {
+    const value =
+      moneyToKobo(
+        candidate,
+      );
+
+    if (
+      value !==
+      null
+    ) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+function sumFeeRows(
+  rows:
+    FeeBreakdown[],
+) {
+  return rows.reduce(
+    (
+      total,
+      row,
+    ) =>
+      total +
+      row
+        .amountKobo,
+    0,
   );
 }
 
@@ -189,19 +279,30 @@ export async function getPaymentFeeQuote({
     !Number.isFinite(
       safeAmount,
     ) ||
-    safeAmount <= 0
+    safeAmount <=
+      0
   ) {
     throw new Error(
       'A valid payment amount is required before fees can be calculated.',
     );
   }
 
+  const safeCurrency =
+    (
+      currency ||
+      'NGN'
+    )
+      .trim()
+      .toUpperCase();
+
   const amount =
     Number(
       (
         safeAmount /
         100
-      ).toFixed(2),
+      ).toFixed(
+        2,
+      ),
     );
 
   const params =
@@ -212,25 +313,100 @@ export async function getPaymentFeeQuote({
         ),
 
       currency:
-        currency
-          .toUpperCase(),
+        safeCurrency,
 
       payment_method:
         providerMethod,
-
-      country:
-        'NG',
     });
+
+  if (
+    safeCurrency ===
+    'NGN'
+  ) {
+    params.set(
+      'country',
+      'NG',
+    );
+  }
 
   const response =
     await flutterwaveRequest(
       `/fees?${params.toString()}`,
     );
 
-  const feeKobo =
-    extractFeeKobo(
+  const breakdown =
+    findFeeRows(
       response,
     );
+
+  const rowFeeKobo =
+    breakdown.length >
+    0
+      ? sumFeeRows(
+          breakdown,
+        )
+      : null;
+
+  const scalarFeeKobo =
+    findScalarFeeKobo(
+      response,
+    );
+
+  const chargeAmountKobo =
+    findChargeAmountKobo(
+      response,
+    );
+
+  let feeKobo =
+    rowFeeKobo ??
+    scalarFeeKobo;
+
+  let totalKobo =
+    chargeAmountKobo;
+
+  /*
+   * Flutterwave's charge_amount is the most
+   * useful value when fees are passed to the
+   * customer because it represents the total
+   * customer charge.
+   */
+  if (
+    totalKobo !==
+      null &&
+    totalKobo >=
+      safeAmount
+  ) {
+    const difference =
+      totalKobo -
+      safeAmount;
+
+    /*
+     * The charge amount is authoritative for
+     * the amount the customer is expected to pay.
+     */
+    feeKobo =
+      difference;
+  }
+
+  if (
+    feeKobo ===
+    null
+  ) {
+    throw new Error(
+      'Flutterwave returned a fee response that did not include a usable fee or customer charge amount.',
+    );
+  }
+
+  if (
+    totalKobo ===
+      null ||
+    totalKobo <
+      safeAmount
+  ) {
+    totalKobo =
+      safeAmount +
+      feeKobo;
+  }
 
   return {
     method,
@@ -242,13 +418,12 @@ export async function getPaymentFeeQuote({
 
     feeKobo,
 
-    totalKobo:
-      safeAmount +
-      feeKobo,
+    totalKobo,
 
     currency:
-      currency
-        .toUpperCase(),
+      safeCurrency,
+
+    breakdown,
 
     rawResponse:
       response,
