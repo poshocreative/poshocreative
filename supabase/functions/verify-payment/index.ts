@@ -15,11 +15,6 @@ async function diagnostic(
   paymentId: string,
   eventType: string,
   internalMessage: string,
-  payload:
-    Record<
-      string,
-      unknown
-    > = {},
 ) {
   await admin
     .from(
@@ -37,8 +32,6 @@ async function diagnostic(
 
       internal_message:
         internalMessage,
-
-      payload,
     });
 }
 
@@ -115,6 +108,7 @@ export default {
               provider_customer_id,
               payment_method,
               amount_kobo,
+              customer_bears_fee,
               currency,
               status
             `)
@@ -181,7 +175,7 @@ export default {
           ctx.supabaseAdmin,
           payment.id,
           'verification_requested',
-          'Payment verification requested.',
+          'Customer requested a payment verification check.',
         );
 
         let charge =
@@ -252,7 +246,7 @@ export default {
                 'awaiting_confirmation',
 
               customer_message:
-                'Flutterwave has not confirmed this payment yet. Please allow a little more time and check again.',
+                'Your payment has not been confirmed yet. Please allow a little more time and check again.',
 
               last_checked_at:
                 now,
@@ -276,7 +270,7 @@ export default {
               'pending',
 
             message:
-              'Flutterwave has not confirmed this payment yet. Please allow a little more time and check again.',
+              'Your payment has not been confirmed yet. Please allow a little more time and check again.',
           });
         }
 

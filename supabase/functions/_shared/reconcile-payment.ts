@@ -32,6 +32,56 @@ function providerCode(
   );
 }
 
+function normalizedFees(
+  charge: any,
+) {
+  if (
+    !Array.isArray(
+      charge?.fees,
+    )
+  ) {
+    return [];
+  }
+
+  return charge.fees.map(
+    (
+      fee: any,
+    ) => ({
+      type:
+        fee?.type ||
+        'provider_fee',
+
+      amount:
+        Number(
+          fee?.amount ||
+            0,
+        ),
+    }),
+  );
+}
+
+function actualFeeKobo(
+  charge: any,
+) {
+  return normalizedFees(
+    charge,
+  ).reduce(
+    (
+      total,
+      fee,
+    ) =>
+      total +
+      Math.round(
+        Number(
+          fee.amount ||
+            0,
+        ) *
+          100,
+      ),
+    0,
+  );
+}
+
 function safeProviderSummary(
   charge: any,
 ) {
@@ -77,6 +127,11 @@ function safeProviderSummary(
         ?.payment_method_details
         ?.type ||
       null,
+
+    fees:
+      normalizedFees(
+        charge,
+      ),
   };
 }
 
@@ -195,6 +250,29 @@ export async function reconcilePayment(
       charge,
     );
 
+  const providerFee =
+    actualFeeKobo(
+      charge,
+    );
+
+  const fees =
+    normalizedFees(
+      charge,
+    );
+
+  const customerBearsFee =
+    payment
+      .customer_bears_fee !==
+    false;
+
+  const actualCustomerTotal =
+    expectedAmount +
+    (
+      customerBearsFee
+        ? providerFee
+        : 0
+    );
+
   const mismatches:
     string[] = [];
 
@@ -235,14 +313,14 @@ export async function reconcilePayment(
     );
   }
 
+  const now =
+    new Date()
+      .toISOString();
+
   if (
     mismatches.length >
     0
   ) {
-    const now =
-      new Date()
-        .toISOString();
-
     console.error(
       'Payment verification mismatch:',
       {
@@ -275,6 +353,20 @@ export async function reconcilePayment(
 
         failure_code:
           'VERIFICATION_MISMATCH',
+
+        actual_provider_fee_kobo:
+          providerFee,
+
+        actual_customer_total_kobo:
+          actualCustomerTotal,
+
+        provider_fees:
+          fees,
+
+        provider_payload:
+          safeProviderSummary(
+            charge,
+          ),
 
         customer_message:
           'We could not verify this payment automatically. Posho Creative has been notified.',
@@ -336,6 +428,9 @@ export async function reconcilePayment(
 
             customer_id:
               actualCustomerId,
+
+            provider_fee_kobo:
+              providerFee,
           },
         },
       },
@@ -358,10 +453,6 @@ export async function reconcilePayment(
     providerCode(
       charge,
     );
-
-  const now =
-    new Date()
-      .toISOString();
 
   if (
     providerStatus !==
@@ -387,7 +478,7 @@ export async function reconcilePayment(
         'failed';
 
       customerMessage =
-        'This payment attempt was not completed. You can try again or choose another payment method.';
+        'This payment attempt was not completed. You can try again using an available payment method.';
     }
 
     if (
@@ -427,6 +518,15 @@ export async function reconcilePayment(
           charge.id ||
           payment
             .provider_transaction_id,
+
+        actual_provider_fee_kobo:
+          providerFee,
+
+        actual_customer_total_kobo:
+          actualCustomerTotal,
+
+        provider_fees:
+          fees,
 
         provider_payload:
           safeProviderSummary(
@@ -477,7 +577,9 @@ export async function reconcilePayment(
           `Provider returned ${providerStatus || 'unknown'} status.`,
 
         payload:
-          charge,
+          safeProviderSummary(
+            charge,
+          ),
       },
     );
 
@@ -508,6 +610,20 @@ export async function reconcilePayment(
 
         provider_response_code:
           code,
+
+        actual_provider_fee_kobo:
+          providerFee,
+
+        actual_customer_total_kobo:
+          actualCustomerTotal,
+
+        provider_fees:
+          fees,
+
+        provider_payload:
+          safeProviderSummary(
+            charge,
+          ),
 
         last_checked_at:
           now,
@@ -551,6 +667,15 @@ export async function reconcilePayment(
 
         provider_transaction_id:
           charge.id,
+
+        actual_provider_fee_kobo:
+          providerFee,
+
+        actual_customer_total_kobo:
+          actualCustomerTotal,
+
+        provider_fees:
+          fees,
 
         provider_payload:
           safeProviderSummary(
@@ -603,10 +728,12 @@ export async function reconcilePayment(
         code,
 
       internalMessage:
-        'Flutterwave payment independently verified successfully.',
+        `Flutterwave payment verified successfully. Provider fee: ${providerFee} kobo.`,
 
       payload:
-        charge,
+        safeProviderSummary(
+          charge,
+        ),
     },
   );
 
@@ -767,6 +894,12 @@ export async function reconcilePayment(
           amount_kobo:
             expectedAmount,
 
+          provider_fee_kobo:
+            providerFee,
+
+          customer_total_kobo:
+            actualCustomerTotal,
+
           reference:
             expectedReference,
 
@@ -786,5 +919,11 @@ export async function reconcilePayment(
         : 'processing',
 
     totalPaid,
+
+    providerFeeKobo:
+      providerFee,
+
+    customerTotalKobo:
+      actualCustomerTotal,
   };
 }

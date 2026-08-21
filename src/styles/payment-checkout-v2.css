@@ -1,0 +1,556 @@
+/* ==========================================================
+   POSHO CREATIVE
+   PAYMENT CHECKOUT V2
+   ========================================================== */
+
+.payment-cost-breakdown {
+  margin: 22px 0;
+
+  padding: 18px;
+
+  border: 1px solid var(--border);
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff,
+      #faf9fc
+    );
+}
+
+.payment-cost-heading {
+  padding-bottom: 15px;
+
+  border-bottom:
+    1px solid
+    var(--border);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.payment-cost-heading > div {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+.payment-cost-heading svg {
+  color:
+    var(--brand-primary);
+}
+
+.payment-cost-heading strong {
+  font-size: 0.9rem;
+}
+
+.payment-cost-heading > span {
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  background:
+    var(--brand-primary-soft);
+
+  color:
+    var(--brand-primary);
+
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.payment-cost-row,
+.payment-cost-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+}
+
+.payment-cost-row {
+  padding: 13px 0;
+
+  border-bottom:
+    1px solid
+    var(--border);
+}
+
+.payment-cost-row span {
+  color:
+    var(--text-soft);
+
+  font-size: 0.82rem;
+}
+
+.payment-cost-row strong {
+  font-family:
+    'Manrope',
+    sans-serif;
+
+  font-size: 0.9rem;
+}
+
+.payment-cost-total {
+  padding-top: 16px;
+}
+
+.payment-cost-total span {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.payment-cost-total strong {
+  color:
+    var(--brand-primary);
+
+  font-family:
+    'Manrope',
+    sans-serif;
+
+  font-size: 1.35rem;
+}
+
+.payment-cost-note {
+  margin-top: 15px;
+
+  padding: 11px 12px;
+
+  border-radius: 12px;
+
+  background:
+    var(--brand-primary-faint);
+
+  color:
+    var(--text-soft);
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 8px;
+
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+.payment-cost-note svg {
+  flex: 0 0 auto;
+
+  margin-top: 1px;
+
+  color:
+    var(--brand-primary);
+}
+
+.payment-method-title {
+  margin:
+    20px 0
+    10px;
+
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.payment-method {
+  position: relative;
+}
+
+.payment-method small {
+  margin-top: 8px;
+
+  color:
+    var(--brand-primary);
+
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.payment-method-disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
+.payment-transfer-warning {
+  margin:
+    15px 0;
+
+  padding: 11px 12px;
+
+  border-radius: 12px;
+
+  background: #fff8e8;
+
+  color: #72571b;
+
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+/* ==========================================================
+   ADMIN — PAYMENT METHOD CONTROL
+   ========================================================== */
+
+.admin-payment-method-settings {
+  margin-bottom: 18px;
+
+  padding: 18px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 20px;
+
+  background: #fff;
+}
+
+.admin-payment-method-settings-heading {
+  margin-bottom: 16px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.admin-payment-method-settings-heading > div {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.admin-payment-method-settings-heading svg {
+  color:
+    var(--brand-primary);
+}
+
+.admin-payment-method-settings-heading span {
+  color:
+    var(--brand-primary);
+
+  font-size: 0.66rem;
+  font-weight: 800;
+
+  letter-spacing: 0.09em;
+}
+
+.admin-payment-method-settings-heading h2 {
+  margin:
+    3px 0 0;
+
+  font-size: 1rem;
+}
+
+.admin-payment-method-settings-heading p {
+  max-width: 430px;
+
+  margin: 0;
+
+  color:
+    var(--text-soft);
+
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.admin-payment-method-control-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 10px;
+}
+
+.admin-payment-method-control {
+  padding: 15px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 16px;
+
+  background:
+    var(--surface-soft);
+}
+
+.admin-payment-method-control.enabled {
+  border-color:
+    var(--brand-primary-border);
+
+  background:
+    var(--brand-primary-faint);
+}
+
+.admin-payment-method-control > div {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.admin-payment-method-control > div > svg {
+  color:
+    var(--brand-primary);
+}
+
+.admin-payment-method-control > div > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.admin-payment-method-control strong {
+  font-size: 0.85rem;
+}
+
+.admin-payment-method-control span {
+  color:
+    var(--text-muted);
+
+  font-size: 0.7rem;
+}
+
+.admin-payment-method-control p {
+  min-height: 36px;
+
+  margin:
+    12px 0;
+
+  color:
+    var(--text-soft);
+
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+.admin-payment-method-control button {
+  width: 100%;
+  min-height: 38px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 10px;
+
+  background: #fff;
+
+  color:
+    var(--text);
+
+  cursor: pointer;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.admin-payment-method-control.enabled button {
+  background:
+    #111015;
+
+  color: #fff;
+}
+
+/* ==========================================================
+   ADMIN — PAYMENT MONEY
+   ========================================================== */
+
+.admin-payment-money-grid {
+  margin:
+    14px 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 8px;
+}
+
+.admin-payment-money-grid > div {
+  padding: 13px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 13px;
+
+  background:
+    var(--surface-soft);
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.admin-payment-money-grid span {
+  color:
+    var(--text-muted);
+
+  font-size: 0.68rem;
+
+  text-transform: uppercase;
+}
+
+.admin-payment-money-grid strong {
+  font-family:
+    'Manrope',
+    sans-serif;
+
+  font-size: 0.88rem;
+}
+
+.admin-payment-money-grid > div:last-child {
+  background:
+    var(--brand-primary-faint);
+}
+
+.admin-payment-money-grid > div:last-child strong {
+  color:
+    var(--brand-primary);
+}
+
+.admin-payment-failure-code {
+  margin-top: 12px;
+
+  padding: 11px 12px;
+
+  border-radius: 11px;
+
+  background: #fff0f0;
+
+  color: #a53232;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 0.73rem;
+}
+
+/* ==========================================================
+   CUSTOMER PAYMENT HISTORY
+   ========================================================== */
+
+.customer-payment-money-grid {
+  margin-top: 14px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 7px;
+}
+
+.customer-payment-money-grid > div {
+  padding: 11px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 12px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.customer-payment-money-grid span {
+  color:
+    var(--text-muted);
+
+  font-size: 0.65rem;
+}
+
+.customer-payment-money-grid strong {
+  font-family:
+    'Manrope',
+    sans-serif;
+
+  font-size: 0.78rem;
+}
+
+.customer-payment-money-grid > div:last-child {
+  background:
+    var(--brand-primary-faint);
+}
+
+.customer-payment-money-grid > div:last-child strong {
+  color:
+    var(--brand-primary);
+}
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media (
+  max-width: 700px
+) {
+  .payment-cost-breakdown {
+    padding: 15px;
+
+    border-radius: 16px;
+  }
+
+  .payment-cost-total strong {
+    font-size: 1.15rem;
+  }
+
+  .admin-payment-method-settings {
+    padding: 14px;
+  }
+
+  .admin-payment-method-settings-heading {
+    flex-direction: column;
+
+    gap: 8px;
+  }
+
+  .admin-payment-method-control-grid,
+  .admin-payment-money-grid,
+  .customer-payment-money-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .admin-payment-method-control p {
+    min-height: auto;
+  }
+}

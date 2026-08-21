@@ -21,7 +21,8 @@ function safeEqual(
     return false;
   }
 
-  let difference = 0;
+  let difference =
+    0;
 
   for (
     let index = 0;
@@ -38,7 +39,8 @@ function safeEqual(
       );
   }
 
-  return difference === 0;
+  return difference ===
+    0;
 }
 
 async function createSignature(
@@ -49,8 +51,11 @@ async function createSignature(
     await crypto.subtle
       .importKey(
         'raw',
+
         new TextEncoder()
-          .encode(secret),
+          .encode(
+            secret,
+          ),
 
         {
           name:
@@ -71,17 +76,22 @@ async function createSignature(
     await crypto.subtle
       .sign(
         'HMAC',
+
         key,
+
         new TextEncoder()
-          .encode(body),
+          .encode(
+            body,
+          ),
       );
 
   return btoa(
-    String.fromCharCode(
-      ...new Uint8Array(
-        signature,
+    String
+      .fromCharCode(
+        ...new Uint8Array(
+          signature,
+        ),
       ),
-    ),
   );
 }
 
@@ -149,6 +159,10 @@ export default {
             expected,
           )
         ) {
+          console.warn(
+            'Rejected Flutterwave webhook with invalid signature.',
+          );
+
           return new Response(
             'Invalid signature',
             {
@@ -175,16 +189,22 @@ export default {
         }
 
         const chargeId =
-          payload?.data?.id;
+          payload
+            ?.data?.id;
 
         const reference =
-          payload?.data
+          payload
+            ?.data
             ?.reference;
 
         if (
           !chargeId ||
           !reference
         ) {
+          console.warn(
+            'Flutterwave webhook did not include a usable charge ID/reference.',
+          );
+
           return new Response(
             'OK',
             {
@@ -194,7 +214,8 @@ export default {
         }
 
         const {
-          data: payment,
+          data:
+            payment,
           error:
             paymentError,
         } =
@@ -209,7 +230,10 @@ export default {
               provider_reference,
               provider_transaction_id,
               virtual_account_id,
+              provider_customer_id,
+              payment_method,
               amount_kobo,
+              customer_bears_fee,
               currency,
               status
             `)
@@ -227,7 +251,7 @@ export default {
 
         if (!payment) {
           console.warn(
-            'Webhook reference not found:',
+            'Webhook payment reference was not found:',
             reference,
           );
 
@@ -246,10 +270,18 @@ export default {
             )}`,
           );
 
+        if (
+          !verified?.data
+        ) {
+          throw new Error(
+            'Flutterwave charge verification returned no transaction data.',
+          );
+        }
+
         await reconcilePayment(
           ctx.supabaseAdmin,
           payment,
-          verified?.data,
+          verified.data,
         );
 
         return new Response(
@@ -258,7 +290,9 @@ export default {
             status: 200,
           },
         );
-      } catch (error) {
+      } catch (
+        error
+      ) {
         console.error(
           'flutterwave-webhook:',
           error,

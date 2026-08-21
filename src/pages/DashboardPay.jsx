@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -9,6 +10,9 @@ import {
   Check,
   Copy,
   ExternalLink,
+  Info,
+  ReceiptText,
+  ShieldCheck,
   Smartphone,
 } from 'lucide-react';
 
@@ -26,17 +30,46 @@ import {
 
 import {
   createPaymentSession,
+  getPaymentFeeQuote,
   verifyPayment,
 } from '../lib/payments';
+
+function MethodIcon({
+  method,
+}) {
+  if (
+    method ===
+    'opay'
+  ) {
+    return (
+      <Smartphone
+        size={23}
+      />
+    );
+  }
+
+  return (
+    <Building2
+      size={23}
+    />
+  );
+}
 
 export default function DashboardPay() {
   const {
     reference,
-  } = useParams();
+  } =
+    useParams();
 
   const [
     order,
     setOrder,
+  ] =
+    useState(null);
+
+  const [
+    checkout,
+    setCheckout,
   ] =
     useState(null);
 
@@ -50,9 +83,7 @@ export default function DashboardPay() {
     method,
     setMethod,
   ] =
-    useState(
-      'bank_transfer',
-    );
+    useState('');
 
   const [
     payment,
@@ -88,28 +119,112 @@ export default function DashboardPay() {
     document.title =
       'Pay for Project | Posho Creative';
 
-    getOrderByReference(
-      reference,
-    )
-      .then(setOrder)
-      .catch(
-        console.error,
-      )
-      .finally(() =>
-        setLoading(false),
-      );
+    const load =
+      async () => {
+        try {
+          setLoading(
+            true,
+          );
+
+          setError('');
+
+          const loadedOrder =
+            await getOrderByReference(
+              reference,
+            );
+
+          setOrder(
+            loadedOrder,
+          );
+
+          if (
+            !loadedOrder
+          ) {
+            return;
+          }
+
+          const quote =
+            await getPaymentFeeQuote(
+              loadedOrder.id,
+            );
+
+          setCheckout(
+            quote,
+          );
+
+          const firstAvailable =
+            (
+              quote.methods ||
+              []
+            ).find(
+              (
+                item,
+              ) =>
+                item.available,
+            );
+
+          setMethod(
+            firstAvailable
+              ?.key ||
+              '',
+          );
+        } catch (
+          loadError
+        ) {
+          console.error(
+            loadError,
+          );
+
+          setError(
+            loadError.message ||
+              'Payment details could not be prepared.',
+          );
+        } finally {
+          setLoading(
+            false,
+          );
+        }
+      };
+
+    load();
   }, [
     reference,
   ]);
 
+  const selected =
+    useMemo(
+      () =>
+        checkout
+          ?.methods
+          ?.find(
+            (
+              item,
+            ) =>
+              item.key ===
+              method,
+          ) ||
+        null,
+      [
+        checkout,
+        method,
+      ],
+    );
+
   const startPayment =
     async () => {
-      if (!order) {
+      if (
+        !order ||
+        !selected ||
+        !selected.available
+      ) {
         return;
       }
 
       try {
-        setSubmitting(true);
+        setSubmitting(
+          true,
+        );
+
         setError('');
 
         const result =
@@ -117,12 +232,13 @@ export default function DashboardPay() {
             orderId:
               order.id,
 
-            method,
+            method:
+              selected.key,
           });
 
         if (
           result.method ===
-          'opay' &&
+            'opay' &&
           result.redirectUrl
         ) {
           window.location.assign(
@@ -150,12 +266,17 @@ export default function DashboardPay() {
 
   const checkPayment =
     async () => {
-      if (!payment?.id) {
+      if (
+        !payment?.id
+      ) {
         return;
       }
 
       try {
-        setChecking(true);
+        setChecking(
+          true,
+        );
+
         setError('');
 
         const result =
@@ -207,7 +328,9 @@ export default function DashboardPay() {
           number,
         );
 
-      setCopied(true);
+      setCopied(
+        true,
+      );
 
       window.setTimeout(
         () =>
@@ -234,20 +357,34 @@ export default function DashboardPay() {
     );
   }
 
-  const outstanding =
-    Math.max(
-      Number(
-        order
-          .quoted_amount_kobo ||
-          0,
-      ) -
-        Number(
-          order
-            .paid_amount_kobo ||
-            0,
-        ),
-      0,
-    );
+  const baseAmount =
+    payment
+      ?.baseAmountKobo ??
+    selected
+      ?.baseAmountKobo ??
+    checkout
+      ?.baseAmountKobo ??
+    0;
+
+  const feeAmount =
+    payment
+      ?.processingFeeKobo ??
+    selected
+      ?.processingFeeKobo ??
+    0;
+
+  const estimatedTotal =
+    payment
+      ?.estimatedCustomerTotalKobo ??
+    selected
+      ?.customerTotalKobo ??
+    baseAmount +
+      feeAmount;
+
+  const exactTransferAmount =
+    payment
+      ?.account
+      ?.amountKobo;
 
   return (
     <div className="commerce-page page-reveal">
@@ -278,75 +415,156 @@ export default function DashboardPay() {
             {order.project_title}
           </p>
 
-          <div className="payment-amount">
-            <span>
-              Amount due
-            </span>
+          <div className="payment-cost-breakdown">
+            <div className="payment-cost-heading">
+              <div>
+                <ReceiptText
+                  size={19}
+                />
 
-            <strong>
-              {formatMoney(
-                outstanding,
-              )}
-            </strong>
+                <strong>
+                  Payment summary
+                </strong>
+              </div>
+
+              <span>
+                NGN
+              </span>
+            </div>
+
+            <div className="payment-cost-row">
+              <span>
+                Project amount
+              </span>
+
+              <strong>
+                {formatMoney(
+                  baseAmount,
+                )}
+              </strong>
+            </div>
+
+            <div className="payment-cost-row">
+              <span>
+                Processing fee
+              </span>
+
+              <strong>
+                {selected
+                  ?.feeAvailable ===
+                false
+                  ? 'Unavailable'
+                  : formatMoney(
+                      feeAmount,
+                    )}
+              </strong>
+            </div>
+
+            <div className="payment-cost-total">
+              <span>
+                Estimated total
+              </span>
+
+              <strong>
+                {formatMoney(
+                  estimatedTotal,
+                )}
+              </strong>
+            </div>
+
+            <div className="payment-cost-note">
+              <Info
+                size={15}
+              />
+
+              <span>
+                Processing fees are calculated securely using the current payment-provider rate. The final payable amount is confirmed when payment details are created.
+              </span>
+            </div>
           </div>
 
           {!payment && (
             <>
-              <div className="payment-method-grid">
-                <button
-                  type="button"
-                  className={
-                    method ===
-                    'bank_transfer'
-                      ? 'payment-method selected'
-                      : 'payment-method'
-                  }
-                  onClick={() =>
-                    setMethod(
-                      'bank_transfer',
-                    )
-                  }
-                >
-                  <Building2
-                    size={23}
-                  />
-
-                  <strong>
-                    Bank transfer
-                  </strong>
-
-                  <span>
-                    Receive a secure Flutterwave account for this payment.
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  className={
-                    method ===
-                    'opay'
-                      ? 'payment-method selected'
-                      : 'payment-method'
-                  }
-                  onClick={() =>
-                    setMethod(
-                      'opay',
-                    )
-                  }
-                >
-                  <Smartphone
-                    size={23}
-                  />
-
-                  <strong>
-                    OPay
-                  </strong>
-
-                  <span>
-                    Continue to Flutterwave and authorise with OPay.
-                  </span>
-                </button>
+              <div className="payment-method-title">
+                Choose payment method
               </div>
+
+              <div className="payment-method-grid">
+                {checkout
+                  ?.methods
+                  ?.map(
+                    (
+                      item,
+                    ) => (
+                      <button
+                        type="button"
+                        key={
+                          item.key
+                        }
+                        className={[
+                          'payment-method',
+                          method ===
+                          item.key
+                            ? 'selected'
+                            : '',
+                          !item.available
+                            ? 'payment-method-disabled'
+                            : '',
+                        ]
+                          .filter(
+                            Boolean,
+                          )
+                          .join(
+                            ' ',
+                          )}
+                        onClick={() =>
+                          item.available &&
+                          setMethod(
+                            item.key,
+                          )
+                        }
+                        disabled={
+                          !item.available
+                        }
+                      >
+                        <MethodIcon
+                          method={
+                            item.key
+                          }
+                        />
+
+                        <strong>
+                          {item.name}
+                        </strong>
+
+                        <span>
+                          {item.available
+                            ? item.description
+                            : item.message ||
+                              'Temporarily unavailable'}
+                        </span>
+
+                        {item.available && (
+                          <small>
+                            Total:{' '}
+                            {formatMoney(
+                              item.customerTotalKobo,
+                            )}
+                          </small>
+                        )}
+                      </button>
+                    ),
+                  )}
+              </div>
+
+              {checkout
+                ?.methods
+                ?.length ===
+                0 && (
+                <div className="workspace-alert">
+                  No payment method is currently available. Please contact Posho Creative.
+                </div>
+              )}
 
               <button
                 type="button"
@@ -355,18 +573,24 @@ export default function DashboardPay() {
                   startPayment
                 }
                 disabled={
-                  submitting
+                  submitting ||
+                  !selected ||
+                  !selected
+                    .available
                 }
               >
                 {submitting
-                  ? 'Creating secure payment...'
-                  : 'Continue securely'}
+                  ? 'Preparing payment...'
+                  : selected
+                    ? `Continue with ${selected.name}`
+                    : 'Choose payment method'}
 
-                {!submitting && (
-                  <ExternalLink
-                    size={17}
-                  />
-                )}
+                {!submitting &&
+                  selected && (
+                    <ExternalLink
+                      size={17}
+                    />
+                  )}
               </button>
             </>
           )}
@@ -380,7 +604,7 @@ export default function DashboardPay() {
                   size={18}
                 />
 
-                Transfer the exact amount below
+                Bank transfer ready
               </div>
 
               <div className="bank-account-detail">
@@ -430,20 +654,20 @@ export default function DashboardPay() {
 
               <div className="bank-account-detail">
                 <span>
-                  Amount
+                  Exact transfer amount
                 </span>
 
                 <strong>
                   {formatMoney(
-                    payment
-                      .amountKobo,
+                    exactTransferAmount ??
+                      estimatedTotal,
                   )}
                 </strong>
               </div>
 
-              <p>
-                Transfer exactly the displayed amount. Flutterwave will notify Posho Creative after the payment is received.
-              </p>
+              <div className="payment-transfer-warning">
+                Transfer the exact amount shown above. Do not round the figure or send a different amount.
+              </div>
 
               <button
                 type="button"
@@ -470,16 +694,20 @@ export default function DashboardPay() {
         </section>
 
         <aside className="payment-security-card">
+          <ShieldCheck
+            size={24}
+          />
+
           <span>
-            PAYMENT SECURITY
+            PAYMENT PROTECTION
           </span>
 
           <h3>
-            Payment verification happens on our server.
+            Payments are confirmed before your project status changes.
           </h3>
 
           <p>
-            Posho Creative does not mark a project as paid from a browser response alone. Flutterwave must confirm the transaction before access or project status is updated.
+            A payment is recorded as successful only after the transaction details have been independently confirmed.
           </p>
         </aside>
       </div>

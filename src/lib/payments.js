@@ -49,6 +49,49 @@ async function getFunctionError(
   );
 }
 
+export async function getPaymentFeeQuote(
+  orderId,
+) {
+  if (!orderId) {
+    throw new Error(
+      'A valid project is required before payment can be prepared.',
+    );
+  }
+
+  const {
+    data,
+    error,
+  } =
+    await supabase.functions
+      .invoke(
+        'payment-fee-quote',
+        {
+          body: {
+            orderId,
+          },
+        },
+      );
+
+  if (error) {
+    throw await getFunctionError(
+      error,
+      'Payment pricing could not be prepared.',
+    );
+  }
+
+  if (
+    !data?.success ||
+    !data?.checkout
+  ) {
+    throw new Error(
+      data?.message ||
+        'Payment pricing could not be prepared.',
+    );
+  }
+
+  return data.checkout;
+}
+
 export async function createPaymentSession({
   orderId,
   method,
@@ -59,14 +102,9 @@ export async function createPaymentSession({
     );
   }
 
-  if (
-    ![
-      'bank_transfer',
-      'opay',
-    ].includes(method)
-  ) {
+  if (!method) {
     throw new Error(
-      'Choose a valid payment method.',
+      'Choose a payment method.',
     );
   }
 
@@ -159,6 +197,11 @@ export async function getMyPaymentAttempts() {
         provider_reference,
         payment_method,
         amount_kobo,
+        base_amount_kobo,
+        estimated_fee_kobo,
+        estimated_customer_total_kobo,
+        actual_provider_fee_kobo,
+        actual_customer_total_kobo,
         currency,
         status,
         provider_status,
@@ -210,6 +253,12 @@ export async function getPaymentById(
         provider_transaction_id,
         payment_method,
         amount_kobo,
+        base_amount_kobo,
+        estimated_fee_kobo,
+        estimated_customer_total_kobo,
+        actual_provider_fee_kobo,
+        actual_customer_total_kobo,
+        provider_fees,
         currency,
         status,
         provider_status,

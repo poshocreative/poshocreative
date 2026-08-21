@@ -4,13 +4,24 @@ import {
 
 import {
   flutterwaveRequest,
+  getPaymentGatewayDiagnostic,
 } from '../_shared/flutterwave.ts';
+
+import {
+  getPaymentFeeQuote,
+} from '../_shared/payment-fees.ts';
 
 function generatePaymentReference() {
   return `PCPAY-${crypto
     .randomUUID()
-    .replaceAll('-', '')
-    .slice(0, 20)
+    .replaceAll(
+      '-',
+      '',
+    )
+    .slice(
+      0,
+      20,
+    )
     .toUpperCase()}`;
 }
 
@@ -102,6 +113,56 @@ function processorCode(
   );
 }
 
+function providerFees(
+  data: any,
+) {
+  if (
+    !Array.isArray(
+      data?.fees,
+    )
+  ) {
+    return [];
+  }
+
+  return data.fees.map(
+    (
+      fee: any,
+    ) => ({
+      type:
+        fee?.type ||
+        'provider_fee',
+
+      amount:
+        Number(
+          fee?.amount ||
+            0,
+        ),
+    }),
+  );
+}
+
+function providerFeeKobo(
+  data: any,
+) {
+  return providerFees(
+    data,
+  ).reduce(
+    (
+      total,
+      fee,
+    ) =>
+      total +
+      Math.round(
+        Number(
+          fee.amount ||
+            0,
+        ) *
+          100,
+      ),
+    0,
+  );
+}
+
 function safeChargeSummary(
   data: any,
 ) {
@@ -144,6 +205,11 @@ function safeChargeSummary(
 
     processor_code:
       processorCode(
+        data,
+      ),
+
+    fees:
+      providerFees(
         data,
       ),
   };
@@ -212,14 +278,6 @@ async function ensureFlutterwaveCustomer(
   admin: any,
   customer: any,
 ) {
-  /*
-   * Search the currently authenticated
-   * Flutterwave account first.
-   *
-   * This is safer than blindly trusting a
-   * previously stored provider customer ID,
-   * especially after API credential rotation.
-   */
   const search =
     await flutterwaveRequest(
       '/customers/search?page=1&size=10',
@@ -413,12 +471,7 @@ export default {
 
         if (
           !orderId ||
-          ![
-            'bank_transfer',
-            'opay',
-          ].includes(
-            requestedMethod,
-          )
+          !requestedMethod
         ) {
           return Response.json(
             {
@@ -429,6 +482,54 @@ export default {
             },
             {
               status: 400,
+            },
+          );
+        }
+
+        const {
+          data:
+            methodSetting,
+          error:
+            methodError,
+        } =
+          await ctx
+            .supabaseAdmin
+            .from(
+              'payment_method_settings',
+            )
+            .select(`
+              method_key,
+              display_name,
+              description,
+              enabled,
+              currency
+            `)
+            .eq(
+              'method_key',
+              requestedMethod,
+            )
+            .maybeSingle();
+
+        if (
+          methodError
+        ) {
+          throw methodError;
+        }
+
+        if (
+          !methodSetting ||
+          !methodSetting
+            .enabled
+        ) {
+          return Response.json(
+            {
+              success: false,
+
+              message:
+                'This payment option is temporarily unavailable. Please choose another method.',
+            },
+            {
+              status: 409,
             },
           );
         }
@@ -524,17 +625,16 @@ export default {
           ).toUpperCase();
 
         if (
-          requestedMethod ===
-            'opay' &&
-          currency !==
-            'NGN'
+          methodSetting
+            .currency !==
+          currency
         ) {
           return Response.json(
             {
               success: false,
 
               message:
-                'OPay is currently available for Naira payments only.',
+                'This payment method is not available for the project currency.',
             },
             {
               status: 409,
@@ -582,6 +682,17 @@ export default {
           );
         }
 
+        const feeQuote =
+          await getPaymentFeeQuote({
+            method:
+              requestedMethod,
+
+            amountKobo:
+              outstanding,
+
+            currency,
+          });
+
         const {
           data:
             customer,
@@ -624,6 +735,10 @@ export default {
         const idempotencyKey =
           crypto.randomUUID();
 
+        const now =
+          new Date()
+            .toISOString();
+
         const {
           data:
             createdPayment,
@@ -648,6 +763,23 @@ export default {
               amount_kobo:
                 outstanding,
 
+              base_amount_kobo:
+                outstanding,
+
+              estimated_fee_kobo:
+                feeQuote
+                  .feeKobo,
+
+              estimated_customer_total_kobo:
+                feeQuote
+                  .totalKobo,
+
+              fee_quoted_at:
+                now,
+
+              customer_bears_fee:
+                true,
+
               currency,
 
               status:
@@ -671,6 +803,22 @@ export default {
               payment_metadata: {
                 order_reference:
                   order.reference,
+
+                fee_quote: {
+                  base_amount_kobo:
+                    outstanding,
+
+                  processing_fee_kobo:
+                    feeQuote
+                      .feeKobo,
+
+                  customer_total_kobo:
+                    feeQuote
+                      .totalKobo,
+
+                  quoted_at:
+                    now,
+                },
               },
 
               provider_payload:
@@ -707,7 +855,7 @@ export default {
               'initializing',
 
             internalMessage:
-              `Payment attempt created for ${order.reference}.`,
+              `Payment attempt created for ${order.reference}. Provider fee quote: ${feeQuote.feeKobo} kobo.`,
           },
         );
 
@@ -758,12 +906,6 @@ export default {
               100
             ).toFixed(2),
           );
-
-        /*
-         * =====================================================
-         * BANK TRANSFER
-         * =====================================================
-         */
 
         if (
           requestedMethod ===
@@ -830,6 +972,20 @@ export default {
             );
           }
 
+          const providerTransferAmountKobo =
+            Number.isFinite(
+              Number(
+                details.amount,
+              ),
+            )
+              ? Math.round(
+                  Number(
+                    details.amount,
+                  ) *
+                    100,
+                )
+              : null;
+
           await ctx
             .supabaseAdmin
             .from(
@@ -857,7 +1013,7 @@ export default {
                 'awaiting_transfer',
 
               customer_message:
-                'Transfer the exact amount to the account shown. Confirmation may take a few moments.',
+                'Transfer the exact amount displayed to the temporary account. Confirmation may take a few moments.',
 
               provider_payload: {
                 id:
@@ -884,6 +1040,19 @@ export default {
                 order_reference:
                   order.reference,
 
+                fee_quote: {
+                  base_amount_kobo:
+                    outstanding,
+
+                  processing_fee_kobo:
+                    feeQuote
+                      .feeKobo,
+
+                  customer_total_kobo:
+                    feeQuote
+                      .totalKobo,
+                },
+
                 virtual_account: {
                   account_number:
                     details
@@ -892,6 +1061,9 @@ export default {
                   bank_name:
                     details
                       .account_bank_name,
+
+                  provider_transfer_amount_kobo:
+                    providerTransferAmountKobo,
 
                   note:
                     details.note,
@@ -925,8 +1097,17 @@ export default {
               internalMessage:
                 'Dynamic virtual account created successfully.',
 
-              payload:
-                account,
+              payload: {
+                virtual_account_id:
+                  details.id,
+
+                provider_transfer_amount_kobo:
+                  providerTransferAmountKobo,
+
+                estimated_fee_kobo:
+                  feeQuote
+                    .feeKobo,
+              },
             },
           );
 
@@ -943,8 +1124,16 @@ export default {
               reference:
                 providerReference,
 
-              amountKobo:
+              baseAmountKobo:
                 outstanding,
+
+              processingFeeKobo:
+                feeQuote
+                  .feeKobo,
+
+              estimatedCustomerTotalKobo:
+                feeQuote
+                  .totalKobo,
 
               currency,
 
@@ -960,6 +1149,9 @@ export default {
                 note:
                   details.note,
 
+                amountKobo:
+                  providerTransferAmountKobo,
+
                 expiresAt:
                   details
                     .account_expiration_datetime,
@@ -968,16 +1160,14 @@ export default {
           });
         }
 
-        /*
-         * =====================================================
-         * OPAY — DEDICATED FLUTTERWAVE V4 GENERAL FLOW
-         *
-         * 1. Customer already prepared
-         * 2. Create OPay payment method
-         * 3. Create charge
-         * 4. Redirect customer to OPay
-         * =====================================================
-         */
+        if (
+          requestedMethod !==
+          'opay'
+        ) {
+          throw new Error(
+            'Unsupported payment method.',
+          );
+        }
 
         const paymentMethod =
           await flutterwaveRequest(
@@ -1042,9 +1232,6 @@ export default {
 
             internalMessage:
               'Flutterwave OPay payment method created.',
-
-            payload:
-              paymentMethod,
           },
         );
 
@@ -1129,6 +1316,11 @@ export default {
             chargeData,
           );
 
+        const actualFee =
+          providerFeeKobo(
+            chargeData,
+          );
+
         await ctx
           .supabaseAdmin
           .from(
@@ -1154,27 +1346,25 @@ export default {
             attempt_stage:
               'awaiting_authorization',
 
+            actual_provider_fee_kobo:
+              actualFee,
+
+            actual_customer_total_kobo:
+              outstanding +
+              actualFee,
+
+            provider_fees:
+              providerFees(
+                chargeData,
+              ),
+
             customer_message:
-              'Continue to OPay to log in and authorise this payment.',
+              'Continue to OPay to authorise this payment.',
 
             provider_payload:
               safeChargeSummary(
                 chargeData,
               ),
-
-            payment_metadata: {
-              order_reference:
-                order.reference,
-
-              payment_method_id:
-                paymentMethodId,
-
-              next_action_type:
-                chargeData
-                  ?.next_action
-                  ?.type ||
-                null,
-            },
           })
           .eq(
             'id',
@@ -1204,7 +1394,9 @@ export default {
               'OPay charge created and redirect returned.',
 
             payload:
-              charge,
+              safeChargeSummary(
+                chargeData,
+              ),
           },
         );
 
@@ -1221,8 +1413,20 @@ export default {
             reference:
               providerReference,
 
-            amountKobo:
+            baseAmountKobo:
               outstanding,
+
+            processingFeeKobo:
+              actualFee ||
+              feeQuote
+                .feeKobo,
+
+            estimatedCustomerTotalKobo:
+              actualFee
+                ? outstanding +
+                  actualFee
+                : feeQuote
+                    .totalKobo,
 
             currency,
 
@@ -1232,14 +1436,27 @@ export default {
       } catch (
         error
       ) {
+        const providerDiagnostic =
+          getPaymentGatewayDiagnostic(
+            error,
+          );
+
         const internalMessage =
-          error instanceof Error
-            ? error.message
-            : 'Unknown payment initialization error.';
+          providerDiagnostic
+            .technicalMessage;
 
         console.error(
           'create-payment-session:',
-          error,
+          {
+            method:
+              requestedMethod,
+
+            code:
+              providerDiagnostic
+                .code,
+
+            internalMessage,
+          },
         );
 
         if (
@@ -1248,7 +1465,7 @@ export default {
           const customerMessage =
             requestedMethod ===
             'opay'
-              ? 'OPay could not start this payment. No charge was confirmed. Please try again or use bank transfer.'
+              ? 'OPay could not start this payment. No charge was confirmed. Please choose another available payment option.'
               : 'Bank transfer could not be prepared. No charge was confirmed. Please try again shortly.';
 
           await ctx
@@ -1264,7 +1481,8 @@ export default {
                 'failed',
 
               failure_code:
-                'PAYMENT_INITIALIZATION_FAILED',
+                providerDiagnostic
+                  .code,
 
               customer_message:
                 customerMessage,
@@ -1293,6 +1511,10 @@ export default {
 
               stage:
                 'failed',
+
+              providerCode:
+                providerDiagnostic
+                  .code,
 
               internalMessage,
 

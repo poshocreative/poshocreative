@@ -54,6 +54,12 @@ export async function getAdminPaymentAttempts(
         payment_method,
         payment_method_id,
         amount_kobo,
+        base_amount_kobo,
+        estimated_fee_kobo,
+        estimated_customer_total_kobo,
+        actual_provider_fee_kobo,
+        actual_customer_total_kobo,
+        provider_fees,
         currency,
         status,
         provider_status,
@@ -143,6 +149,78 @@ export async function getAdminPaymentAttempts(
         ),
     }),
   );
+}
+
+export async function getPaymentMethodSettings() {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'payment_method_settings',
+      )
+      .select(`
+        method_key,
+        display_name,
+        description,
+        enabled,
+        currency,
+        sort_order,
+        updated_at
+      `)
+      .order(
+        'sort_order',
+        {
+          ascending:
+            true,
+        },
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function updatePaymentMethodEnabled({
+  methodKey,
+  enabled,
+}) {
+  const {
+    data: {
+      user,
+    },
+  } =
+    await supabase.auth
+      .getUser();
+
+  const {
+    error,
+  } =
+    await supabase
+      .from(
+        'payment_method_settings',
+      )
+      .update({
+        enabled:
+          Boolean(
+            enabled,
+          ),
+
+        updated_by:
+          user?.id ||
+          null,
+      })
+      .eq(
+        'method_key',
+        methodKey,
+      );
+
+  if (error) {
+    throw error;
+  }
 }
 
 export async function recheckAdminPayment(

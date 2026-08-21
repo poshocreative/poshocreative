@@ -26,6 +26,7 @@ import './styles/company-pages.css';
 import './styles/platform-v2.css';
 import './styles/admin-mobile-pro.css';
 import './styles/payment-operations.css';
+import './styles/payment-checkout-v2.css';
 
 const root =
   document.getElementById(

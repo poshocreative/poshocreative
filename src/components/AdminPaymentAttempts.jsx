@@ -68,6 +68,44 @@ function methodName(
   );
 }
 
+function paymentAmounts(
+  payment,
+) {
+  const base =
+    Number(
+      payment
+        .base_amount_kobo ??
+        payment
+          .amount_kobo ??
+        0,
+    );
+
+  const fee =
+    Number(
+      payment
+        .actual_provider_fee_kobo ??
+        payment
+          .estimated_fee_kobo ??
+        0,
+    );
+
+  const total =
+    Number(
+      payment
+        .actual_customer_total_kobo ??
+        payment
+          .estimated_customer_total_kobo ??
+        base +
+          fee,
+    );
+
+  return {
+    base,
+    fee,
+    total,
+  };
+}
+
 function statusIcon(
   status,
 ) {
@@ -246,7 +284,7 @@ export default function AdminPaymentAttempts({
           </h2>
 
           <p>
-            Every payment initiation, provider state and verification attempt for this project.
+            Every payment initiation, fee quotation, provider state and verification attempt associated with this project.
           </p>
         </div>
 
@@ -298,6 +336,11 @@ export default function AdminPaymentAttempts({
                 payment
                   .payment_attempt_diagnostics
                   ?.[0];
+
+              const amounts =
+                paymentAmounts(
+                  payment,
+                );
 
               const canRecheck =
                 payment.status !==
@@ -356,17 +399,45 @@ export default function AdminPaymentAttempts({
                     </span>
                   </div>
 
-                  <div className="admin-payment-amount">
-                    <span>
-                      Amount
-                    </span>
+                  <div className="admin-payment-money-grid">
+                    <div>
+                      <span>
+                        Project amount
+                      </span>
 
-                    <strong>
-                      {formatMoney(
-                        payment.amount_kobo,
-                        payment.currency,
-                      )}
-                    </strong>
+                      <strong>
+                        {formatMoney(
+                          amounts.base,
+                          payment.currency,
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        Processing fee
+                      </span>
+
+                      <strong>
+                        {formatMoney(
+                          amounts.fee,
+                          payment.currency,
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        Customer total
+                      </span>
+
+                      <strong>
+                        {formatMoney(
+                          amounts.total,
+                          payment.currency,
+                        )}
+                      </strong>
+                    </div>
                   </div>
 
                   <div className="admin-payment-detail-grid">
@@ -465,6 +536,18 @@ export default function AdminPaymentAttempts({
                     </div>
                   </div>
 
+                  {payment.failure_code && (
+                    <div className="admin-payment-failure-code">
+                      <AlertTriangle
+                        size={16}
+                      />
+
+                      <strong>
+                        {payment.failure_code}
+                      </strong>
+                    </div>
+                  )}
+
                   {payment.customer_message && (
                     <div className="admin-payment-customer-message">
                       <span>
@@ -479,13 +562,19 @@ export default function AdminPaymentAttempts({
 
                   {latestDiagnostic?.internal_message && (
                     <div className="admin-payment-internal-message">
-                      <span>
-                        LATEST INTERNAL EVENT
-                      </span>
+                      <AlertTriangle
+                        size={16}
+                      />
 
-                      <p>
-                        {latestDiagnostic.internal_message}
-                      </p>
+                      <div>
+                        <span>
+                          LATEST INTERNAL EVENT
+                        </span>
+
+                        <p>
+                          {latestDiagnostic.internal_message}
+                        </p>
+                      </div>
                     </div>
                   )}
 
@@ -510,7 +599,7 @@ export default function AdminPaymentAttempts({
                         {busyId ===
                         payment.id
                           ? 'Checking...'
-                          : 'Recheck Flutterwave'}
+                          : 'Recheck transaction'}
                       </button>
                     )}
 
@@ -520,7 +609,7 @@ export default function AdminPaymentAttempts({
                       0 && (
                       <details className="admin-payment-events">
                         <summary>
-                          View event trail
+                          View full event trail
                         </summary>
 
                         <div>
@@ -546,6 +635,13 @@ export default function AdminPaymentAttempts({
                                       event.event_type,
                                     )}
                                   </strong>
+
+                                  {event.provider_code && (
+                                    <small>
+                                      Code:{' '}
+                                      {event.provider_code}
+                                    </small>
+                                  )}
 
                                   {event.internal_message && (
                                     <p>
