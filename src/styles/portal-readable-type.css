@@ -1,0 +1,826 @@
+/* ==========================================================
+   POSHO CREATIVE
+   PORTAL READABILITY SYSTEM V3
+
+   PURPOSE
+   - Remove micro-text from operational cards
+   - Keep dashboard compact and premium
+   - Improve desktop and mobile readability
+   - Fix page-heading clearance below sticky portal header
+
+   IMPORTANT:
+   THIS FILE MUST REMAIN THE LAST CSS IMPORT IN main.jsx
+   ========================================================== */
+
+
+/* ==========================================================
+   1. PORTAL PAGE CLEARANCE
+   ========================================================== */
+
+.client-pro-content {
+  padding-top: 34px !important;
+}
+
+.admin-pro-content {
+  padding-top: 34px !important;
+}
+
+.workspace-view-heading-v3,
+.project-directory-heading {
+  margin-top: 0 !important;
+  padding-top: 4px;
+  transform: none !important;
+}
+
+
+/* ==========================================================
+   2. PORTAL BASE TYPOGRAPHY
+   ========================================================== */
+
+.client-pro-content,
+.admin-pro-content,
+.workspace-view,
+.admin-view {
+  font-size: 16px;
+}
+
+.client-pro-content p,
+.admin-pro-content p,
+.workspace-view p,
+.admin-view p {
+  font-size: 0.9rem !important;
+  line-height: 1.62 !important;
+}
+
+
+/* ==========================================================
+   3. PAGE HEADINGS
+   ========================================================== */
+
+.workspace-view-heading-v3 h2,
+.project-directory-heading h2 {
+  margin-top: 5px !important;
+
+  font-size:
+    clamp(
+      2rem,
+      3vw,
+      2.8rem
+    ) !important;
+
+  line-height: 1.04 !important;
+
+  letter-spacing:
+    -0.045em;
+}
+
+.workspace-view-heading-v3 > div > p,
+.project-directory-heading > div > p {
+  margin-top: 9px !important;
+
+  font-size: 0.98rem !important;
+  line-height: 1.55 !important;
+}
+
+.workspace-kicker {
+  font-size: 0.7rem !important;
+  font-weight: 850 !important;
+
+  letter-spacing:
+    0.1em !important;
+}
+
+
+/* ==========================================================
+   4. PROJECT PAGE TOP METRIC CARDS
+   ========================================================== */
+
+.project-directory-metrics article {
+  min-height: 124px !important;
+
+  padding: 17px !important;
+
+  align-items: start;
+}
+
+.project-directory-metrics article > div {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.project-directory-metrics article > span {
+  font-size: 0.78rem !important;
+  line-height: 1.3 !important;
+}
+
+.project-directory-metrics article > strong {
+  font-size: 1.85rem !important;
+}
+
+
+/* ==========================================================
+   5. SEARCH / SORT
+   ========================================================== */
+
+.project-directory-search input {
+  font-size: 0.9rem !important;
+}
+
+.project-directory-sort select {
+  font-size: 0.82rem !important;
+}
+
+
+/* ==========================================================
+   6. PROJECT FILTER PILLS
+   ========================================================== */
+
+.project-directory-filters button {
+  min-height: 38px !important;
+
+  padding:
+    0 13px !important;
+
+  font-size: 0.78rem !important;
+}
+
+
+/* ==========================================================
+   7. PROJECT CARD HEADER
+   ========================================================== */
+
+.project-directory-card {
+  padding: 21px !important;
+}
+
+.project-directory-card-identity small {
+  margin-bottom: 5px !important;
+
+  font-size: 0.68rem !important;
+  line-height: 1.3 !important;
+}
+
+.project-directory-card-identity h3 {
+  font-size: 1.32rem !important;
+  line-height: 1.15 !important;
+}
+
+.project-directory-card-identity p {
+  margin-top: 6px !important;
+
+  font-size: 0.9rem !important;
+  line-height: 1.4 !important;
+}
+
+
+/* ==========================================================
+   8. PROJECT STATE PILLS
+   ========================================================== */
+
+.project-directory-state {
+  min-height: 32px !important;
+
+  padding:
+    0 10px !important;
+
+  font-size: 0.7rem !important;
+}
+
+
+/* ==========================================================
+   9. PROJECT PROGRESS CARD
+   ========================================================== */
+
+.project-directory-progress {
+  padding: 16px !important;
+}
+
+.project-directory-progress-heading span {
+  font-size: 0.65rem !important;
+  line-height: 1.3 !important;
+}
+
+.project-directory-progress-heading > div strong {
+  font-size: 0.82rem !important;
+}
+
+.project-directory-progress-heading > strong {
+  font-size: 1.25rem !important;
+}
+
+.project-directory-progress > p {
+  margin-top: 11px !important;
+
+  font-size: 0.88rem !important;
+  line-height: 1.55 !important;
+}
+
+.project-directory-progress-track {
+  height: 9px !important;
+}
+
+
+/* ==========================================================
+   10. CUSTOMER ATTENTION CARD
+   ========================================================== */
+
+.project-directory-action {
+  padding:
+    13px 14px !important;
+}
+
+.project-directory-action span {
+  font-size: 0.64rem !important;
+}
+
+.project-directory-action strong {
+  margin-top: 2px;
+
+  font-size: 0.8rem !important;
+  line-height: 1.4 !important;
+}
+
+
+/* ==========================================================
+   11. DECLINE / PROJECT DECISION CARD
+   ========================================================== */
+
+.project-directory-decline {
+  padding: 15px !important;
+}
+
+.project-directory-decline span {
+  font-size: 0.65rem !important;
+}
+
+.project-directory-decline p {
+  margin-top: 7px !important;
+
+  font-size: 0.88rem !important;
+  line-height: 1.55 !important;
+}
+
+
+/* ==========================================================
+   12. FINANCIAL MINI CARDS
+   ========================================================== */
+
+.project-directory-finance {
+  gap: 9px !important;
+}
+
+.project-directory-finance > div {
+  min-height: 68px;
+
+  padding:
+    13px !important;
+
+  justify-content: center;
+}
+
+.project-directory-finance span {
+  font-size: 0.7rem !important;
+  line-height: 1.25 !important;
+}
+
+.project-directory-finance strong {
+  margin-top: 2px;
+
+  font-size: 0.88rem !important;
+  line-height: 1.3 !important;
+}
+
+
+/* ==========================================================
+   13. DEADLINE / PAYMENT / SUBMITTED ROW
+   ========================================================== */
+
+.project-directory-meta {
+  margin-top: 15px !important;
+
+  gap: 10px !important;
+}
+
+.project-directory-meta > div {
+  min-height: 48px;
+
+  gap: 9px !important;
+}
+
+.project-directory-meta svg {
+  width: 17px;
+  height: 17px;
+}
+
+.project-directory-meta span {
+  font-size: 0.7rem !important;
+  line-height: 1.25 !important;
+}
+
+.project-directory-meta strong {
+  margin-top: 1px;
+
+  font-size: 0.8rem !important;
+  line-height: 1.35 !important;
+}
+
+.project-directory-payment {
+  min-height: 24px;
+
+  padding:
+    4px 8px !important;
+
+  font-size: 0.68rem !important;
+
+  display: inline-flex;
+  align-items: center;
+}
+
+
+/* ==========================================================
+   14. PROJECT CARD FOOTER
+   ========================================================== */
+
+.project-directory-card-footer {
+  margin-top: 15px !important;
+
+  padding-top: 14px !important;
+}
+
+.project-directory-card-footer > span {
+  font-size: 0.7rem !important;
+  line-height: 1.35 !important;
+}
+
+.project-directory-card-footer > a {
+  min-height: 40px;
+
+  padding:
+    0 12px;
+
+  font-size: 0.78rem !important;
+}
+
+
+/* ==========================================================
+   15. NEW PROJECT BUTTON
+   ========================================================== */
+
+.project-directory-new {
+  min-height: 46px !important;
+
+  padding:
+    0 16px !important;
+
+  font-size: 0.82rem !important;
+}
+
+
+/* ==========================================================
+   16. CLIENT NAVIGATION
+   ========================================================== */
+
+.client-pro-navigation a > strong {
+  font-size: 0.82rem !important;
+}
+
+.client-pro-account span {
+  font-size: 0.66rem !important;
+}
+
+.client-pro-account strong {
+  font-size: 0.84rem !important;
+}
+
+.client-pro-nav-label {
+  font-size: 0.67rem !important;
+}
+
+.client-pro-security strong {
+  font-size: 0.78rem !important;
+}
+
+.client-pro-security span {
+  font-size: 0.67rem !important;
+}
+
+.client-pro-signout {
+  font-size: 0.76rem !important;
+}
+
+
+/* ==========================================================
+   17. PAYMENT CARDS
+   ========================================================== */
+
+.workspace-payment-metric > span {
+  font-size: 0.76rem !important;
+}
+
+.workspace-payment-metric > strong {
+  font-size: 1.4rem !important;
+}
+
+.workspace-payment-metric > small {
+  font-size: 0.7rem !important;
+}
+
+.workspace-payment-project small {
+  font-size: 0.67rem !important;
+}
+
+.workspace-payment-project h3 {
+  font-size: 1.08rem !important;
+}
+
+.workspace-payment-project span {
+  font-size: 0.76rem !important;
+}
+
+.workspace-payment-state {
+  font-size: 0.7rem !important;
+}
+
+.workspace-payment-total-panel span {
+  font-size: 0.7rem !important;
+}
+
+.workspace-payment-total-panel strong {
+  font-size: 1rem !important;
+}
+
+.workspace-payment-details-grid span {
+  font-size: 0.69rem !important;
+}
+
+.workspace-payment-details-grid strong {
+  font-size: 0.8rem !important;
+}
+
+.workspace-payment-reference-bar span {
+  font-size: 0.64rem !important;
+}
+
+.workspace-payment-reference-bar strong {
+  font-size: 0.76rem !important;
+}
+
+
+/* ==========================================================
+   18. FILE LIBRARY CARDS
+   ========================================================== */
+
+.workspace-file-metric > span {
+  font-size: 0.76rem !important;
+}
+
+.workspace-file-metric > strong {
+  font-size: 1.35rem !important;
+}
+
+.workspace-file-title-row > strong {
+  font-size: 0.86rem !important;
+}
+
+.workspace-file-role {
+  font-size: 0.64rem !important;
+}
+
+.workspace-file-meta-v3 {
+  font-size: 0.7rem !important;
+}
+
+.workspace-file-main-v3 > small {
+  font-size: 0.7rem !important;
+}
+
+.workspace-file-project-heading small {
+  font-size: 0.68rem !important;
+}
+
+.workspace-file-project-heading h3 {
+  font-size: 1.05rem !important;
+}
+
+.workspace-file-project-heading p {
+  font-size: 0.76rem !important;
+}
+
+
+/* ==========================================================
+   19. UPDATE / ACTIVITY CARDS
+   ========================================================== */
+
+.workspace-update-metric > span {
+  font-size: 0.76rem !important;
+}
+
+.workspace-update-metric > strong {
+  font-size: 1.4rem !important;
+}
+
+.workspace-activity-category {
+  font-size: 0.64rem !important;
+}
+
+.workspace-activity-title-row h3 {
+  font-size: 1rem !important;
+}
+
+.workspace-activity-project strong {
+  font-size: 0.78rem !important;
+}
+
+.workspace-activity-project span {
+  font-size: 0.7rem !important;
+}
+
+.workspace-activity-message {
+  font-size: 0.84rem !important;
+}
+
+.workspace-activity-context > span {
+  font-size: 0.7rem !important;
+}
+
+.workspace-activity-time span {
+  font-size: 0.68rem !important;
+}
+
+
+/* ==========================================================
+   20. ADMIN SMALL OPERATIONAL CARDS
+   ========================================================== */
+
+.admin-project-facts-grid span,
+.admin-contact-list span,
+.admin-money-row span {
+  font-size: 0.72rem !important;
+}
+
+.admin-project-facts-grid strong,
+.admin-contact-list strong {
+  font-size: 0.84rem !important;
+}
+
+.admin-money-row strong {
+  font-size: 0.92rem !important;
+}
+
+.admin-card-description {
+  font-size: 0.82rem !important;
+  line-height: 1.55 !important;
+}
+
+.admin-project-file-title > strong,
+.admin-pcc-file-name > strong {
+  font-size: 0.86rem !important;
+}
+
+.admin-project-file-meta,
+.admin-pcc-file-meta {
+  font-size: 0.7rem !important;
+}
+
+
+/* ==========================================================
+   21. FORMS
+   ========================================================== */
+
+.client-pro-content label > span,
+.admin-pro-content label > span,
+.workspace-view label > span,
+.admin-view label > span {
+  font-size: 0.78rem !important;
+}
+
+.client-pro-content input,
+.client-pro-content textarea,
+.client-pro-content select,
+.admin-pro-content input,
+.admin-pro-content textarea,
+.admin-pro-content select {
+  font-size: 0.88rem !important;
+}
+
+
+/* ==========================================================
+   22. GENERIC PORTAL BUTTONS
+   ========================================================== */
+
+.client-pro-content button,
+.client-pro-content .button,
+.admin-pro-content button,
+.admin-pro-content .button {
+  font-size: 0.78rem !important;
+}
+
+
+/* ==========================================================
+   23. TABLET
+   ========================================================== */
+
+@media (
+  max-width: 900px
+) {
+  .client-pro-content,
+  .admin-pro-content {
+    padding-top: 25px !important;
+  }
+
+  .workspace-view-heading-v3 h2,
+  .project-directory-heading h2 {
+    font-size:
+      clamp(
+        1.7rem,
+        7vw,
+        2.25rem
+      ) !important;
+  }
+
+  .workspace-view-heading-v3 > div > p,
+  .project-directory-heading > div > p {
+    font-size: 0.9rem !important;
+  }
+
+  .project-directory-card {
+    padding: 17px !important;
+  }
+
+  .project-directory-card-identity h3 {
+    font-size: 1.18rem !important;
+  }
+
+  .project-directory-card-identity p {
+    font-size: 0.84rem !important;
+  }
+
+  .project-directory-finance span {
+    font-size: 0.68rem !important;
+  }
+
+  .project-directory-finance strong {
+    font-size: 0.84rem !important;
+  }
+
+  .project-directory-meta span {
+    font-size: 0.68rem !important;
+  }
+
+  .project-directory-meta strong {
+    font-size: 0.78rem !important;
+  }
+
+  .client-pro-mobile-tabs a,
+  .client-pro-mobile-tabs button,
+  .admin-pro-mobile-tabs a,
+  .admin-pro-mobile-tabs button {
+    font-size: 0.7rem !important;
+  }
+
+  .client-pro-topbar-title > span,
+  .admin-pro-topbar-title > span {
+    font-size: 0.63rem !important;
+  }
+
+  .client-pro-topbar-title > strong,
+  .admin-pro-topbar-title > strong {
+    font-size: 0.86rem !important;
+  }
+}
+
+
+/* ==========================================================
+   24. MOBILE PROJECT CARDS
+   ========================================================== */
+
+@media (
+  max-width: 700px
+) {
+  .project-directory-metrics {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      ) !important;
+  }
+
+  .project-directory-metrics article {
+    min-height: 105px !important;
+
+    padding: 13px !important;
+  }
+
+  .project-directory-metrics article > span {
+    font-size: 0.72rem !important;
+  }
+
+  .project-directory-metrics article > strong {
+    font-size: 1.5rem !important;
+  }
+
+  .project-directory-card-header {
+    gap: 10px;
+  }
+
+  .project-directory-state {
+    font-size: 0.66rem !important;
+  }
+
+  .project-directory-progress-heading span {
+    font-size: 0.62rem !important;
+  }
+
+  .project-directory-progress-heading > div strong {
+    font-size: 0.78rem !important;
+  }
+
+  .project-directory-progress > p {
+    font-size: 0.82rem !important;
+  }
+
+  .project-directory-action span,
+  .project-directory-decline span {
+    font-size: 0.62rem !important;
+  }
+
+  .project-directory-action strong {
+    font-size: 0.76rem !important;
+  }
+
+  .project-directory-decline p {
+    font-size: 0.82rem !important;
+  }
+
+  .project-directory-finance > div {
+    min-height: 62px;
+  }
+
+  .project-directory-card-footer > span {
+    font-size: 0.67rem !important;
+  }
+}
+
+
+/* ==========================================================
+   25. SMALL MOBILE
+   ========================================================== */
+
+@media (
+  max-width: 430px
+) {
+  .client-pro-content,
+  .admin-pro-content {
+    padding-top: 20px !important;
+  }
+
+  .workspace-view-heading-v3 h2,
+  .project-directory-heading h2 {
+    font-size: 1.65rem !important;
+  }
+
+  .workspace-view-heading-v3 > div > p,
+  .project-directory-heading > div > p {
+    font-size: 0.86rem !important;
+  }
+
+  .project-directory-card {
+    padding: 15px !important;
+  }
+
+  .project-directory-card-identity small {
+    font-size: 0.64rem !important;
+  }
+
+  .project-directory-card-identity h3 {
+    font-size: 1.08rem !important;
+  }
+
+  .project-directory-card-identity p {
+    font-size: 0.8rem !important;
+  }
+
+  .project-directory-finance span {
+    font-size: 0.67rem !important;
+  }
+
+  .project-directory-finance strong {
+    font-size: 0.82rem !important;
+  }
+
+  .project-directory-meta span {
+    font-size: 0.66rem !important;
+  }
+
+  .project-directory-meta strong {
+    font-size: 0.76rem !important;
+  }
+
+  .project-directory-payment {
+    font-size: 0.65rem !important;
+  }
+
+  .project-directory-card-footer > a {
+    font-size: 0.74rem !important;
+  }
+}

@@ -54,6 +54,18 @@ export default function App() {
         '/admin/',
       );
 
+  const clientWorkspace =
+    location.pathname ===
+      '/dashboard' ||
+    location.pathname
+      .startsWith(
+        '/dashboard/',
+      );
+
+  const portalArea =
+    adminArea ||
+    clientWorkspace;
+
   return (
     <div className="app">
       <ScrollToTop />
@@ -62,7 +74,7 @@ export default function App() {
 
       <GlobalMotion />
 
-      {!adminArea && (
+      {!portalArea && (
         <Header />
       )}
 
@@ -238,7 +250,7 @@ export default function App() {
         />
       </Routes>
 
-      {!adminArea && (
+      {!portalArea && (
         <Footer />
       )}
     </div>

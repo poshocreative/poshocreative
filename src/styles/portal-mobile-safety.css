@@ -1,0 +1,985 @@
+/* ==========================================================
+   POSHO CREATIVE
+   PORTAL MOBILE VIEWPORT SAFETY
+
+   PURPOSE
+   - Prevent horizontal page overflow
+   - Prevent long text/amounts from breaking cards
+   - Keep grids inside the viewport
+   - Keep inputs/buttons/modals responsive
+   - Preserve intentional horizontal scrolling for filters
+   ========================================================== */
+
+
+/* ==========================================================
+   GLOBAL PORTAL SAFETY
+   ========================================================== */
+
+.client-pro-shell,
+.client-pro-main,
+.client-pro-content,
+.admin-pro-shell,
+.admin-pro-main,
+.admin-pro-content,
+.workspace-view,
+.admin-view {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.client-pro-shell,
+.admin-pro-shell {
+  overflow-x: clip;
+}
+
+
+/* ==========================================================
+   MEDIA / EMBEDS
+   ========================================================== */
+
+.client-pro-content img,
+.admin-pro-content img,
+.workspace-view img,
+.admin-view img,
+.client-pro-content video,
+.admin-pro-content video,
+.workspace-view video,
+.admin-view video,
+.client-pro-content iframe,
+.admin-pro-content iframe,
+.workspace-view iframe,
+.admin-view iframe {
+  max-width: 100%;
+}
+
+
+/* ==========================================================
+   TEXT SAFETY
+   ========================================================== */
+
+.client-pro-content h1,
+.client-pro-content h2,
+.client-pro-content h3,
+.client-pro-content h4,
+.client-pro-content p,
+.client-pro-content strong,
+.client-pro-content span,
+
+.admin-pro-content h1,
+.admin-pro-content h2,
+.admin-pro-content h3,
+.admin-pro-content h4,
+.admin-pro-content p,
+.admin-pro-content strong,
+.admin-pro-content span,
+
+.workspace-view h1,
+.workspace-view h2,
+.workspace-view h3,
+.workspace-view p,
+
+.admin-view h1,
+.admin-view h2,
+.admin-view h3,
+.admin-view p {
+  max-width: 100%;
+
+  overflow-wrap: anywhere;
+
+  word-break: normal;
+}
+
+
+/* ==========================================================
+   FORMS
+   ========================================================== */
+
+.client-pro-content input,
+.client-pro-content textarea,
+.client-pro-content select,
+.client-pro-content button,
+
+.admin-pro-content input,
+.admin-pro-content textarea,
+.admin-pro-content select,
+.admin-pro-content button,
+
+.workspace-view input,
+.workspace-view textarea,
+.workspace-view select,
+.workspace-view button,
+
+.admin-view input,
+.admin-view textarea,
+.admin-view select,
+.admin-view button {
+  min-width: 0;
+  max-width: 100%;
+}
+
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media (
+  max-width: 900px
+) {
+  html,
+  body,
+  #root,
+  .app {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: clip;
+  }
+
+  /* ========================================================
+     PORTAL SHELL
+     ======================================================== */
+
+  .client-pro-shell,
+  .admin-pro-shell {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: clip;
+  }
+
+  .client-pro-main,
+  .admin-pro-main {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+
+    overflow-x: clip;
+  }
+
+  .client-pro-content,
+  .admin-pro-content {
+    width:
+      calc(
+        100% - 24px
+      ) !important;
+
+    max-width:
+      calc(
+        100% - 24px
+      ) !important;
+
+    min-width: 0;
+
+    margin:
+      0 auto !important;
+  }
+
+
+  /* ========================================================
+     TOP BAR
+     ======================================================== */
+
+  .client-pro-topbar,
+  .admin-pro-topbar {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .client-pro-topbar-title,
+  .admin-pro-topbar-title {
+    min-width: 0;
+
+    flex: 1;
+  }
+
+  .client-pro-topbar-title > span,
+  .client-pro-topbar-title > strong,
+  .admin-pro-topbar-title > span,
+  .admin-pro-topbar-title > strong {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+
+  .client-pro-session,
+  .admin-pro-session {
+    flex: 0 0 auto;
+
+    max-width: 100px;
+
+    white-space: nowrap;
+  }
+
+
+  /* ========================================================
+     WORKSPACE PAGE
+     ======================================================== */
+
+  .workspace-view,
+  .admin-view,
+  .project-directory,
+  .workspace-payments-v3,
+  .workspace-files-v3,
+  .workspace-updates-v3 {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+
+  /* ========================================================
+     PAGE HEADINGS
+     ======================================================== */
+
+  .workspace-view-heading-v3,
+  .project-directory-heading {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .workspace-view-heading-v3 > div,
+  .project-directory-heading > div {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .workspace-view-heading-v3 h2,
+  .project-directory-heading h2 {
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+  }
+
+  .project-directory-new {
+    width: fit-content;
+    max-width: 100%;
+
+    align-self: flex-start;
+  }
+
+
+  /* ========================================================
+     METRIC GRIDS
+     ======================================================== */
+
+  .project-directory-metrics,
+  .workspace-payment-metrics,
+  .workspace-file-metrics,
+  .workspace-update-metrics {
+    width: 100%;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      ) !important;
+  }
+
+  .project-directory-metrics article,
+  .workspace-payment-metric,
+  .workspace-file-metric,
+  .workspace-update-metric {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .project-directory-metrics strong,
+  .workspace-payment-metric strong,
+  .workspace-file-metric strong,
+  .workspace-update-metric strong {
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+  }
+
+
+  /* ========================================================
+     PROJECT DIRECTORY CONTROLS
+     ======================================================== */
+
+  .project-directory-controls {
+    width: 100%;
+
+    grid-template-columns:
+      minmax(
+        0,
+        1fr
+      ) !important;
+  }
+
+  .project-directory-search,
+  .project-directory-sort {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .project-directory-search input,
+  .project-directory-sort select {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+
+  /* ========================================================
+     INTENTIONAL HORIZONTAL FILTER SCROLL
+     ======================================================== */
+
+  .project-directory-filters,
+  .workspace-payment-filters,
+  .workspace-file-filters,
+  .workspace-update-filters {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: auto;
+
+    overscroll-behavior-x:
+      contain;
+
+    scrollbar-width: none;
+
+    -webkit-overflow-scrolling:
+      touch;
+  }
+
+  .project-directory-filters::-webkit-scrollbar,
+  .workspace-payment-filters::-webkit-scrollbar,
+  .workspace-file-filters::-webkit-scrollbar,
+  .workspace-update-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+
+  /* ========================================================
+     PROJECT CARDS
+     ======================================================== */
+
+  .project-directory-list,
+  .project-directory-card {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .project-directory-card-header {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+  .project-directory-card-identity {
+    min-width: 0;
+
+    flex: 1;
+  }
+
+  .project-directory-card-identity small,
+  .project-directory-card-identity h3,
+  .project-directory-card-identity p {
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+  }
+
+  .project-directory-state {
+    max-width: 45%;
+
+    white-space: normal;
+
+    text-align: center;
+
+    justify-content: center;
+  }
+
+
+  /* ========================================================
+     PROGRESS
+     ======================================================== */
+
+  .project-directory-progress,
+  .project-directory-progress-heading {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .project-directory-progress-heading > div {
+    min-width: 0;
+  }
+
+  .project-directory-progress-heading > div strong {
+    white-space: normal !important;
+
+    overflow: visible !important;
+
+    text-overflow: clip !important;
+
+    overflow-wrap: anywhere;
+  }
+
+
+  /* ========================================================
+     PROJECT ATTENTION / DECLINE
+     ======================================================== */
+
+  .project-directory-action,
+  .project-directory-decline {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .project-directory-action > div {
+    min-width: 0;
+  }
+
+
+  /* ========================================================
+     PROJECT FINANCE CARDS
+     ======================================================== */
+
+  .project-directory-finance {
+    width: 100%;
+
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
+
+  .project-directory-finance > div {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+  .project-directory-finance strong {
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+  }
+
+
+  /* ========================================================
+     PROJECT META
+     ======================================================== */
+
+  .project-directory-meta {
+    width: 100%;
+
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
+
+  .project-directory-meta > div {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+  .project-directory-meta > div > div {
+    min-width: 0;
+  }
+
+
+  /* ========================================================
+     PROJECT CARD FOOTER
+     ======================================================== */
+
+  .project-directory-card-footer {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+  .project-directory-card-footer > span {
+    min-width: 0;
+
+    flex: 1;
+  }
+
+  .project-directory-card-footer > a {
+    flex: 0 0 auto;
+
+    max-width: 100%;
+  }
+
+
+  /* ========================================================
+     PAYMENT CARDS
+     ======================================================== */
+
+  .workspace-payment-card,
+  .workspace-payment-total-panel,
+  .workspace-payment-details-grid,
+  .workspace-payment-reference-bar,
+  .workspace-payment-receipt {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .workspace-payment-project,
+  .workspace-payment-project > div {
+    min-width: 0;
+  }
+
+  .workspace-payment-project h3,
+  .workspace-payment-reference-bar strong {
+    overflow-wrap: anywhere;
+  }
+
+  .workspace-payment-total-breakdown,
+  .workspace-payment-details-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      ) !important;
+  }
+
+
+  /* ========================================================
+     FILE LIBRARY
+     ======================================================== */
+
+  .workspace-file-project-group,
+  .workspace-file-project-heading,
+  .workspace-file-row-v3,
+  .workspace-latest-delivery {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .workspace-file-project-heading > div,
+  .workspace-file-main-v3,
+  .workspace-file-title-row {
+    min-width: 0;
+  }
+
+  .workspace-file-title-row > strong,
+  .workspace-file-project-heading h3,
+  .workspace-latest-delivery-copy h3 {
+    max-width: 100%;
+
+    white-space: normal !important;
+
+    overflow-wrap: anywhere;
+
+    text-overflow: clip !important;
+  }
+
+
+  /* ========================================================
+     ACTIVITY / UPDATES
+     ======================================================== */
+
+  .workspace-activity-card,
+  .workspace-activity-content,
+  .workspace-activity-title-row {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .workspace-activity-title-row > div {
+    min-width: 0;
+  }
+
+  .workspace-activity-title-row h3,
+  .workspace-activity-message,
+  .workspace-activity-project strong {
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+
+    white-space: normal;
+  }
+
+
+  /* ========================================================
+     ADMIN PROJECT VIEW
+     ======================================================== */
+
+  .admin-project-hero,
+  .admin-project-grid,
+  .admin-project-main,
+  .admin-project-sidebar,
+  .admin-control-card,
+  .admin-review-decision-card,
+  .admin-decline-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    min-width: 0 !important;
+  }
+
+  .admin-project-hero > div {
+    min-width: 0;
+  }
+
+  .admin-project-hero h1,
+  .admin-project-hero p {
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+  }
+
+
+  /* ========================================================
+     ADMIN PROJECT FACTS
+     ======================================================== */
+
+  .admin-project-facts-grid {
+    width: 100%;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      ) !important;
+  }
+
+  .admin-project-facts-grid > div {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+  .admin-project-facts-grid strong {
+    overflow-wrap: anywhere;
+  }
+
+
+  /* ========================================================
+     ADMIN FILES
+     ======================================================== */
+
+  .admin-project-file,
+  .admin-pcc-file {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .admin-project-file-copy,
+  .admin-pcc-file-copy {
+    min-width: 0;
+  }
+
+  .admin-project-file-title > strong,
+  .admin-pcc-file-name > strong {
+    max-width: 100%;
+
+    white-space: normal !important;
+
+    overflow-wrap: anywhere;
+
+    text-overflow: clip !important;
+  }
+
+
+  /* ========================================================
+     ADMIN PROGRESS
+     ======================================================== */
+
+  .admin-current-progress-card,
+  .admin-pcc-current,
+  .admin-progress-form,
+  .admin-pcc-progress-form,
+  .admin-pcc-customer-preview {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .admin-progress-presets,
+  .admin-pcc-presets {
+    width: 100%;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      ) !important;
+  }
+
+  .admin-progress-presets button,
+  .admin-pcc-presets button {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+
+  /* ========================================================
+     TABLES
+     ======================================================== */
+
+  .admin-table-wrap,
+  .workspace-table-wrap,
+  .table-responsive {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: auto;
+
+    -webkit-overflow-scrolling:
+      touch;
+  }
+
+  table {
+    max-width: 100%;
+  }
+
+
+  /* ========================================================
+     MODALS / SHEETS
+     ======================================================== */
+
+  .admin-pcc-preview-dialog {
+    width:
+      calc(
+        100vw - 20px
+      ) !important;
+
+    max-width:
+      calc(
+        100vw - 20px
+      ) !important;
+  }
+
+  .client-pro-mobile-sheet,
+  .admin-pro-mobile-sheet {
+    max-width:
+      calc(
+        100vw - 16px
+      );
+  }
+
+
+  /* ========================================================
+     BOTTOM NAV
+     ======================================================== */
+
+  .client-pro-mobile-tabs,
+  .admin-pro-mobile-tabs {
+    max-width:
+      calc(
+        100vw - 20px
+      );
+
+    overflow: hidden;
+  }
+
+  .client-pro-mobile-tabs a,
+  .client-pro-mobile-tabs button,
+  .admin-pro-mobile-tabs a,
+  .admin-pro-mobile-tabs button {
+    min-width: 0;
+  }
+
+  .client-pro-mobile-tabs span,
+  .admin-pro-mobile-tabs span {
+    max-width: 100%;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+}
+
+
+/* ==========================================================
+   SMALL MOBILE
+   ========================================================== */
+
+@media (
+  max-width: 520px
+) {
+  .client-pro-content,
+  .admin-pro-content {
+    width:
+      calc(
+        100% - 20px
+      ) !important;
+
+    max-width:
+      calc(
+        100% - 20px
+      ) !important;
+  }
+
+  /* Project header stacks cleanly */
+
+  .project-directory-card-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .project-directory-state {
+    max-width: 100%;
+
+    align-self: flex-start;
+  }
+
+  /* Financial cards are easier to read stacked */
+
+  .project-directory-finance {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .project-directory-finance > div {
+    min-height: 60px;
+  }
+
+  /* Metadata also stacks */
+
+  .project-directory-meta {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .project-directory-meta > div {
+    min-height: 42px;
+  }
+
+  /* Footer stacks */
+
+  .project-directory-card-footer {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .project-directory-card-footer > a {
+    width: 100%;
+
+    justify-content: center;
+  }
+
+  /* Payments */
+
+  .workspace-payment-total-breakdown,
+  .workspace-payment-details-grid {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .workspace-payment-reference-bar {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .workspace-payment-reference-bar button {
+    width: 100%;
+  }
+
+  /* Admin */
+
+  .admin-project-facts-grid {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .admin-review-buttons {
+    grid-template-columns:
+      1fr !important;
+  }
+}
+
+
+/* ==========================================================
+   VERY SMALL MOBILE
+   ========================================================== */
+
+@media (
+  max-width: 390px
+) {
+  .client-pro-content,
+  .admin-pro-content {
+    width:
+      calc(
+        100% - 16px
+      ) !important;
+
+    max-width:
+      calc(
+        100% - 16px
+      ) !important;
+  }
+
+  .project-directory-card,
+  .workspace-payment-card,
+  .workspace-file-project-group,
+  .workspace-activity-card,
+  .admin-control-card {
+    border-radius: 15px !important;
+  }
+
+  .client-pro-mobile-tabs,
+  .admin-pro-mobile-tabs {
+    left: 6px;
+    right: 6px;
+
+    max-width:
+      calc(
+        100vw - 12px
+      );
+  }
+}

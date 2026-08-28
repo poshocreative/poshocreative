@@ -1,0 +1,522 @@
+/* ==========================================================
+   POSHO CREATIVE
+   PAYMENT MANAGEMENT SYSTEM
+   PROFESSIONAL UI
+   ========================================================== */
+
+
+/* ==========================================================
+   PAYMENT SUMMARY CARD
+   ========================================================== */
+
+
+.payment-summary-card {
+
+display:grid;
+
+grid-template-columns:
+repeat(4,minmax(0,1fr));
+
+gap:16px;
+
+padding:22px;
+
+background:
+var(--surface-card,#ffffff);
+
+border:
+1px solid rgba(0,0,0,.08);
+
+border-radius:22px;
+
+box-shadow:
+0 15px 35px rgba(0,0,0,.06);
+
+}
+
+
+.payment-summary-card > div {
+
+padding:18px;
+
+border-radius:16px;
+
+background:
+rgba(108,43,217,.05);
+
+display:flex;
+
+flex-direction:column;
+
+gap:8px;
+
+}
+
+
+.payment-summary-card span {
+
+font-size:.78rem;
+
+font-weight:700;
+
+color:#64748b;
+
+}
+
+
+.payment-summary-card strong {
+
+font-size:1.35rem;
+
+font-weight:900;
+
+color:#111827;
+
+}
+
+
+
+.payment-plan-status {
+
+background:
+rgba(34,197,94,.12)
+!important;
+
+}
+
+
+
+.payment-plan-status strong {
+
+color:#15803d;
+
+}
+
+
+
+/* ==========================================================
+   PART PAYMENT REQUEST
+   ========================================================== */
+
+
+.part-payment-request,
+.admin-payment-plan,
+.payment-timeline {
+
+background:white;
+
+border:
+
+1px solid rgba(0,0,0,.08);
+
+border-radius:22px;
+
+padding:24px;
+
+box-shadow:
+
+0 12px 30px rgba(0,0,0,.05);
+
+margin-top:20px;
+
+}
+
+
+.part-payment-request h3,
+.admin-payment-plan h3,
+.payment-timeline h3 {
+
+font-size:1.25rem;
+
+font-weight:900;
+
+margin-bottom:10px;
+
+}
+
+
+
+.part-payment-request p {
+
+color:#64748b;
+
+font-size:.92rem;
+
+line-height:1.6;
+
+}
+
+
+
+/* ==========================================================
+   FORM ELEMENTS
+   ========================================================== */
+
+
+.part-payment-request input,
+.part-payment-request textarea,
+
+.admin-payment-plan input,
+.admin-payment-plan textarea,
+
+.payment-management input,
+.payment-management textarea {
+
+
+width:100%;
+
+padding:14px 16px;
+
+border-radius:14px;
+
+border:
+
+1px solid #e5e7eb;
+
+font-size:.95rem;
+
+outline:none;
+
+margin-top:12px;
+
+transition:.25s ease;
+
+}
+
+
+
+.part-payment-request input:focus,
+.part-payment-request textarea:focus,
+
+.admin-payment-plan input:focus,
+.admin-payment-plan textarea:focus {
+
+border-color:#6C2BD9;
+
+box-shadow:
+
+0 0 0 4px rgba(108,43,217,.12);
+
+}
+
+
+
+.part-payment-request textarea,
+.admin-payment-plan textarea {
+
+min-height:120px;
+
+resize:vertical;
+
+}
+
+
+
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+
+
+.part-payment-request button,
+.admin-payment-plan button,
+.payment-management button {
+
+
+margin-top:18px;
+
+padding:
+
+13px 22px;
+
+border-radius:14px;
+
+border:none;
+
+background:#6C2BD9;
+
+color:white;
+
+font-weight:800;
+
+font-size:.9rem;
+
+cursor:pointer;
+
+transition:.25s ease;
+
+}
+
+
+
+.part-payment-request button:hover,
+.admin-payment-plan button:hover,
+.payment-management button:hover {
+
+transform:translateY(-2px);
+
+box-shadow:
+
+0 12px 25px rgba(108,43,217,.25);
+
+}
+
+
+
+.part-payment-request button:disabled,
+.admin-payment-plan button:disabled {
+
+opacity:.6;
+
+cursor:not-allowed;
+
+}
+
+
+
+/* ==========================================================
+   ADDITIONAL COST
+   ========================================================== */
+
+
+.additional-cost-form {
+
+background:white;
+
+padding:24px;
+
+border-radius:22px;
+
+border:
+
+1px solid rgba(0,0,0,.08);
+
+}
+
+
+
+.additional-cost-form h3 {
+
+font-size:1.2rem;
+
+font-weight:900;
+
+}
+
+
+
+
+/* ==========================================================
+   PAYMENT TIMELINE
+   ========================================================== */
+
+
+.payment-event {
+
+position:relative;
+
+padding:
+
+18px 18px 18px 28px;
+
+border-left:
+
+3px solid #6C2BD9;
+
+margin-top:18px;
+
+background:
+
+rgba(108,43,217,.04);
+
+border-radius:
+
+0 16px 16px 0;
+
+}
+
+
+
+.payment-event strong {
+
+display:block;
+
+font-size:1rem;
+
+font-weight:850;
+
+}
+
+
+
+.payment-event p {
+
+margin-top:8px;
+
+font-size:.9rem;
+
+color:#475569;
+
+line-height:1.5;
+
+}
+
+
+
+.payment-event small {
+
+display:block;
+
+margin-top:10px;
+
+font-size:.75rem;
+
+color:#94a3b8;
+
+}
+
+
+
+/* ==========================================================
+   ADMIN PAYMENT CONTROL AREA
+   ========================================================== */
+
+
+.admin-payment-control {
+
+display:grid;
+
+grid-template-columns:
+
+repeat(2,minmax(0,1fr));
+
+gap:20px;
+
+}
+
+
+
+.admin-payment-card {
+
+background:white;
+
+border-radius:24px;
+
+padding:24px;
+
+border:
+
+1px solid rgba(0,0,0,.08);
+
+}
+
+
+
+.admin-payment-card h3 {
+
+font-size:1.25rem;
+
+font-weight:900;
+
+}
+
+
+
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+
+@media(max-width:900px){
+
+
+.payment-summary-card {
+
+grid-template-columns:
+
+repeat(2,minmax(0,1fr));
+
+padding:16px;
+
+}
+
+
+.payment-summary-card > div {
+
+padding:15px;
+
+}
+
+
+.payment-summary-card strong {
+
+font-size:1.1rem;
+
+}
+
+
+
+.admin-payment-control {
+
+grid-template-columns:
+
+1fr;
+
+}
+
+
+
+.part-payment-request,
+.admin-payment-plan,
+.payment-timeline {
+
+padding:18px;
+
+border-radius:18px;
+
+}
+
+
+
+}
+
+
+
+@media(max-width:520px){
+
+
+.payment-summary-card {
+
+grid-template-columns:
+
+1fr;
+
+}
+
+
+
+.payment-summary-card span {
+
+font-size:.72rem;
+
+}
+
+
+.payment-summary-card strong {
+
+font-size:1.05rem;
+
+}
+
+
+
+.part-payment-request h3,
+.admin-payment-plan h3,
+.payment-timeline h3 {
+
+font-size:1.1rem;
+
+}
+
+
+}

@@ -1,0 +1,496 @@
+/* ==========================================================
+   POSHO CREATIVE
+   MANAGEMENT PROJECT DETAIL — MOBILE V3
+   ========================================================== */
+
+@media (
+  max-width: 900px
+) {
+  .admin-view {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-view .workspace-back-link {
+    min-height: 38px;
+
+    margin-bottom: 13px;
+
+    font-size: 0.7rem;
+  }
+
+  /* PROJECT HERO */
+
+  .admin-project-hero,
+  .admin-project-hero-v2 {
+    width: 100%;
+
+    min-width: 0;
+
+    padding: 17px;
+
+    border-radius: 18px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 13px;
+  }
+
+  .admin-project-hero > div,
+  .admin-project-hero-v2 > div {
+    min-width: 0;
+  }
+
+  .admin-project-hero span,
+  .admin-project-hero-v2 span {
+    overflow-wrap: anywhere;
+  }
+
+  .admin-project-hero h1,
+  .admin-project-hero-v2 h1 {
+    max-width: 100%;
+
+    margin:
+      5px 0;
+
+    overflow-wrap: anywhere;
+
+    font-size:
+      clamp(
+        1.45rem,
+        7vw,
+        2.1rem
+      );
+
+    line-height: 1;
+
+    letter-spacing:
+      -0.045em;
+  }
+
+  .admin-project-hero p,
+  .admin-project-hero-v2 p {
+    max-width: 100%;
+
+    margin: 0;
+
+    overflow-wrap: anywhere;
+
+    font-size: 0.68rem;
+    line-height: 1.5;
+  }
+
+  .admin-decision-pill {
+    flex: 0 0 auto;
+
+    max-width: 42%;
+
+    text-align: center;
+
+    white-space: normal;
+  }
+
+  /* MAIN LAYOUT */
+
+  .admin-project-grid {
+    width: 100%;
+
+    min-width: 0;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    gap: 12px !important;
+  }
+
+  .admin-project-main,
+  .admin-project-sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+  .admin-project-sidebar {
+    position: static !important;
+  }
+
+  .admin-control-card {
+    width: 100%;
+    min-width: 0;
+
+    padding: 15px !important;
+
+    border-radius: 17px !important;
+  }
+
+  .admin-control-card h2 {
+    overflow-wrap: anywhere;
+
+    font-size: 1rem;
+  }
+
+  .admin-card-description {
+    font-size: 0.69rem !important;
+    line-height: 1.55;
+  }
+
+  /* REVIEW */
+
+  .admin-review-decision-card {
+    padding: 16px;
+
+    border-radius: 18px;
+
+    align-items: stretch !important;
+
+    flex-direction: column !important;
+
+    gap: 14px;
+  }
+
+  .admin-review-decision-card h2 {
+    font-size: 1.15rem;
+  }
+
+  .admin-review-buttons {
+    width: 100%;
+
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      ) !important;
+
+    gap: 7px;
+  }
+
+  .admin-review-buttons button {
+    min-width: 0;
+
+    min-height: 43px;
+
+    padding:
+      0 9px;
+
+    font-size: 0.68rem;
+  }
+
+  /* PROJECT FACTS */
+
+  .admin-project-facts-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      ) !important;
+
+    gap: 7px !important;
+  }
+
+  .admin-project-facts-grid > div {
+    padding: 10px !important;
+
+    border-radius: 11px !important;
+  }
+
+  .admin-project-facts-grid span {
+    font-size: 0.56rem !important;
+  }
+
+  .admin-project-facts-grid strong {
+    font-size: 0.69rem !important;
+  }
+
+  .admin-brief-block {
+    min-width: 0;
+  }
+
+  .admin-brief-block p,
+  .admin-reference-links {
+    overflow-wrap: anywhere;
+
+    font-size: 0.7rem !important;
+    line-height: 1.62;
+  }
+
+  /* SECTION HEADINGS */
+
+  .admin-project-section-heading {
+    width: 100%;
+
+    align-items: flex-start !important;
+
+    gap: 9px !important;
+  }
+
+  .admin-project-section-heading > div {
+    min-width: 0;
+  }
+
+  .admin-project-section-heading h2 {
+    overflow-wrap: anywhere;
+
+    font-size: 0.95rem;
+  }
+
+  .admin-project-count-pill,
+  .admin-progress-percentage {
+    flex: 0 0 auto;
+  }
+
+  /* ATTACHED FILES */
+
+  .admin-project-file {
+    width: 100%;
+
+    padding: 11px !important;
+
+    grid-template-columns:
+      38px
+      minmax(0, 1fr) !important;
+
+    gap: 9px !important;
+
+    border-radius: 13px !important;
+  }
+
+  .admin-project-file-icon {
+    width: 38px !important;
+    height: 38px !important;
+
+    border-radius: 10px !important;
+  }
+
+  .admin-project-file-title {
+    min-width: 0;
+
+    align-items: flex-start !important;
+
+    flex-direction: column !important;
+
+    gap: 4px !important;
+  }
+
+  .admin-project-file-title > strong {
+    width: 100%;
+
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+
+    font-size: 0.7rem !important;
+  }
+
+  .admin-project-file-meta {
+    gap:
+      3px
+      7px !important;
+
+    font-size: 0.58rem !important;
+  }
+
+  .admin-project-file-actions {
+    width: 100%;
+
+    grid-column:
+      1 / -1;
+
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: 6px !important;
+  }
+
+  .admin-project-file-actions button {
+    width: 100%;
+
+    min-height: 38px !important;
+  }
+
+  /* PROGRESS */
+
+  .admin-current-progress-card {
+    padding: 13px !important;
+
+    border-radius: 14px !important;
+  }
+
+  .admin-current-progress-top {
+    gap: 9px !important;
+  }
+
+  .admin-current-progress-top >
+  div {
+    min-width: 0;
+  }
+
+  .admin-current-progress-top >
+  div >
+  strong {
+    overflow-wrap: anywhere;
+
+    font-size: 0.77rem !important;
+  }
+
+  .admin-progress-form-heading {
+    align-items: flex-start !important;
+
+    gap: 8px !important;
+  }
+
+  .admin-progress-presets {
+    width: 100%;
+
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+
+    gap: 5px !important;
+  }
+
+  .admin-progress-presets button {
+    width: 100%;
+    min-width: 0;
+
+    padding:
+      0 5px !important;
+  }
+
+  .admin-progress-range-field >
+  div {
+    grid-template-columns:
+      minmax(0, 1fr)
+      72px !important;
+
+    gap: 8px !important;
+  }
+
+  .admin-progress-form textarea,
+  .admin-form-stack textarea {
+    min-height: 100px;
+  }
+
+  .admin-progress-form
+  .button,
+  .admin-form-stack
+  .button {
+    width: 100%;
+  }
+
+  .admin-progress-history-item {
+    grid-template-columns:
+      42px
+      minmax(0, 1fr) !important;
+
+    gap: 9px !important;
+  }
+
+  .admin-progress-history-percent {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  /* PAYMENT / QUOTE / WORKFLOW */
+
+  .admin-money-row {
+    min-width: 0;
+  }
+
+  .admin-money-row strong {
+    overflow-wrap: anywhere;
+  }
+
+  .admin-form-stack {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-form-stack input,
+  .admin-form-stack select,
+  .admin-form-stack textarea {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+  }
+
+  .admin-contact-list strong {
+    overflow-wrap: anywhere;
+  }
+
+  /* DECLINE DIALOG */
+
+  .admin-decline-panel {
+    padding: 15px;
+
+    border-radius: 17px;
+  }
+
+  .admin-decline-panel-heading {
+    align-items: flex-start;
+  }
+}
+
+@media (
+  max-width: 520px
+) {
+  .admin-project-hero,
+  .admin-project-hero-v2 {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .admin-decision-pill {
+    max-width: 100%;
+
+    align-self: flex-start;
+  }
+
+  .admin-review-buttons {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .admin-project-facts-grid {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .admin-progress-presets {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .admin-progress-form-heading,
+  .admin-current-progress-top,
+  .admin-project-section-heading {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .admin-project-count-pill,
+  .admin-progress-percentage {
+    align-self: flex-start;
+  }
+}

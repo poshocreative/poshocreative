@@ -1,25 +1,28 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
 import {
-  ArrowRight,
   Bell,
   FileText,
   FolderKanban,
   LayoutDashboard,
-  Plus,
+  LogOut,
+  MoreHorizontal,
   ReceiptText,
   Settings,
+  ShieldCheck,
+  X,
 } from 'lucide-react';
 
 import {
-  Link,
   NavLink,
   Outlet,
   useLocation,
+  useNavigate,
 } from 'react-router-dom';
 
 import {
@@ -30,21 +33,128 @@ import {
   getUnreadNotificationCount,
 } from '../lib/notificationCenter';
 
+const navigation = [
+  {
+    to:
+      '/dashboard',
+
+    end:
+      true,
+
+    label:
+      'Overview',
+
+    icon:
+      LayoutDashboard,
+  },
+  {
+    to:
+      '/dashboard/orders',
+
+    label:
+      'Projects',
+
+    icon:
+      FolderKanban,
+  },
+  {
+    to:
+      '/dashboard/payments',
+
+    label:
+      'Payments',
+
+    icon:
+      ReceiptText,
+  },
+  {
+    to:
+      '/dashboard/files',
+
+    label:
+      'Files',
+
+    icon:
+      FileText,
+  },
+  {
+    to:
+      '/dashboard/notifications',
+
+    label:
+      'Updates',
+
+    icon:
+      Bell,
+  },
+  {
+    to:
+      '/dashboard/profile',
+
+    label:
+      'Profile',
+
+    icon:
+      Settings,
+  },
+];
+
+const mobilePrimary =
+  navigation.slice(
+    0,
+    3,
+  );
+
+const mobileSecondary =
+  navigation.slice(
+    3,
+  );
+
+function routeMatches(
+  pathname,
+  route,
+) {
+  if (
+    route ===
+    '/dashboard'
+  ) {
+    return (
+      pathname ===
+      '/dashboard'
+    );
+  }
+
+  return pathname
+    .startsWith(
+      route,
+    );
+}
+
 export default function DashboardShell() {
   const {
     profile,
     user,
+    signOut,
   } =
     useAuth();
 
   const location =
     useLocation();
 
+  const navigate =
+    useNavigate();
+
   const [
     unreadCount,
     setUnreadCount,
   ] =
     useState(0);
+
+  const [
+    moreOpen,
+    setMoreOpen,
+  ] =
+    useState(false);
 
   const fullName =
     profile?.full_name ||
@@ -57,12 +167,54 @@ export default function DashboardShell() {
       .trim()
       .split(' ')[0];
 
+  const currentTitle =
+    useMemo(() => {
+      if (
+        location.pathname
+          .includes(
+            '/orders/',
+          )
+      ) {
+        return 'Project';
+      }
+
+      const match =
+        [...navigation]
+          .reverse()
+          .find(
+            (
+              item,
+            ) =>
+              routeMatches(
+                location
+                  .pathname,
+                item.to,
+              ),
+          );
+
+      return (
+        match?.label ||
+        'Workspace'
+      );
+    }, [
+      location.pathname,
+    ]);
+
+  const moreActive =
+    mobileSecondary.some(
+      (
+        item,
+      ) =>
+        routeMatches(
+          location.pathname,
+          item.to,
+        ),
+    );
+
   const loadUnreadCount =
     useCallback(
       async () => {
-        if (
-          !user?.id
-        ) {
+        if (!user?.id) {
           setUnreadCount(
             0,
           );
@@ -99,10 +251,17 @@ export default function DashboardShell() {
   ]);
 
   useEffect(() => {
+    setMoreOpen(
+      false,
+    );
+  }, [
+    location.pathname,
+  ]);
+
+  useEffect(() => {
     const refresh =
-      () => {
+      () =>
         loadUnreadCount();
-      };
 
     window.addEventListener(
       'focus',
@@ -129,6 +288,72 @@ export default function DashboardShell() {
     loadUnreadCount,
   ]);
 
+  useEffect(() => {
+    if (!moreOpen) {
+      return undefined;
+    }
+
+    const oldOverflow =
+      document.body
+        .style
+        .overflow;
+
+    document.body
+      .style
+      .overflow =
+      'hidden';
+
+    const handleKey =
+      (
+        event,
+      ) => {
+        if (
+          event.key ===
+          'Escape'
+        ) {
+          setMoreOpen(
+            false,
+          );
+        }
+      };
+
+    window.addEventListener(
+      'keydown',
+      handleKey,
+    );
+
+    return () => {
+      document.body
+        .style
+        .overflow =
+        oldOverflow;
+
+      window.removeEventListener(
+        'keydown',
+        handleKey,
+      );
+    };
+  }, [
+    moreOpen,
+  ]);
+
+  const logout =
+    async () => {
+      setMoreOpen(
+        false,
+      );
+
+      await signOut();
+
+      navigate(
+        '/login',
+        {
+          replace:
+            true,
+        },
+      );
+    };
+
   const unreadLabel =
     unreadCount >
     99
@@ -136,147 +361,334 @@ export default function DashboardShell() {
       : unreadCount;
 
   return (
-    <main className="workspace-page workspace-page-v3">
-      <div className="workspace-glow workspace-glow-one" />
-      <div className="workspace-glow workspace-glow-two" />
+    <main className="client-pro-shell">
+      <aside className="client-pro-sidebar">
+        <div className="client-pro-brand">
+          <img
+            src="/brand/posho-creative-logo.png"
+            alt="Posho Creative"
+          />
 
-      <section className="workspace-header workspace-header-v3">
-        <div className="container workspace-header-inner workspace-header-inner-v3">
-          <div className="workspace-heading workspace-heading-v3">
-            <div className="workspace-eyebrow-row">
-              <span>
-                CLIENT WORKSPACE
-              </span>
+          <span>
+            CLIENT
+          </span>
+        </div>
 
-              <div className="workspace-account-state">
-                <span />
-
-                Secure account
-              </div>
-            </div>
-
-            <h1>
-              Welcome back, {firstName}.
-            </h1>
-
-            <p>
-              Manage your projects, payments, files and updates from one organised workspace.
-            </p>
+        <div className="client-pro-account">
+          <div className="client-pro-avatar">
+            {firstName
+              .charAt(0)
+              .toUpperCase()}
           </div>
 
-          <div className="workspace-header-actions">
-            <Link
-              to="/dashboard/orders"
-              className="workspace-header-secondary-action"
-            >
-              Projects
+          <div>
+            <span>
+              WELCOME BACK
+            </span>
 
-              <ArrowRight
-                size={16}
-              />
-            </Link>
-
-            <Link
-              to="/order"
-              className="button button-primary workspace-new-project-button"
-            >
-              <Plus
-                size={18}
-              />
-
-              New project
-            </Link>
+            <strong>
+              {firstName}
+            </strong>
           </div>
         </div>
-      </section>
 
-      <div className="workspace-navigation-wrapper workspace-navigation-wrapper-v3">
-        <div className="container">
-          <nav
-            className="workspace-navigation workspace-navigation-v3"
-            aria-label="Client workspace"
-          >
-            <NavLink
-              to="/dashboard"
-              end
-            >
-              <LayoutDashboard
-                size={17}
-              />
+        <div className="client-pro-nav-label">
+          WORKSPACE
+        </div>
 
-              <span>
-                Overview
-              </span>
-            </NavLink>
+        <nav className="client-pro-navigation">
+          {navigation.map(
+            ({
+              to,
+              end,
+              label,
+              icon:
+                Icon,
+            }) => (
+              <NavLink
+                key={
+                  to
+                }
+                to={
+                  to
+                }
+                end={
+                  end
+                }
+              >
+                <span className="client-pro-nav-icon">
+                  <Icon
+                    size={18}
+                  />
 
-            <NavLink to="/dashboard/orders">
-              <FolderKanban
-                size={17}
-              />
+                  {label ===
+                    'Updates' &&
+                    unreadCount >
+                      0 && (
+                      <i>
+                        {unreadLabel}
+                      </i>
+                    )}
+                </span>
 
-              <span>
-                Projects
-              </span>
-            </NavLink>
-
-            <NavLink to="/dashboard/payments">
-              <ReceiptText
-                size={17}
-              />
-
-              <span>
-                Payments
-              </span>
-            </NavLink>
-
-            <NavLink to="/dashboard/files">
-              <FileText
-                size={17}
-              />
-
-              <span>
-                Files
-              </span>
-            </NavLink>
-
-            <NavLink
-              to="/dashboard/notifications"
-              className="workspace-updates-nav-link"
-            >
-              <Bell
-                size={17}
-              />
-
-              <span>
-                Updates
-              </span>
-
-              {unreadCount >
-                0 && (
-                <strong className="workspace-nav-unread-badge">
-                  {unreadLabel}
+                <strong>
+                  {label}
                 </strong>
-              )}
-            </NavLink>
+              </NavLink>
+            ),
+          )}
+        </nav>
 
-            <NavLink to="/dashboard/profile">
-              <Settings
-                size={17}
-              />
+        <div className="client-pro-sidebar-footer">
+          <div className="client-pro-security">
+            <ShieldCheck
+              size={17}
+            />
+
+            <div>
+              <strong>
+                Secure workspace
+              </strong>
 
               <span>
-                Profile
+                Private client account
               </span>
-            </NavLink>
-          </nav>
-        </div>
-      </div>
+            </div>
+          </div>
 
-      <section className="workspace-view-section workspace-view-section-v3">
-        <div className="container">
+          <button
+            type="button"
+            className="client-pro-signout"
+            onClick={
+              logout
+            }
+          >
+            <LogOut
+              size={17}
+            />
+
+            Sign out
+          </button>
+        </div>
+      </aside>
+
+      <section className="client-pro-main">
+        <header className="client-pro-topbar">
+          <div className="client-pro-mobile-brand">
+            <img
+              src="/brand/posho-creative-icon.png"
+              alt=""
+            />
+          </div>
+
+          <div className="client-pro-topbar-title">
+            <span>
+              POSHO CREATIVE
+            </span>
+
+            <strong>
+              {currentTitle}
+            </strong>
+          </div>
+
+          <div className="client-pro-session">
+            <span />
+
+            Secure
+          </div>
+        </header>
+
+        <div className="client-pro-content">
           <Outlet />
         </div>
       </section>
+
+      <nav
+        className="client-pro-mobile-tabs"
+        aria-label="Client workspace navigation"
+      >
+        {mobilePrimary.map(
+          ({
+            to,
+            end,
+            label,
+            icon:
+              Icon,
+          }) => (
+            <NavLink
+              key={
+                to
+              }
+              to={
+                to
+              }
+              end={
+                end
+              }
+            >
+              <Icon
+                size={20}
+              />
+
+              <span>
+                {label}
+              </span>
+            </NavLink>
+          ),
+        )}
+
+        <button
+          type="button"
+          className={
+            moreActive ||
+            moreOpen
+              ? 'active'
+              : ''
+          }
+          onClick={() =>
+            setMoreOpen(
+              true,
+            )
+          }
+          aria-expanded={
+            moreOpen
+          }
+        >
+          <MoreHorizontal
+            size={21}
+          />
+
+          <span>
+            More
+          </span>
+
+          {unreadCount >
+            0 && (
+            <strong className="client-pro-more-badge">
+              {unreadLabel}
+            </strong>
+          )}
+        </button>
+      </nav>
+
+      <button
+        type="button"
+        className={`client-pro-sheet-backdrop ${
+          moreOpen
+            ? 'visible'
+            : ''
+        }`}
+        onClick={() =>
+          setMoreOpen(
+            false,
+          )
+        }
+        aria-label="Close client workspace menu"
+      />
+
+      <aside
+        className={`client-pro-mobile-sheet ${
+          moreOpen
+            ? 'open'
+            : ''
+        }`}
+        aria-hidden={
+          !moreOpen
+        }
+      >
+        <div className="client-pro-sheet-handle" />
+
+        <div className="client-pro-sheet-heading">
+          <div>
+            <span>
+              CLIENT WORKSPACE
+            </span>
+
+            <h2>
+              More
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              setMoreOpen(
+                false,
+              )
+            }
+            aria-label="Close workspace menu"
+          >
+            <X
+              size={19}
+            />
+          </button>
+        </div>
+
+        <nav className="client-pro-sheet-links">
+          {mobileSecondary.map(
+            ({
+              to,
+              label,
+              icon:
+                Icon,
+            }) => (
+              <NavLink
+                key={
+                  to
+                }
+                to={
+                  to
+                }
+              >
+                <span>
+                  <Icon
+                    size={19}
+                  />
+
+                  {label ===
+                    'Updates' &&
+                    unreadCount >
+                      0 && (
+                      <i>
+                        {unreadLabel}
+                      </i>
+                    )}
+                </span>
+
+                <div>
+                  <strong>
+                    {label}
+                  </strong>
+
+                  <small>
+                    {label ===
+                    'Files'
+                      ? 'Project references and delivered files'
+                      : label ===
+                          'Updates'
+                        ? 'Project activity and important updates'
+                        : 'Account and contact information'}
+                  </small>
+                </div>
+              </NavLink>
+            ),
+          )}
+        </nav>
+
+        <button
+          type="button"
+          className="client-pro-mobile-signout"
+          onClick={
+            logout
+          }
+        >
+          <LogOut
+            size={18}
+          />
+
+          Sign out of Client Workspace
+        </button>
+      </aside>
     </main>
   );
 }
