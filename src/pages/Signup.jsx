@@ -15,10 +15,11 @@ import {
 } from 'lucide-react';
 
 import {
-  Link,
   Navigate,
   useSearchParams,
 } from 'react-router-dom';
+
+import Link from '../components/PortalLink';
 
 import { useAuth } from '../context/AuthContext';
 
@@ -27,14 +28,18 @@ export default function Signup() {
     signUp,
     isAuthenticated,
     loading,
+    portalRoutes,
   } = useAuth();
 
   const [searchParams] =
     useSearchParams();
 
   const next =
-    searchParams.get('next') ||
-    '/dashboard';
+    searchParams.get('next') ===
+      '/order'
+      ? '/order'
+      : portalRoutes
+          .customerBase;
 
   const [form, setForm] = useState({
     fullName: '',

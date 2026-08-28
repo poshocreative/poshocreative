@@ -4,10 +4,11 @@ import {
 } from 'react';
 
 import {
-  Link,
   NavLink,
   useLocation,
 } from 'react-router-dom';
+
+import Link from './PortalLink';
 
 import {
   BriefcaseBusiness,
@@ -51,6 +52,7 @@ export default function Header() {
     profile,
     user,
     signOut,
+    portalRoutes,
   } = useAuth();
 
   const adminAccount =
@@ -84,8 +86,10 @@ export default function Header() {
 
   const accountRoute =
     adminAccount
-      ? '/admin'
-      : '/dashboard';
+      ? portalRoutes
+          .adminBase
+      : portalRoutes
+          .customerBase;
 
   const accountLabel =
     adminAccount

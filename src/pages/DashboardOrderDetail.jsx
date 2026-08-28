@@ -14,9 +14,10 @@ import {
 } from 'lucide-react';
 
 import {
-  Link,
   useParams,
 } from 'react-router-dom';
+
+import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
 import PartPaymentRequest from '../components/payment/PartPaymentRequest';

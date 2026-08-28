@@ -1,6 +1,7 @@
 import {
   Navigate,
   useLocation,
+  useParams,
 } from 'react-router-dom';
 
 import BrandLoader from './BrandLoader';
@@ -11,11 +12,18 @@ import {
 
 export default function ProtectedRoute({
   children,
+  portalRole = null,
 }) {
   const {
     isAuthenticated,
     loading,
+    portalRoutes,
+    portalSession,
   } = useAuth();
+
+  const {
+    portalToken,
+  } = useParams();
 
   const location =
     useLocation();
@@ -41,6 +49,34 @@ export default function ProtectedRoute({
         replace
       />
     );
+  }
+
+  if (portalRole) {
+    const expectedToken =
+      portalRole === 'admin'
+        ? portalSession
+            ?.adminToken
+        : portalSession
+            ?.customerToken;
+
+    if (
+      !expectedToken ||
+      portalToken !==
+        expectedToken
+    ) {
+      return (
+        <Navigate
+          to={
+            portalRole === 'admin'
+              ? portalRoutes
+                  .adminAccess
+              : portalRoutes
+                  .customerBase
+          }
+          replace
+        />
+      );
+    }
   }
 
   return children;

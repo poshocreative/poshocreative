@@ -12,11 +12,12 @@ import {
 } from 'lucide-react';
 
 import {
-  Link,
   Navigate,
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
+
+import Link from '../components/PortalLink';
 
 import {
   isAdminEmail,
@@ -32,6 +33,7 @@ export default function Login() {
     isAuthenticated,
     loading,
     user,
+    portalRoutes,
   } = useAuth();
 
   const navigate =
@@ -42,11 +44,21 @@ export default function Login() {
   ] =
     useSearchParams();
 
-  const next =
+  const requestedNext =
     searchParams.get(
       'next',
     ) ||
-    '/dashboard';
+    '';
+
+  const publicProtectedNext =
+    requestedNext ===
+      '/order' ||
+    requestedNext
+      .startsWith(
+        '/payment-return',
+      )
+      ? requestedNext
+      : '';
 
   const [
     form,
@@ -87,7 +99,10 @@ export default function Login() {
     ) {
       return (
         <Navigate
-          to="/admin/access"
+          to={
+            portalRoutes
+              .adminAccess
+          }
           replace
         />
       );
@@ -95,7 +110,11 @@ export default function Login() {
 
     return (
       <Navigate
-        to={next}
+        to={
+          publicProtectedNext ||
+          portalRoutes
+            .customerBase
+        }
         replace
       />
     );
@@ -145,6 +164,8 @@ export default function Login() {
         data,
         error:
           signInError,
+        portalRoutes:
+          nextPortalRoutes,
       } =
         await signIn(
           form,
@@ -198,7 +219,8 @@ export default function Login() {
         )
       ) {
         navigate(
-          '/admin/access',
+          nextPortalRoutes
+            .adminAccess,
           {
             replace: true,
           },
@@ -208,7 +230,9 @@ export default function Login() {
       }
 
       navigate(
-        next,
+        publicProtectedNext ||
+          nextPortalRoutes
+            .customerBase,
         {
           replace: true,
         },
@@ -410,7 +434,11 @@ export default function Login() {
             <p className="auth-switch-copy">
               New to Posho Creative?{' '}
               <Link
-                to={`/signup?next=${encodeURIComponent(next)}`}
+                to={
+                  publicProtectedNext
+                    ? `/signup?next=${encodeURIComponent(publicProtectedNext)}`
+                    : '/signup'
+                }
               >
                 Create an account
               </Link>

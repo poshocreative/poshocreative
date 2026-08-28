@@ -102,8 +102,6 @@ const privatePrefixes = [
   '/signup',
   '/email-verified',
   '/order',
-  '/dashboard',
-  '/admin',
   '/404',
 ];
 
@@ -176,6 +174,10 @@ export default function SeoManager() {
 
   useEffect(() => {
     const privatePage =
+      /^\/[wm]\/[a-f0-9]{64}(?:\/|$)/
+        .test(
+          pathname,
+        ) ||
       privatePrefixes.some(
         (prefix) =>
           pathname ===
@@ -233,9 +235,16 @@ export default function SeoManager() {
     const canonical =
       ensureCanonical();
 
+    const sharePath =
+      privatePage
+        ? '/'
+        : pathname === '/'
+          ? '/'
+          : pathname;
+
     canonical.setAttribute(
       'href',
-      `${SITE_URL}${pathname === '/' ? '/' : pathname}`,
+      `${SITE_URL}${sharePath}`,
     );
 
     const ogTitle =
@@ -277,7 +286,7 @@ export default function SeoManager() {
 
     ogUrl.setAttribute(
       'content',
-      `${SITE_URL}${pathname === '/' ? '/' : pathname}`,
+      `${SITE_URL}${sharePath}`,
     );
   }, [
     pathname,

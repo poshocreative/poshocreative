@@ -6,6 +6,7 @@ import {
 import {
   Navigate,
   useLocation,
+  useParams,
 } from 'react-router-dom';
 
 import BrandLoader from './BrandLoader';
@@ -27,7 +28,13 @@ export default function AdminProtectedRoute({
   const {
     isAuthenticated,
     loading,
+    portalRoutes,
+    portalSession,
   } = useAuth();
+
+  const {
+    portalToken,
+  } = useParams();
 
   const [
     state,
@@ -111,7 +118,22 @@ export default function AdminProtectedRoute({
   if (!isAuthenticated) {
     return (
       <Navigate
-        to="/login?next=%2Fadmin"
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  if (
+    portalToken !==
+      portalSession
+        ?.adminToken
+  ) {
+    return (
+      <Navigate
+        to={
+          portalRoutes.adminAccess
+        }
         replace
       />
     );
@@ -131,7 +153,10 @@ export default function AdminProtectedRoute({
   ) {
     return (
       <Navigate
-        to="/dashboard"
+        to={
+          portalRoutes
+            .customerBase
+        }
         replace
       />
     );
@@ -140,7 +165,10 @@ export default function AdminProtectedRoute({
   if (!state.hasAccess) {
     return (
       <Navigate
-        to="/admin/access"
+        to={
+          portalRoutes
+            .adminAccess
+        }
         replace
       />
     );

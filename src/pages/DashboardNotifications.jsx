@@ -28,6 +28,10 @@ import {
 import BrandLoader from '../components/BrandLoader';
 
 import {
+  useAuth,
+} from '../context/AuthContext';
+
+import {
   formatMoney,
 } from '../lib/orders';
 
@@ -43,6 +47,10 @@ import {
   markAllActivityNotificationsRead,
   notificationMatchesFilter,
 } from '../lib/notificationCenter';
+
+import {
+  resolvePortalPath,
+} from '../lib/portalSession';
 
 const filters = [
   {
@@ -271,6 +279,10 @@ function NotificationIcon({
 export default function DashboardNotifications() {
   const navigate =
     useNavigate();
+
+  const {
+    portalRoutes,
+  } = useAuth();
 
   const [
     notifications,
@@ -636,7 +648,10 @@ export default function DashboardNotifications() {
         );
 
       navigate(
-        destination.path,
+        resolvePortalPath(
+          destination.path,
+          portalRoutes,
+        ),
       );
     };
 

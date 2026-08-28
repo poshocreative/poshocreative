@@ -22,9 +22,10 @@ import {
 } from 'lucide-react';
 
 import {
-  Link,
   useSearchParams,
 } from 'react-router-dom';
+
+import Link from '../components/PortalLink';
 
 import {
   useAuth,

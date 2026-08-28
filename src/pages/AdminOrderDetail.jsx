@@ -21,9 +21,10 @@ import {
 } from 'lucide-react';
 
 import {
-  Link,
   useParams,
 } from 'react-router-dom';
+
+import Link from '../components/PortalLink';
 
 import AdminPaymentAttempts from '../components/AdminPaymentAttempts';
 import BrandLoader from '../components/BrandLoader';

@@ -21,9 +21,7 @@ import {
   XCircle,
 } from 'lucide-react';
 
-import {
-  Link,
-} from 'react-router-dom';
+import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
 

@@ -28,80 +28,62 @@ import {
   useAuth,
 } from '../context/AuthContext';
 
-const navigation = [
+const navigationItems = [
   {
-    to: '/admin',
+    suffix: '',
     end: true,
     label: 'Overview',
     icon:
       LayoutDashboard,
   },
   {
-    to: '/admin/orders',
+    suffix: 'orders',
     label: 'Orders',
     icon:
       FolderKanban,
   },
   {
-    to: '/admin/customers',
+    suffix: 'customers',
     label: 'Clients',
     icon:
       UsersRound,
   },
   {
-    to: '/admin/quotes',
+    suffix: 'quotes',
     label: 'Quotes',
     icon:
       BadgeDollarSign,
   },
   {
-    to: '/admin/payments',
+    suffix: 'payments',
     label: 'Payments',
     icon:
       ReceiptText,
   },
   {
-    to: '/admin/pricing',
+    suffix: 'pricing',
     label: 'Pricing',
     icon:
       Settings2,
   },
 ];
 
-const mobilePrimary =
-  navigation.slice(
-    0,
-    3,
-  );
-
-const mobileSecondary =
-  navigation.slice(
-    3,
-  );
-
 function routeMatches(
   pathname,
   route,
 ) {
-  if (
-    route ===
-    '/admin'
-  ) {
-    return (
-      pathname ===
-      '/admin'
-    );
-  }
-
-  return pathname
-    .startsWith(
-      route,
-    );
+  return (
+    pathname === route ||
+    pathname.startsWith(
+      `${route}/`,
+    )
+  );
 }
 
 export default function AdminShell() {
   const {
     signOut,
+    adminPath,
   } =
     useAuth();
 
@@ -116,6 +98,29 @@ export default function AdminShell() {
     setMoreOpen,
   ] =
     useState(false);
+
+  const navigation =
+    useMemo(
+      () =>
+        navigationItems.map(
+          (item) => ({
+            ...item,
+            to:
+              adminPath(
+                item.suffix,
+              ),
+          }),
+        ),
+      [
+        adminPath,
+      ],
+    );
+
+  const mobilePrimary =
+    navigation.slice(0, 3);
+
+  const mobileSecondary =
+    navigation.slice(3);
 
   const currentTitle =
     useMemo(() => {
@@ -137,6 +142,7 @@ export default function AdminShell() {
       );
     }, [
       location.pathname,
+      navigation,
     ]);
 
   const moreActive =

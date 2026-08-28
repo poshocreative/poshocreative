@@ -35,6 +35,7 @@ export default function AdminAccess() {
     user,
     signOut,
     loading,
+    portalRoutes,
   } = useAuth();
 
   const [checking, setChecking] =
@@ -108,7 +109,8 @@ export default function AdminAccess() {
             state.hasAccess
           ) {
             navigate(
-              '/admin',
+              portalRoutes
+                .adminBase,
               {
                 replace: true,
               },
@@ -146,6 +148,7 @@ export default function AdminAccess() {
     loading,
     user,
     navigate,
+    portalRoutes.adminBase,
   ]);
 
   if (
@@ -154,7 +157,7 @@ export default function AdminAccess() {
   ) {
     return (
       <Navigate
-        to="/login?next=%2Fadmin%2Faccess"
+        to="/login"
         replace
       />
     );
@@ -166,7 +169,10 @@ export default function AdminAccess() {
   ) {
     return (
       <Navigate
-        to="/dashboard"
+        to={
+          portalRoutes
+            .customerBase
+        }
         replace
       />
     );
@@ -196,7 +202,8 @@ export default function AdminAccess() {
         );
 
         navigate(
-          '/admin',
+          portalRoutes
+            .adminBase,
           {
             replace: true,
           },

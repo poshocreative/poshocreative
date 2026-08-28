@@ -17,9 +17,14 @@ import {
 } from 'lucide-react';
 
 import {
-  Link,
   useParams,
 } from 'react-router-dom';
+
+import Link from '../components/PortalLink';
+
+import {
+  useAuth,
+} from '../context/AuthContext';
 
 import BrandLoader from '../components/BrandLoader';
 
@@ -37,6 +42,10 @@ import {
 import {
   getPartPaymentRequests,
 } from '../lib/projectFinance';
+
+import {
+  resolvePortalPath,
+} from '../lib/portalSession';
 
 function MethodIcon({
   method,
@@ -64,6 +73,10 @@ export default function DashboardPay() {
     reference,
   } =
     useParams();
+
+  const {
+    portalRoutes,
+  } = useAuth();
 
   const [
     order,
@@ -347,7 +360,10 @@ export default function DashboardPay() {
           result?.success
         ) {
           window.location.assign(
-            `/dashboard/orders/${reference}`,
+            resolvePortalPath(
+              `/dashboard/orders/${reference}`,
+              portalRoutes,
+            ),
           );
 
           return;

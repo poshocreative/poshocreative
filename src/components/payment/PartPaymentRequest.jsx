@@ -13,7 +13,7 @@ import {
   XCircle,
 } from 'lucide-react';
 
-import { Link } from 'react-router-dom';
+import Link from '../PortalLink';
 
 import { formatMoney } from '../../lib/orders';
 import {

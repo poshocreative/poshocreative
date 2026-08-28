@@ -11,6 +11,14 @@ import {
   supabase,
 } from '../lib/supabase';
 
+import {
+  appendPortalPath,
+  clearPortalSession,
+  createPortalSession,
+  ensurePortalSession,
+  getPortalRoutes,
+} from '../lib/portalSession';
+
 const AuthContext =
   createContext(null);
 
@@ -41,6 +49,11 @@ export function AuthProvider({
     profileLoading,
     setProfileLoading,
   ] = useState(false);
+
+  const [
+    portalSession,
+    setPortalSession,
+  ] = useState(null);
 
   const loadProfile =
     useCallback(
@@ -154,6 +167,15 @@ export function AuthProvider({
               null,
           );
 
+          setPortalSession(
+            initialSession?.user?.id
+              ? ensurePortalSession(
+                  initialSession
+                    .user.id,
+                )
+              : null,
+          );
+
           if (
             initialSession
               ?.user?.id
@@ -206,6 +228,19 @@ export function AuthProvider({
               nextSession?.user ||
                 null,
             );
+
+            setPortalSession(
+              nextSession?.user?.id
+                ? ensurePortalSession(
+                    nextSession
+                      .user.id,
+                  )
+                : null,
+            );
+
+            if (!nextSession) {
+              clearPortalSession();
+            }
 
             if (
               nextSession
@@ -318,9 +353,27 @@ export function AuthProvider({
               password,
             });
 
+        const nextPortalSession =
+          !error &&
+          data?.user?.id
+            ? createPortalSession(
+                data.user.id,
+              )
+            : null;
+
+        if (nextPortalSession) {
+          setPortalSession(
+            nextPortalSession,
+          );
+        }
+
         return {
           data,
           error,
+          portalRoutes:
+            getPortalRoutes(
+              nextPortalSession,
+            ),
         };
       } catch (error) {
         return {
@@ -340,9 +393,11 @@ export function AuthProvider({
             .signOut();
 
         if (!error) {
+          clearPortalSession();
           setSession(null);
           setUser(null);
           setProfile(null);
+          setPortalSession(null);
         }
 
         return {
@@ -374,10 +429,18 @@ export function AuthProvider({
 
   const value =
     useMemo(
-      () => ({
+      () => {
+        const portalRoutes =
+          getPortalRoutes(
+            portalSession,
+          );
+
+        return ({
         session,
         user,
         profile,
+        portalSession,
+        portalRoutes,
 
         loading,
         profileLoading,
@@ -389,13 +452,29 @@ export function AuthProvider({
         signIn,
         signOut,
         refreshProfile,
-      }),
+        customerPath:
+          (suffix = '') =>
+            appendPortalPath(
+              portalRoutes
+                .customerBase,
+              suffix,
+            ),
+        adminPath:
+          (suffix = '') =>
+            appendPortalPath(
+              portalRoutes
+                .adminBase,
+              suffix,
+            ),
+      });
+      },
       [
         session,
         user,
         profile,
         loading,
         profileLoading,
+        portalSession,
         refreshProfile,
       ],
     );

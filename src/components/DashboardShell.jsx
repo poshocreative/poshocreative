@@ -33,10 +33,9 @@ import {
   getUnreadNotificationCount,
 } from '../lib/notificationCenter';
 
-const navigation = [
+const navigationItems = [
   {
-    to:
-      '/dashboard',
+    suffix: '',
 
     end:
       true,
@@ -48,8 +47,7 @@ const navigation = [
       LayoutDashboard,
   },
   {
-    to:
-      '/dashboard/orders',
+    suffix: 'orders',
 
     label:
       'Projects',
@@ -58,8 +56,7 @@ const navigation = [
       FolderKanban,
   },
   {
-    to:
-      '/dashboard/payments',
+    suffix: 'payments',
 
     label:
       'Payments',
@@ -68,8 +65,7 @@ const navigation = [
       ReceiptText,
   },
   {
-    to:
-      '/dashboard/files',
+    suffix: 'files',
 
     label:
       'Files',
@@ -78,8 +74,7 @@ const navigation = [
       FileText,
   },
   {
-    to:
-      '/dashboard/notifications',
+    suffix: 'notifications',
 
     label:
       'Updates',
@@ -88,8 +83,7 @@ const navigation = [
       Bell,
   },
   {
-    to:
-      '/dashboard/profile',
+    suffix: 'profile',
 
     label:
       'Profile',
@@ -99,35 +93,16 @@ const navigation = [
   },
 ];
 
-const mobilePrimary =
-  navigation.slice(
-    0,
-    3,
-  );
-
-const mobileSecondary =
-  navigation.slice(
-    3,
-  );
-
 function routeMatches(
   pathname,
   route,
 ) {
-  if (
-    route ===
-    '/dashboard'
-  ) {
-    return (
-      pathname ===
-      '/dashboard'
-    );
-  }
-
-  return pathname
-    .startsWith(
-      route,
-    );
+  return (
+    pathname === route ||
+    pathname.startsWith(
+      `${route}/`,
+    )
+  );
 }
 
 export default function DashboardShell() {
@@ -135,6 +110,7 @@ export default function DashboardShell() {
     profile,
     user,
     signOut,
+    customerPath,
   } =
     useAuth();
 
@@ -155,6 +131,29 @@ export default function DashboardShell() {
     setMoreOpen,
   ] =
     useState(false);
+
+  const navigation =
+    useMemo(
+      () =>
+        navigationItems.map(
+          (item) => ({
+            ...item,
+            to:
+              customerPath(
+                item.suffix,
+              ),
+          }),
+        ),
+      [
+        customerPath,
+      ],
+    );
+
+  const mobilePrimary =
+    navigation.slice(0, 3);
+
+  const mobileSecondary =
+    navigation.slice(3);
 
   const fullName =
     profile?.full_name ||
@@ -198,6 +197,7 @@ export default function DashboardShell() {
       );
     }, [
       location.pathname,
+      navigation,
     ]);
 
   const moreActive =

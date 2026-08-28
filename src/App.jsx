@@ -47,19 +47,15 @@ export default function App() {
     useLocation();
 
   const adminArea =
-    location.pathname ===
-      '/admin' ||
-    location.pathname
-      .startsWith(
-        '/admin/',
+    /^\/m\/[a-f0-9]{64}(?:\/|$)/
+      .test(
+        location.pathname,
       );
 
   const clientWorkspace =
-    location.pathname ===
-      '/dashboard' ||
-    location.pathname
-      .startsWith(
-        '/dashboard/',
+    /^\/w\/[a-f0-9]{64}(?:\/|$)/
+      .test(
+        location.pathname,
       );
 
   const portalArea =
@@ -138,9 +134,9 @@ export default function App() {
         />
 
         <Route
-          path="/dashboard"
+          path="/w/:portalToken"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute portalRole="customer">
               <DashboardShell />
             </ProtectedRoute>
           }
@@ -187,16 +183,16 @@ export default function App() {
         </Route>
 
         <Route
-          path="/admin/access"
+          path="/m/:portalToken/access"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute portalRole="admin">
               <AdminAccess />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin"
+          path="/m/:portalToken"
           element={
             <AdminProtectedRoute>
               <AdminShell />
