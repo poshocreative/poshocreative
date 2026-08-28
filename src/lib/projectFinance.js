@@ -14,7 +14,7 @@ function isPartPaymentSchemaUnavailable(error) {
   const message = String(error?.message || '').toLowerCase();
 
   return (
-    ['42P01', '42883', 'PGRST202', 'PGRST205'].includes(code) ||
+    ['42P01', '42703', '42883', 'PGRST202', 'PGRST205'].includes(code) ||
     message.includes('part_payment_requests') ||
     message.includes('request_project_part_payment') ||
     message.includes('admin_review_part_payment') ||
@@ -36,6 +36,7 @@ export async function getPartPaymentState(orderId) {
       id,
       order_id,
       reason,
+      requested_amount_kobo,
       status,
       approved_amount_kobo,
       approval_expires_at,
@@ -73,11 +74,16 @@ export async function getPartPaymentRequests(orderId) {
   return state.requests;
 }
 
-export async function requestProjectPartPayment({ orderId, reason }) {
+export async function requestProjectPartPayment({
+  orderId,
+  requestedAmountKobo,
+  reason = '',
+}) {
   const { data, error } = await supabase.rpc(
     'request_project_part_payment',
     {
       p_order_id: orderId,
+      p_requested_amount_kobo: requestedAmountKobo,
       p_reason: reason.trim(),
     },
   );

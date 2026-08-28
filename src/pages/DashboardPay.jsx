@@ -211,13 +211,20 @@ export default function DashboardPay() {
             quote.paymentScope !==
               'approved_installment';
 
+          const pendingRequest =
+            partPaymentState.requests.find(
+              (request) => request.status === 'pending',
+            );
+
           setCheckoutBlocked(
-            installmentMismatch,
+            Boolean(pendingRequest) || installmentMismatch,
           );
 
-          if (
-            installmentMismatch
-          ) {
+          if (pendingRequest) {
+            setError(
+              'Your part-payment request is awaiting Management review. Payment will be enabled here as soon as it is approved.',
+            );
+          } else if (installmentMismatch) {
             setError(
               'Your installment is approved, but the installment checkout is still being updated. Payment has been paused so you are not charged the full balance. Please try again shortly.',
             );

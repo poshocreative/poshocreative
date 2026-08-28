@@ -34,6 +34,12 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function dateInputFromNow(days) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
 export default function AdminPaymentRequestManager({
   orderId,
   outstandingKobo,
@@ -82,9 +88,12 @@ export default function AdminPaymentRequestManager({
   const openReview = (request) => {
     setSelectedRequest(request);
     setForm({
-      amount: '',
-      approvalExpiry: '',
-      balanceDue: '',
+      amount:
+        request.requested_amount_kobo > 0
+          ? String(request.requested_amount_kobo / 100)
+          : '',
+      approvalExpiry: dateInputFromNow(7),
+      balanceDue: dateInputFromNow(37),
       note: '',
       allowWorkToStart: false,
     });
@@ -97,7 +106,12 @@ export default function AdminPaymentRequestManager({
       return;
     }
 
-    const amountKobo = Math.round(Number(form.amount) * 100);
+    const requestedAmountKobo = Number(
+      selectedRequest.requested_amount_kobo || 0,
+    );
+    const amountKobo = requestedAmountKobo > 0
+      ? requestedAmountKobo
+      : Math.round(Number(form.amount) * 100);
 
     if (
       decision === 'approve' &&
@@ -167,8 +181,8 @@ export default function AdminPaymentRequestManager({
           <span>PAYMENT ARRANGEMENTS</span>
           <h2>Part-payment requests</h2>
           <p className="admin-card-description">
-            Review the customer's reason, then approve a controlled installment
-            or decline it with a clear explanation.
+            Review the amount requested for this project, then approve it or
+            decline it with a clear explanation.
           </p>
         </div>
         <HandCoins size={22} />
@@ -209,6 +223,11 @@ export default function AdminPaymentRequestManager({
                 <small>{formatDate(request.created_at)}</small>
               </div>
               <p>{request.reason}</p>
+              {request.requested_amount_kobo > 0 && (
+                <strong className="finance-requested-amount">
+                  Requested: {formatMoney(request.requested_amount_kobo)}
+                </strong>
+              )}
               {request.approved_amount_kobo && (
                 <strong className="finance-approved-amount">
                   Approved: {formatMoney(request.approved_amount_kobo)}
@@ -238,23 +257,37 @@ export default function AdminPaymentRequestManager({
             <CalendarClock size={21} />
           </div>
 
+          {selectedRequest.requested_amount_kobo > 0 && (
+            <div className="finance-review-requested-amount">
+              <span>Customer requested</span>
+              <strong>
+                {formatMoney(selectedRequest.requested_amount_kobo)}
+              </strong>
+              <small>
+                Approving accepts this exact installment for the project.
+              </small>
+            </div>
+          )}
+
           <div className="finance-review-grid">
-            <label>
-              <span>Approved installment in Naira</span>
-              <input
-                type="number"
-                min="1"
-                step="0.01"
-                value={form.amount}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    amount: event.target.value,
-                  }))
-                }
-                placeholder="e.g. 50000"
-              />
-            </label>
+            {!selectedRequest.requested_amount_kobo && (
+              <label>
+                <span>Approved installment in Naira</span>
+                <input
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  value={form.amount}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      amount: event.target.value,
+                    }))
+                  }
+                  placeholder="Legacy request amount"
+                />
+              </label>
+            )}
             <label>
               <span>Installment approval expires</span>
               <input

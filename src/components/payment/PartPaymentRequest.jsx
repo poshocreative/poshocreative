@@ -53,6 +53,7 @@ export default function PartPaymentRequest({
 }) {
   const [requests, setRequests] = useState([]);
   const [available, setAvailable] = useState(true);
+  const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -109,10 +110,21 @@ export default function PartPaymentRequest({
   const submit = async (event) => {
     event.preventDefault();
     const cleanReason = reason.trim();
+    const requestedAmountKobo = Math.round(Number(amount) * 100);
 
-    if (cleanReason.length < 10) {
+    if (
+      !Number.isFinite(requestedAmountKobo) ||
+      requestedAmountKobo <= 0
+    ) {
       setError(
-        'Please give Management a short explanation of at least 10 characters.',
+        'Enter the amount you would like Management to approve.',
+      );
+      return;
+    }
+
+    if (requestedAmountKobo >= outstandingKobo) {
+      setError(
+        'The requested part payment must be lower than the outstanding project balance.',
       );
       return;
     }
@@ -121,7 +133,12 @@ export default function PartPaymentRequest({
       setSubmitting(true);
       setError('');
       setSuccess('');
-      await requestProjectPartPayment({ orderId, reason: cleanReason });
+      await requestProjectPartPayment({
+        orderId,
+        requestedAmountKobo,
+        reason: cleanReason,
+      });
+      setAmount('');
       setReason('');
       setSuccess('Your request has been sent to Management for review.');
       await load();
@@ -139,8 +156,8 @@ export default function PartPaymentRequest({
           <span>PAYMENT FLEXIBILITY</span>
           <h3>Request a part-payment arrangement</h3>
           <p>
-            Ask Management to approve a smaller first installment. Management
-            sets the approved amount and payment dates.
+            Enter the installment you can pay for this project. Management will
+            review that exact amount before payment is enabled.
           </p>
         </div>
         <HandCoins size={23} />
@@ -198,6 +215,16 @@ export default function PartPaymentRequest({
             </div>
           )}
 
+          {latestRequest.requested_amount_kobo > 0 &&
+            latestRequest.status !== 'approved' && (
+            <div className="finance-requested-amount-line">
+              <span>Amount requested</span>
+              <strong>
+                {formatMoney(latestRequest.requested_amount_kobo)}
+              </strong>
+            </div>
+          )}
+
           {(latestRequest.admin_note || latestRequest.decline_reason) && (
             <p className="finance-admin-note">
               <strong>Management note:</strong>{' '}
@@ -219,13 +246,29 @@ export default function PartPaymentRequest({
       {!loading && available && !activeRequest && outstandingKobo > 0 && (
         <form onSubmit={submit} className="finance-request-form">
           <label>
-            <span>Why do you need a part-payment arrangement?</span>
+            <span>Amount you want to pay now (NGN)</span>
+            <input
+              type="number"
+              min="1"
+              max={Math.max(outstandingKobo / 100 - 0.01, 1)}
+              step="0.01"
+              inputMode="decimal"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              placeholder="e.g. 50000"
+              required
+            />
+            <small>
+              This must be lower than {formatMoney(outstandingKobo)}.
+            </small>
+          </label>
+          <label>
+            <span>Note to Management (optional)</span>
             <textarea
               value={reason}
               maxLength="3000"
               onChange={(event) => setReason(event.target.value)}
-              placeholder="Briefly explain the arrangement you need so Management can review it fairly."
-              required
+              placeholder="Add any helpful context for your request."
             />
           </label>
           <button type="submit" disabled={submitting}>

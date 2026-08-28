@@ -773,16 +773,22 @@ export default {
             )
             .select(`
               id,
+              status,
               approved_amount_kobo,
-              approval_expires_at
+              approval_expires_at,
+              reviewed_at,
+              created_at
             `)
             .eq(
               'order_id',
               order.id,
             )
-            .eq(
+            .in(
               'status',
-              'approved',
+              [
+                'pending',
+                'approved',
+              ],
             )
             .order(
               'reviewed_at',
@@ -791,14 +797,26 @@ export default {
                   false,
               },
             )
-            .limit(1);
+            .limit(5);
 
         if (partPaymentError) {
           throw partPaymentError;
         }
 
         const approvedRequest =
-          approvedRequests?.[0] ||
+          approvedRequests?.find(
+            (request) =>
+              request.status ===
+              'approved',
+          ) ||
+          null;
+
+        const pendingRequest =
+          approvedRequests?.find(
+            (request) =>
+              request.status ===
+              'pending',
+          ) ||
           null;
 
         const approvalIsCurrent =
@@ -832,6 +850,23 @@ export default {
           approvalIsCurrent
             ? 'approved_installment'
             : 'full_balance';
+
+        if (
+          pendingRequest &&
+          !approvalIsCurrent
+        ) {
+          return Response.json(
+            {
+              success: false,
+
+              message:
+                'Your part-payment request is awaiting Management review. Payment will be enabled after it is approved.',
+            },
+            {
+              status: 409,
+            },
+          );
+        }
 
         if (approvalIsCurrent) {
           const recentAttemptCutoff =
