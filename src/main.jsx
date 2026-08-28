@@ -20,6 +20,7 @@ import "./styles/global.css";
 import "./styles/order.css";
 import "./styles/auth.css";
 import "./styles/dashboard.css";
+import "./styles/workspace.css";
 import "./styles/animations.css";
 
 
@@ -58,6 +59,7 @@ import "./styles/workspace-updates.css";
 // ==========================================================
 
 import "./styles/client-portal-pro.css";
+import "./styles/admin-project-control-center.css";
 import "./styles/admin-project-mobile-v3.css";
 
 

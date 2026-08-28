@@ -28,6 +28,28 @@ import {
   getOrderByReference,
 } from '../lib/orders';
 
+function formatDate(value) {
+  if (!value) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('en-NG', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(value));
+}
+
+function displayFileName(value) {
+  const normalized = String(value || '')
+    .replaceAll('\\', '/')
+    .split('/')
+    .filter(Boolean)
+    .pop();
+
+  return normalized || 'Project file';
+}
+
 export default function DashboardOrderDetail() {
   const {
     reference,
@@ -429,6 +451,11 @@ export default function DashboardOrderDetail() {
                       }
                       className="project-history-item"
                     >
+                      <span
+                        className="project-history-dot"
+                        aria-hidden="true"
+                      />
+
                       <strong>
                         Posho Creative
                       </strong>
@@ -436,6 +463,12 @@ export default function DashboardOrderDetail() {
                       <p>
                         {note.note}
                       </p>
+
+                      {note.created_at && (
+                        <time dateTime={note.created_at}>
+                          {formatDate(note.created_at)}
+                        </time>
+                      )}
                     </article>
                   ),
                 )}
@@ -479,13 +512,15 @@ export default function DashboardOrderDetail() {
                       }
                       className="project-file-row"
                     >
-                      <FileText
-                        size={18}
-                      />
+                      <div className="project-file-icon">
+                        <FileText
+                          size={18}
+                        />
+                      </div>
 
                       <div>
-                        <strong>
-                          {file.original_name}
+                        <strong title={displayFileName(file.original_name)}>
+                          {displayFileName(file.original_name)}
                         </strong>
 
                         <span>
