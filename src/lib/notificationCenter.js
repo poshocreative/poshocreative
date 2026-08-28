@@ -267,6 +267,15 @@ export function getNotificationTitle(
     payment_failed:
       'Payment unsuccessful',
 
+    part_payment_requested:
+      'Part-payment request submitted',
+
+    part_payment_approved:
+      'Part-payment approved',
+
+    part_payment_declined:
+      'Part-payment request declined',
+
     project_started:
       'Project work started',
 
@@ -312,6 +321,48 @@ export function getNotificationMessage(
     notification
       ?.orders ||
     {};
+
+  if (
+    notification?.event_type ===
+    'part_payment_requested'
+  ) {
+    return payload.requested_amount_kobo
+      ? `Your request to pay ${new Intl.NumberFormat('en-NG', {
+          style: 'currency',
+          currency: 'NGN',
+          maximumFractionDigits: 2,
+        }).format(Number(payload.requested_amount_kobo) / 100)} has been sent to Management.`
+      : 'Your part-payment request has been sent to Management for review.';
+  }
+
+  if (
+    notification?.event_type ===
+    'part_payment_approved'
+  ) {
+    const amount = payload.approved_amount_kobo
+      ? new Intl.NumberFormat('en-NG', {
+          style: 'currency',
+          currency: 'NGN',
+          maximumFractionDigits: 2,
+        }).format(Number(payload.approved_amount_kobo) / 100)
+      : 'your requested installment';
+
+    const note =
+      typeof payload.message === 'string' && payload.message.trim()
+        ? ` Management note: ${payload.message.trim()}`
+        : '';
+
+    return `Management approved ${amount}. Secure payment is now available in your workspace.${note}`;
+  }
+
+  if (
+    notification?.event_type ===
+    'part_payment_declined'
+  ) {
+    return payload.reason
+      ? `Management declined this request: ${payload.reason}`
+      : 'Management declined this part-payment request. Open your payment workspace for details.';
+  }
 
   if (
     typeof payload

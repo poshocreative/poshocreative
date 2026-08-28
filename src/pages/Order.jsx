@@ -26,6 +26,7 @@ import {
 } from 'react-router-dom';
 
 import Link from '../components/PortalLink';
+import SocialPlatformGrid from '../components/SocialPlatformGrid';
 
 import {
   useAuth,
@@ -38,6 +39,10 @@ import {
   orderCatalog,
   timelineOptions,
 } from '../data/orderCatalog';
+
+import {
+  getSocialPlatform,
+} from '../data/socialPlatforms';
 
 import {
   createProjectOrder,
@@ -107,6 +112,30 @@ function createEmptyForm(
       '',
 
     referenceLinks:
+      '',
+
+    platform:
+      '',
+
+    profileUrl:
+      '',
+
+    serviceQuantity:
+      '',
+
+    serviceInstructions:
+      '',
+
+    adDurationDays:
+      '',
+
+    adBudgetNgn:
+      '',
+
+    adAudience:
+      '',
+
+    adDestinationUrl:
       '',
 
     budget:
@@ -413,6 +442,32 @@ export default function Order() {
       ],
     );
 
+  const isSocialService =
+    form.service ===
+    'social-media-management';
+
+  const isAdvertisingService =
+    form.service ===
+    'advertising';
+
+  const needsSocialQuantity =
+    [
+      'follower-growth',
+      'post-likes',
+      'post-comments',
+      'page-followers',
+      'channel-subscribers',
+      'video-views',
+      'music-streams',
+    ].includes(
+      form.projectType,
+    );
+
+  const selectedPlatform =
+    getSocialPlatform(
+      form.platform,
+    );
+
   const catalogMap =
     useMemo(
       () =>
@@ -613,6 +668,30 @@ export default function Order() {
 
           projectType:
             '',
+
+          platform:
+            '',
+
+          profileUrl:
+            '',
+
+          serviceQuantity:
+            '',
+
+          serviceInstructions:
+            '',
+
+          adDurationDays:
+            '',
+
+          adBudgetNgn:
+            '',
+
+          adAudience:
+            '',
+
+          adDestinationUrl:
+            '',
         }),
       );
     }
@@ -654,6 +733,30 @@ export default function Order() {
             slug,
 
           projectType:
+            '',
+
+          platform:
+            '',
+
+          profileUrl:
+            '',
+
+          serviceQuantity:
+            '',
+
+          serviceInstructions:
+            '',
+
+          adDurationDays:
+            '',
+
+          adBudgetNgn:
+            '',
+
+          adAudience:
+            '',
+
+          adDestinationUrl:
             '',
         }),
       );
@@ -842,6 +945,101 @@ export default function Order() {
         ) {
           setError(
             'Tell us what you want this project to achieve.',
+          );
+
+          return false;
+        }
+
+        if (
+          (
+            isSocialService ||
+            isAdvertisingService
+          ) &&
+          !form.platform
+        ) {
+          setError(
+            'Choose the social or entertainment platform for this project.',
+          );
+
+          return false;
+        }
+
+        if (
+          isSocialService &&
+          !form.profileUrl
+            .trim()
+        ) {
+          setError(
+            'Enter the profile, page, post or content link for this social-media request.',
+          );
+
+          return false;
+        }
+
+        if (
+          isSocialService &&
+          needsSocialQuantity &&
+          (
+            !Number.isInteger(
+              Number(
+                form.serviceQuantity,
+              ),
+            ) ||
+            Number(
+              form.serviceQuantity,
+            ) <= 0
+          )
+        ) {
+          setError(
+            'Enter a valid quantity for the social-media service.',
+          );
+
+          return false;
+        }
+
+        if (
+          isAdvertisingService &&
+          (
+            !Number.isInteger(
+              Number(
+                form.adDurationDays,
+              ),
+            ) ||
+            Number(
+              form.adDurationDays,
+            ) < 1 ||
+            Number(
+              form.adDurationDays,
+            ) > 365
+          )
+        ) {
+          setError(
+            'Enter how many days the advertising campaign should run, from 1 to 365 days.',
+          );
+
+          return false;
+        }
+
+        if (
+          isAdvertisingService &&
+          Number(
+            form.adBudgetNgn,
+          ) <= 0
+        ) {
+          setError(
+            'Enter the advertising media budget you want Management to review.',
+          );
+
+          return false;
+        }
+
+        if (
+          isAdvertisingService &&
+          !form.adDestinationUrl
+            .trim()
+        ) {
+          setError(
+            'Enter the page, website or content link the advert should promote.',
           );
 
           return false;
@@ -1575,6 +1773,223 @@ export default function Order() {
                   />
                 </div>
 
+                {(isSocialService ||
+                  isAdvertisingService) && (
+                  <section className="order-specialist-brief">
+                    <div className="order-subheading">
+                      <span className="order-section-kicker">
+                        PLATFORM
+                      </span>
+
+                      <h3>
+                        Where should this service run?
+                      </h3>
+
+                      <p>
+                        Select the social or entertainment platform connected to this project.
+                      </p>
+                    </div>
+
+                    <SocialPlatformGrid
+                      value={form.platform}
+                      onChange={(platform) =>
+                        updateField(
+                          'platform',
+                          platform,
+                        )
+                      }
+                    />
+                  </section>
+                )}
+
+                {isSocialService && (
+                  <section className="order-specialist-brief">
+                    <div className="order-subheading">
+                      <span className="order-section-kicker">
+                        SOCIAL SERVICE DETAILS
+                      </span>
+
+                      <h3>
+                        Tell us exactly what to promote.
+                      </h3>
+
+                      <p>
+                        Management uses these details to confirm availability, pricing and delivery before payment.
+                      </p>
+                    </div>
+
+                    <div className="order-two-column-fields">
+                      <div className="order-field">
+                        <label htmlFor="profileUrl">
+                          Profile, page, post or content link
+                        </label>
+
+                        <input
+                          id="profileUrl"
+                          type="url"
+                          value={form.profileUrl}
+                          onChange={(event) =>
+                            updateField(
+                              'profileUrl',
+                              event.target.value,
+                            )
+                          }
+                          placeholder="https://..."
+                        />
+                      </div>
+
+                      {needsSocialQuantity && (
+                        <div className="order-field">
+                          <label htmlFor="serviceQuantity">
+                            Quantity requested
+                          </label>
+
+                          <input
+                            id="serviceQuantity"
+                            type="number"
+                            min="1"
+                            max="100000000"
+                            step="1"
+                            inputMode="numeric"
+                            value={form.serviceQuantity}
+                            onChange={(event) =>
+                              updateField(
+                                'serviceQuantity',
+                                event.target.value,
+                              )
+                            }
+                            placeholder="Example: 1,000"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="order-field">
+                      <label htmlFor="serviceInstructions">
+                        Campaign instructions
+                        <span>Optional</span>
+                      </label>
+
+                      <textarea
+                        id="serviceInstructions"
+                        value={form.serviceInstructions}
+                        onChange={(event) =>
+                          updateField(
+                            'serviceInstructions',
+                            event.target.value,
+                          )
+                        }
+                        placeholder="Add comment wording, audience preferences, content details or the name of another platform."
+                      />
+                    </div>
+                  </section>
+                )}
+
+                {isAdvertisingService && (
+                  <section className="order-specialist-brief">
+                    <div className="order-subheading">
+                      <span className="order-section-kicker">
+                        AD CAMPAIGN DETAILS
+                      </span>
+
+                      <h3>
+                        Set the campaign duration and media budget.
+                      </h3>
+
+                      <p>
+                        Management will review the campaign and issue the final payable quote through your secure workspace.
+                      </p>
+                    </div>
+
+                    <div className="order-two-column-fields">
+                      <div className="order-field">
+                        <label htmlFor="adDurationDays">
+                          Campaign duration in days
+                        </label>
+
+                        <input
+                          id="adDurationDays"
+                          type="number"
+                          min="1"
+                          max="365"
+                          step="1"
+                          inputMode="numeric"
+                          value={form.adDurationDays}
+                          onChange={(event) =>
+                            updateField(
+                              'adDurationDays',
+                              event.target.value,
+                            )
+                          }
+                          placeholder="Example: 14"
+                        />
+                      </div>
+
+                      <div className="order-field">
+                        <label htmlFor="adBudgetNgn">
+                          Advertising media budget (NGN)
+                        </label>
+
+                        <input
+                          id="adBudgetNgn"
+                          type="number"
+                          min="1"
+                          step="100"
+                          inputMode="decimal"
+                          value={form.adBudgetNgn}
+                          onChange={(event) =>
+                            updateField(
+                              'adBudgetNgn',
+                              event.target.value,
+                            )
+                          }
+                          placeholder="Example: 50000"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="order-two-column-fields">
+                      <div className="order-field">
+                        <label htmlFor="adDestinationUrl">
+                          Destination or content link
+                        </label>
+
+                        <input
+                          id="adDestinationUrl"
+                          type="url"
+                          value={form.adDestinationUrl}
+                          onChange={(event) =>
+                            updateField(
+                              'adDestinationUrl',
+                              event.target.value,
+                            )
+                          }
+                          placeholder="https://..."
+                        />
+                      </div>
+
+                      <div className="order-field">
+                        <label htmlFor="adAudience">
+                          Target audience
+                          <span>Optional</span>
+                        </label>
+
+                        <input
+                          id="adAudience"
+                          value={form.adAudience}
+                          onChange={(event) =>
+                            updateField(
+                              'adAudience',
+                              event.target.value,
+                            )
+                          }
+                          placeholder="Location, age range or interests"
+                        />
+                      </div>
+                    </div>
+                  </section>
+                )}
+
                 <div className="order-field">
                   <label htmlFor="referenceLinks">
                     Reference links
@@ -2047,6 +2462,52 @@ export default function Order() {
                       </p>
                     </div>
                   </div>
+
+                  {(isSocialService ||
+                    isAdvertisingService) && (
+                    <div className="order-review-section">
+                      <span>
+                        Service details
+                      </span>
+
+                      <div>
+                        <strong>
+                          {selectedPlatform?.name ||
+                            'Platform not selected'}
+                        </strong>
+
+                        {isSocialService && (
+                          <>
+                            <p>
+                              {form.profileUrl}
+                            </p>
+
+                            {needsSocialQuantity && (
+                              <p>
+                                Quantity: {Number(form.serviceQuantity || 0).toLocaleString('en-NG')}
+                              </p>
+                            )}
+                          </>
+                        )}
+
+                        {isAdvertisingService && (
+                          <>
+                            <p>
+                              {form.adDurationDays} day campaign
+                            </p>
+
+                            <p>
+                              Media budget: {formatMoney(Math.round(Number(form.adBudgetNgn || 0) * 100))}
+                            </p>
+
+                            <p>
+                              {form.adDestinationUrl}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="order-review-section">
                     <span>

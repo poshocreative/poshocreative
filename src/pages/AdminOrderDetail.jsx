@@ -28,6 +28,7 @@ import Link from '../components/PortalLink';
 
 import AdminPaymentAttempts from '../components/AdminPaymentAttempts';
 import BrandLoader from '../components/BrandLoader';
+import ProjectServiceDetails from '../components/ProjectServiceDetails';
 import AdminBalanceCollection from '../components/payment/AdminBalanceCollection';
 import AdminPaymentRequestManager from '../components/payment/AdminPaymentRequestManager';
 
@@ -1105,6 +1106,10 @@ export default function AdminOrderDetail() {
               </div>
             )}
           </section>
+
+          <ProjectServiceDetails
+            details={order.service_details}
+          />
 
           <section className="admin-control-card admin-project-files-card">
             <div className="admin-project-section-heading">

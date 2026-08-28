@@ -23,6 +23,8 @@ import {
   updatePaymentMethodEnabled,
 } from '../lib/adminPayments';
 
+import AdminPartPaymentInbox from '../components/payment/AdminPartPaymentInbox';
+
 import {
   formatMoney,
   formatOrderStatus,
@@ -459,6 +461,8 @@ export default function AdminPayments() {
           {success}
         </div>
       )}
+
+      <AdminPartPaymentInbox />
 
       <section className="admin-payment-method-settings">
         <div className="admin-payment-method-settings-heading">

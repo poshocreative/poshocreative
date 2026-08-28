@@ -264,6 +264,12 @@ export default function DashboardShell() {
       () =>
         loadUnreadCount();
 
+    const timer =
+      window.setInterval(
+        refresh,
+        30000,
+      );
+
     window.addEventListener(
       'focus',
       refresh,
@@ -275,6 +281,10 @@ export default function DashboardShell() {
     );
 
     return () => {
+      window.clearInterval(
+        timer,
+      );
+
       window.removeEventListener(
         'focus',
         refresh,

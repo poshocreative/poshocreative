@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -6,6 +7,7 @@ import {
 
 import {
   BadgeDollarSign,
+  BellRing,
   FolderKanban,
   LayoutDashboard,
   LogOut,
@@ -27,6 +29,10 @@ import {
 import {
   useAuth,
 } from '../context/AuthContext';
+
+import {
+  getAdminPendingPartPaymentCount,
+} from '../lib/projectFinance';
 
 const navigationItems = [
   {
@@ -100,6 +106,25 @@ export default function AdminShell() {
   ] =
     useState(false);
 
+  const [
+    pendingPartPaymentCount,
+    setPendingPartPaymentCount,
+  ] = useState(0);
+
+  const loadPendingPartPayments =
+    useCallback(async () => {
+      try {
+        setPendingPartPaymentCount(
+          await getAdminPendingPartPaymentCount(),
+        );
+      } catch (error) {
+        console.error(
+          'Unable to load pending part-payment count:',
+          error,
+        );
+      }
+    }, []);
+
   const navigation =
     useMemo(
       () =>
@@ -110,10 +135,15 @@ export default function AdminShell() {
               adminPath(
                 item.suffix,
               ),
+            badge:
+              item.suffix === 'payments'
+                ? pendingPartPaymentCount
+                : 0,
           }),
         ),
       [
         adminPath,
+        pendingPartPaymentCount,
       ],
     );
 
@@ -161,6 +191,47 @@ export default function AdminShell() {
     );
   }, [
     location.pathname,
+  ]);
+
+  useEffect(() => {
+    loadPendingPartPayments();
+
+    const refresh = () =>
+      loadPendingPartPayments();
+
+    const timer =
+      window.setInterval(
+        refresh,
+        30000,
+      );
+
+    window.addEventListener(
+      'focus',
+      refresh,
+    );
+
+    window.addEventListener(
+      'posho:admin-part-payments-changed',
+      refresh,
+    );
+
+    return () => {
+      window.clearInterval(
+        timer,
+      );
+
+      window.removeEventListener(
+        'focus',
+        refresh,
+      );
+
+      window.removeEventListener(
+        'posho:admin-part-payments-changed',
+        refresh,
+      );
+    };
+  }, [
+    loadPendingPartPayments,
   ]);
 
   useEffect(() => {
@@ -257,6 +328,7 @@ export default function AdminShell() {
               to,
               end,
               label,
+              badge,
               icon:
                 Icon,
             }) => (
@@ -276,6 +348,13 @@ export default function AdminShell() {
                 <strong>
                   {label}
                 </strong>
+
+                {badge > 0 && (
+                  <span className="admin-pro-nav-badge" aria-label={`${badge} pending part-payment requests`}>
+                    <BellRing size={12} />
+                    {badge > 99 ? '99+' : badge}
+                  </span>
+                )}
               </NavLink>
             ),
           )}
@@ -362,6 +441,7 @@ export default function AdminShell() {
             to,
             end,
             label,
+            badge,
             icon:
               Icon,
           }) => (
@@ -379,6 +459,12 @@ export default function AdminShell() {
               <span>
                 {label}
               </span>
+
+              {badge > 0 && (
+                <strong className="admin-pro-mobile-badge">
+                  {badge > 99 ? '99+' : badge}
+                </strong>
+              )}
             </NavLink>
           ),
         )}
@@ -468,6 +554,7 @@ export default function AdminShell() {
             ({
               to,
               label,
+              badge,
               icon:
                 Icon,
             }) => (
@@ -487,6 +574,12 @@ export default function AdminShell() {
                   <strong>
                     {label}
                   </strong>
+
+                  {badge > 0 && (
+                    <span className="admin-pro-sheet-badge">
+                      {badge} pending
+                    </span>
+                  )}
 
                   <small>
                     {label ===

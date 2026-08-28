@@ -24,6 +24,7 @@ import Link from '../components/PortalLink';
 import BrandLoader from '../components/BrandLoader';
 import PartPaymentRequest from '../components/payment/PartPaymentRequest';
 import ProjectFileUploader from '../components/ProjectFileUploader';
+import ProjectServiceDetails from '../components/ProjectServiceDetails';
 
 import {
   formatMoney,
@@ -446,6 +447,10 @@ export default function DashboardOrderDetail() {
               </div>
             </div>
           </section>
+
+          <ProjectServiceDetails
+            details={order.service_details}
+          />
 
           <section className="workspace-panel">
             <div className="workspace-panel-heading">

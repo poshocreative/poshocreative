@@ -1,0 +1,585 @@
+.social-platform-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.social-platform-option {
+  min-width: 0;
+  min-height: 78px;
+  padding: 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+button.social-platform-option {
+  cursor: pointer;
+}
+
+button.social-platform-option:hover,
+.social-platform-option.selected {
+  transform: translateY(-2px);
+  border-color: var(--brand-primary);
+  box-shadow: 0 10px 28px rgba(83, 41, 145, 0.09);
+}
+
+.social-platform-option.selected {
+  background: var(--brand-primary-faint);
+}
+
+.social-platform-logo {
+  position: relative;
+  width: 35px;
+  height: 35px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #f7f5f9;
+}
+
+.social-platform-logo img {
+  position: relative;
+  z-index: 1;
+  width: 21px;
+  height: 21px;
+  object-fit: contain;
+}
+
+.social-platform-logo-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--brand-primary);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.social-platform-option strong {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.social-platform-grid-compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.social-platform-grid-compact .social-platform-option {
+  min-height: 64px;
+}
+
+.order-specialist-brief {
+  padding: 24px;
+  border: 1px solid var(--brand-primary-border);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(108, 43, 217, 0.045), #fff 62%);
+}
+
+.order-section-kicker {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--brand-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.social-commerce-showcase {
+  padding: 40px 0 100px;
+}
+
+.social-commerce-showcase-inner {
+  padding: clamp(30px, 5vw, 64px);
+  border-radius: 32px;
+  background: #121015;
+  color: #fff;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+  gap: 60px;
+  align-items: center;
+}
+
+.social-commerce-copy h2 {
+  max-width: 700px;
+  margin: 16px 0 20px;
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(2.2rem, 4vw, 4.4rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.social-commerce-copy p {
+  max-width: 620px;
+  margin: 0;
+  color: #aaa4b0;
+  line-height: 1.75;
+}
+
+.social-commerce-actions {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.social-commerce-showcase .button-secondary {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.social-commerce-platforms > span {
+  display: block;
+  margin-bottom: 15px;
+  color: #77717d;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.social-commerce-platforms .social-platform-option {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.055);
+  color: #fff;
+}
+
+.social-commerce-platforms .social-platform-logo {
+  background: #fff;
+}
+
+.project-service-details {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.project-service-details-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.project-service-details-heading span,
+.project-service-instructions > span {
+  color: var(--brand-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.project-service-details-heading h3 {
+  margin: 7px 0 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.35rem;
+}
+
+.project-service-platform {
+  padding: 8px 12px 8px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.project-service-platform img,
+.project-service-platform .social-platform-logo > svg {
+  width: 22px;
+  height: 22px;
+}
+
+.project-service-platform .social-platform-logo {
+  width: 30px;
+  height: 30px;
+}
+
+.project-service-platform strong {
+  font-size: 12px;
+}
+
+.project-service-detail-grid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.project-service-detail-grid > div {
+  padding: 16px;
+  border-radius: 14px;
+  background: #f8f7fa;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 10px;
+}
+
+.project-service-detail-grid svg {
+  grid-row: span 2;
+  color: var(--brand-primary);
+}
+
+.project-service-detail-grid span {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.project-service-detail-grid strong {
+  font-size: 13px;
+}
+
+.project-service-link {
+  margin-top: 16px;
+  color: var(--brand-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.project-service-instructions {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.project-service-instructions p {
+  margin: 8px 0 0;
+  color: var(--text-soft);
+  line-height: 1.65;
+}
+
+.admin-pro-nav-badge {
+  margin-left: auto;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #6c2bd9;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.admin-pro-mobile-badge {
+  position: absolute;
+  top: 5px;
+  right: calc(50% - 24px);
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+}
+
+.admin-pro-sheet-badge {
+  display: block;
+  margin-top: 3px;
+  color: #8b5cf6;
+  font-size: 10px;
+}
+
+.admin-part-payment-inbox {
+  margin-bottom: 26px;
+  padding: clamp(22px, 3vw, 32px);
+  border: 1px solid rgba(108, 43, 217, 0.2);
+  border-radius: 24px;
+  background: linear-gradient(140deg, rgba(108, 43, 217, 0.06), #fff 52%);
+}
+
+.admin-part-payment-inbox-heading,
+.admin-part-payment-inbox-actions,
+.admin-part-payment-item,
+.admin-part-payment-item-topline,
+.admin-part-payment-review-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-part-payment-inbox-heading > div:first-child > span,
+.admin-part-payment-review-heading span,
+.admin-part-payment-item-topline > span {
+  color: var(--brand-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.admin-part-payment-inbox-heading h2 {
+  margin: 8px 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.8rem;
+}
+
+.admin-part-payment-inbox-heading p {
+  max-width: 660px;
+  margin: 0;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+.admin-part-payment-inbox-actions > button,
+.admin-part-payment-review-heading > button {
+  width: 39px;
+  height: 39px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--text-soft);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.admin-request-count {
+  min-height: 39px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #17141b;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.admin-part-payment-empty {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  color: var(--text-soft);
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.admin-part-payment-empty svg {
+  color: #1e9a65;
+}
+
+.admin-part-payment-empty strong {
+  color: var(--text);
+}
+
+.admin-part-payment-empty p {
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+
+.admin-part-payment-list {
+  margin-top: 22px;
+  display: grid;
+  gap: 12px;
+}
+
+.admin-part-payment-item {
+  align-items: stretch;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.admin-part-payment-item-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-part-payment-item-topline time {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.admin-part-payment-item h3 {
+  margin: 12px 0 5px;
+  font-size: 1rem;
+}
+
+.admin-part-payment-customer,
+.admin-part-payment-reason {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+.admin-part-payment-reason {
+  max-width: 680px;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+.admin-part-payment-project-link {
+  margin-top: 13px;
+  color: var(--brand-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.admin-part-payment-amounts {
+  min-width: 220px;
+  padding-left: 22px;
+  border-left: 1px solid var(--border);
+  display: grid;
+  align-content: center;
+  gap: 12px;
+}
+
+.admin-part-payment-amounts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.admin-part-payment-amounts span {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.admin-part-payment-amounts strong {
+  font-size: 12px;
+}
+
+.admin-part-payment-review {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  padding: 24px;
+  background: rgba(11, 8, 15, 0.72);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+}
+
+.admin-part-payment-review-card {
+  width: min(660px, 100%);
+  padding: clamp(22px, 4vw, 36px);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 34px 100px rgba(0, 0, 0, 0.25);
+}
+
+.admin-part-payment-review-heading h3 {
+  margin: 7px 0 0;
+  font-size: 1.35rem;
+}
+
+.admin-part-payment-note {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.admin-part-payment-note > span {
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.admin-part-payment-note textarea {
+  min-height: 115px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  resize: vertical;
+}
+
+@media (max-width: 900px) {
+  .social-commerce-showcase-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-part-payment-item {
+    flex-direction: column;
+  }
+
+  .admin-part-payment-amounts {
+    padding: 18px 0 0;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .social-platform-grid,
+  .social-platform-grid-compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .order-specialist-brief {
+    padding: 18px;
+  }
+
+  .social-commerce-showcase {
+    padding: 20px 0 70px;
+  }
+
+  .social-commerce-showcase-inner {
+    padding: 26px 18px;
+    border-radius: 22px;
+    gap: 36px;
+  }
+
+  .social-commerce-actions,
+  .social-commerce-actions .button {
+    width: 100%;
+  }
+
+  .project-service-details-heading,
+  .admin-part-payment-inbox-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .project-service-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-part-payment-inbox {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .admin-part-payment-inbox-actions {
+    width: 100%;
+  }
+
+  .admin-request-count {
+    flex: 1;
+  }
+
+  .finance-review-actions {
+    flex-direction: column;
+  }
+
+  .finance-review-actions > button {
+    width: 100%;
+  }
+}

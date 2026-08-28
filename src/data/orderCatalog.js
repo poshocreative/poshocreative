@@ -132,6 +132,48 @@ export const orderCatalog = [
     icon: Share2,
     projectTypes: [
       {
+        id: 'follower-growth',
+        label: 'Followers & Audience Growth',
+        description:
+          'Request a follower or audience-growth package for a selected platform.',
+      },
+      {
+        id: 'post-likes',
+        label: 'Post Likes',
+        description:
+          'Order an engagement package for a specific social post.',
+      },
+      {
+        id: 'post-comments',
+        label: 'Post Comments',
+        description:
+          'Request a managed comments package with clear campaign instructions.',
+      },
+      {
+        id: 'page-followers',
+        label: 'Page Followers',
+        description:
+          'Grow the following of a business, creator or entertainment page.',
+      },
+      {
+        id: 'channel-subscribers',
+        label: 'Channel Subscribers',
+        description:
+          'Request subscriber growth for an eligible video or creator channel.',
+      },
+      {
+        id: 'video-views',
+        label: 'Video Views',
+        description:
+          'Promote an eligible video to increase its audience and visibility.',
+      },
+      {
+        id: 'music-streams',
+        label: 'Music & Entertainment Streams',
+        description:
+          'Promotional support for music, podcasts and entertainment content.',
+      },
+      {
         id: 'account-management',
         label: 'Account Management',
         description:

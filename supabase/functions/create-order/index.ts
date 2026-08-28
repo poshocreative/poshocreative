@@ -8,6 +8,17 @@ type FileInput = {
   type?: string;
 };
 
+type ServiceDetailsInput = {
+  platform?: string | null;
+  profileUrl?: string | null;
+  quantity?: number | null;
+  instructions?: string | null;
+  adDurationDays?: number | null;
+  adBudgetKobo?: number | null;
+  adAudience?: string | null;
+  adDestinationUrl?: string | null;
+};
+
 type OrderPayload = {
   serviceSlug: string;
   projectType: string;
@@ -17,6 +28,8 @@ type OrderPayload = {
   projectGoal: string;
 
   referenceLinks?: string;
+
+  serviceDetails?: ServiceDetailsInput;
 
   budget: string;
   timeline: string;
@@ -56,6 +69,34 @@ const allowedContacts =
     'whatsapp',
     'email',
     'phone',
+  ]);
+
+const allowedPlatforms =
+  new Set([
+    'instagram',
+    'facebook',
+    'tiktok',
+    'youtube',
+    'x',
+    'linkedin',
+    'snapchat',
+    'telegram',
+    'whatsapp',
+    'spotify',
+    'soundcloud',
+    'twitch',
+    'other',
+  ]);
+
+const quantityBasedSocialServices =
+  new Set([
+    'follower-growth',
+    'post-likes',
+    'post-comments',
+    'page-followers',
+    'channel-subscribers',
+    'video-views',
+    'music-streams',
   ]);
 
 const allowedMimeTypes =
@@ -230,6 +271,59 @@ export default {
             5000,
           );
 
+        const platform =
+          clean(
+            body.serviceDetails
+              ?.platform,
+            60,
+          ).toLowerCase();
+
+        const profileUrl =
+          clean(
+            body.serviceDetails
+              ?.profileUrl,
+            2000,
+          );
+
+        const serviceQuantity =
+          Number(
+            body.serviceDetails
+              ?.quantity,
+          );
+
+        const serviceInstructions =
+          clean(
+            body.serviceDetails
+              ?.instructions,
+            5000,
+          );
+
+        const adDurationDays =
+          Number(
+            body.serviceDetails
+              ?.adDurationDays,
+          );
+
+        const adBudgetKobo =
+          Number(
+            body.serviceDetails
+              ?.adBudgetKobo,
+          );
+
+        const adAudience =
+          clean(
+            body.serviceDetails
+              ?.adAudience,
+            1000,
+          );
+
+        const adDestinationUrl =
+          clean(
+            body.serviceDetails
+              ?.adDestinationUrl,
+            2000,
+          );
+
         const budget =
           clean(
             body.budget,
@@ -358,6 +452,124 @@ export default {
             'Choose a valid contact method.',
           );
         }
+
+        const isSocialService =
+          serviceSlug ===
+          'social-media-management';
+
+        const isAdvertisingService =
+          serviceSlug ===
+          'advertising';
+
+        if (
+          (
+            isSocialService ||
+            isAdvertisingService
+          ) &&
+          !allowedPlatforms.has(
+            platform,
+          )
+        ) {
+          return responseError(
+            'Choose a valid social or entertainment platform.',
+          );
+        }
+
+        if (
+          isSocialService &&
+          !profileUrl
+        ) {
+          return responseError(
+            'Provide the profile, page, post or content link for this request.',
+          );
+        }
+
+        if (
+          isSocialService &&
+          quantityBasedSocialServices.has(
+            projectType,
+          ) &&
+          (
+            !Number.isSafeInteger(
+              serviceQuantity,
+            ) ||
+            serviceQuantity < 1 ||
+            serviceQuantity > 100000000
+          )
+        ) {
+          return responseError(
+            'Enter a valid quantity for the selected social-media service.',
+          );
+        }
+
+        if (
+          isAdvertisingService &&
+          (
+            !Number.isSafeInteger(
+              adDurationDays,
+            ) ||
+            adDurationDays < 1 ||
+            adDurationDays > 365
+          )
+        ) {
+          return responseError(
+            'Advertising duration must be between 1 and 365 days.',
+          );
+        }
+
+        if (
+          isAdvertisingService &&
+          (
+            !Number.isSafeInteger(
+              adBudgetKobo,
+            ) ||
+            adBudgetKobo < 100
+          )
+        ) {
+          return responseError(
+            'Enter a valid advertising media budget.',
+          );
+        }
+
+        if (
+          isAdvertisingService &&
+          !adDestinationUrl
+        ) {
+          return responseError(
+            'Provide the page, website or content link the advert should promote.',
+          );
+        }
+
+        const serviceDetails =
+          isSocialService
+            ? {
+                platform,
+                profile_url:
+                  profileUrl,
+                quantity:
+                  quantityBasedSocialServices.has(
+                    projectType,
+                  )
+                    ? serviceQuantity
+                    : null,
+                instructions:
+                  serviceInstructions ||
+                  null,
+              }
+            : isAdvertisingService
+              ? {
+                  platform,
+                  duration_days:
+                    adDurationDays,
+                  media_budget_kobo:
+                    adBudgetKobo,
+                  target_audience:
+                    adAudience ||
+                    null,
+                  destination_url:
+                    adDestinationUrl,
+                }
+              : {};
 
         const {
           data: catalogItem,
@@ -685,6 +897,9 @@ export default {
                 reference_links:
                   referenceLinks ||
                   null,
+
+                service_details:
+                  serviceDetails,
 
                 budget,
 

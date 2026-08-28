@@ -85,6 +85,52 @@ export async function createProjectOrder({
             referenceLinks:
               form.referenceLinks,
 
+            serviceDetails: {
+              platform:
+                form.platform ||
+                null,
+
+              profileUrl:
+                form.profileUrl ||
+                null,
+
+              quantity:
+                form.serviceQuantity
+                  ? Number(
+                      form.serviceQuantity,
+                    )
+                  : null,
+
+              instructions:
+                form.serviceInstructions ||
+                null,
+
+              adDurationDays:
+                form.adDurationDays
+                  ? Number(
+                      form.adDurationDays,
+                    )
+                  : null,
+
+              adBudgetKobo:
+                form.adBudgetNgn
+                  ? Math.round(
+                      Number(
+                        form.adBudgetNgn,
+                      ) *
+                        100,
+                    )
+                  : null,
+
+              adAudience:
+                form.adAudience ||
+                null,
+
+              adDestinationUrl:
+                form.adDestinationUrl ||
+                null,
+            },
+
             budget:
               form.budget,
 
@@ -378,6 +424,7 @@ export async function getMyOrders() {
         project_title,
         project_description,
         project_goal,
+        service_details,
         budget,
         timeline,
         deadline,
@@ -433,6 +480,7 @@ export async function getOrderByReference(
         project_description,
         project_goal,
         reference_links,
+        service_details,
         budget,
         timeline,
         deadline,

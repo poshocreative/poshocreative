@@ -74,6 +74,73 @@ export async function getPartPaymentRequests(orderId) {
   return state.requests;
 }
 
+export async function getAdminPartPaymentInbox() {
+  const {
+    data,
+    error,
+  } = await supabase
+    .from('part_payment_requests')
+    .select(`
+      id,
+      order_id,
+      reason,
+      requested_amount_kobo,
+      status,
+      created_at,
+      orders (
+        reference,
+        project_title,
+        quoted_amount_kobo,
+        paid_amount_kobo,
+        customers (
+          full_name,
+          email
+        )
+      )
+    `)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    if (isPartPaymentSchemaUnavailable(error)) {
+      return [];
+    }
+
+    throw financeError(
+      error,
+      'Pending part-payment requests could not be loaded.',
+    );
+  }
+
+  return data || [];
+}
+
+export async function getAdminPendingPartPaymentCount() {
+  const {
+    count,
+    error,
+  } = await supabase
+    .from('part_payment_requests')
+    .select('id', {
+      count: 'exact',
+      head: true,
+    })
+    .eq('status', 'pending');
+
+  if (error) {
+    if (isPartPaymentSchemaUnavailable(error)) {
+      return 0;
+    }
+
+    throw financeError(
+      error,
+      'Pending part-payment requests could not be counted.',
+    );
+  }
+
+  return Number(count || 0);
+}
+
 export async function requestProjectPartPayment({
   orderId,
   requestedAmountKobo,
