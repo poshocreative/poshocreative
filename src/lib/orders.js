@@ -353,6 +353,7 @@ export async function getOrderByReference(
     notes,
     payments,
     quotes,
+    costs,
   ] =
     await Promise.all([
       supabase
@@ -482,6 +483,31 @@ export async function getOrderByReference(
               false,
           },
         ),
+
+      supabase
+        .from(
+          'project_cost_items',
+        )
+        .select(`
+          id,
+          title,
+          description,
+          amount_kobo,
+          status,
+          due_at,
+          created_at
+        `)
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
     ]);
 
   return {
@@ -505,6 +531,10 @@ export async function getOrderByReference(
 
     quotes:
       quotes.data ||
+      [],
+
+    costs:
+      costs.data ||
       [],
   };
 }

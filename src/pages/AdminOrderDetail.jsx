@@ -28,6 +28,7 @@ import Link from '../components/PortalLink';
 
 import AdminPaymentAttempts from '../components/AdminPaymentAttempts';
 import BrandLoader from '../components/BrandLoader';
+import AdminBalanceCollection from '../components/payment/AdminBalanceCollection';
 import AdminPaymentRequestManager from '../components/payment/AdminPaymentRequestManager';
 
 import {
@@ -1613,6 +1614,19 @@ export default function AdminOrderDetail() {
           />
 
           {approved &&
+            paid > 0 &&
+            balance > 0 && (
+            <AdminBalanceCollection
+              orderId={order.id}
+              projectValueKobo={quoted}
+              paidKobo={paid}
+              outstandingKobo={balance}
+              costs={order.costs}
+              onUpdated={load}
+            />
+          )}
+
+          {approved &&
             balance > 0 && (
             <AdminPaymentRequestManager
               orderId={order.id}
@@ -1623,6 +1637,7 @@ export default function AdminOrderDetail() {
 
           {approved && (
             <>
+              {paid === 0 && (
               <section className="admin-control-card">
                 <BadgeDollarSign
                   size={22}
@@ -1724,6 +1739,7 @@ export default function AdminOrderDetail() {
                   </button>
                 </form>
               </section>
+              )}
 
               <section className="admin-control-card">
                 <MessageSquareText

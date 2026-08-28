@@ -776,14 +776,19 @@ export default {
           if (
             order
               .payment_status ===
-            'successful'
+              'successful' ||
+            Number(
+              order
+                .paid_amount_kobo ||
+                0,
+            ) > 0
           ) {
             return json(
               {
                 success: false,
 
                 message:
-                  'This project has already been paid.',
+                  'This project has a confirmed payment. Add an additional project cost instead of replacing its original quote.',
               },
               409,
             );
@@ -1020,6 +1025,296 @@ export default {
           return json({
             success: true,
             quote,
+          });
+        }
+
+        /* ====================================================
+           ADD A POST-INSTALLMENT PROJECT COST
+           ==================================================== */
+
+        if (
+          action ===
+          'add_project_cost'
+        ) {
+          const amountKobo =
+            Number(
+              body?.amountKobo,
+            );
+
+          if (
+            Number(
+              order
+                .paid_amount_kobo ||
+                0,
+            ) <= 0
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'An additional cost can be added here after the first confirmed payment.',
+              },
+              409,
+            );
+          }
+
+          if (
+            !Number.isFinite(
+              amountKobo,
+            ) ||
+            amountKobo <= 0
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'Enter a valid additional project cost.',
+              },
+              400,
+            );
+          }
+
+          const {
+            data: result,
+            error: costError,
+          } =
+            await ctx
+              .supabase
+              .rpc(
+                'admin_add_project_cost',
+                {
+                  p_order_id:
+                    order.id,
+
+                  p_title:
+                    clean(
+                      body?.title,
+                      160,
+                    ),
+
+                  p_amount_kobo:
+                    Math.round(
+                      amountKobo,
+                    ),
+
+                  p_description:
+                    clean(
+                      body?.description,
+                      3000,
+                    ) ||
+                    null,
+
+                  p_due_at:
+                    body?.dueAt ||
+                    null,
+                },
+              );
+
+          if (costError) {
+            throw costError;
+          }
+
+          return json({
+            success: true,
+            finance: result,
+          });
+        }
+
+        /* ====================================================
+           REQUEST THE CURRENT REMAINING BALANCE
+           ==================================================== */
+
+        if (
+          action ===
+          'request_remaining_payment'
+        ) {
+          const paid =
+            Number(
+              order
+                .paid_amount_kobo ||
+                0,
+            );
+
+          const projectValue =
+            Number(
+              order
+                .quoted_amount_kobo ||
+                0,
+            );
+
+          const outstanding =
+            Math.max(
+              projectValue -
+                paid,
+              0,
+            );
+
+          if (paid <= 0) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'The first payment must be confirmed before requesting the remaining balance.',
+              },
+              409,
+            );
+          }
+
+          if (outstanding <= 0) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'There is no remaining project balance to request.',
+              },
+              409,
+            );
+          }
+
+          if (
+            [
+              'completed',
+              'cancelled',
+            ].includes(
+              order.status,
+            )
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'This project is not open for another payment.',
+              },
+              409,
+            );
+          }
+
+          const note =
+            clean(
+              body?.note,
+              3000,
+            );
+
+          const dueAt =
+            body?.dueAt
+              ? new Date(
+                  body.dueAt,
+                )
+                  .toISOString()
+              : null;
+
+          const now =
+            new Date()
+              .toISOString();
+
+          const {
+            error: balanceError,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'orders',
+              )
+              .update({
+                payment_status:
+                  'processing',
+
+                customer_action_required:
+                  true,
+
+                customer_action_label:
+                  'Remaining project balance ready for payment',
+
+                last_admin_activity_at:
+                  now,
+              })
+              .eq(
+                'id',
+                order.id,
+              );
+
+          if (balanceError) {
+            throw balanceError;
+          }
+
+          if (note) {
+            await ctx
+              .supabaseAdmin
+              .from(
+                'order_notes',
+              )
+              .insert({
+                order_id:
+                  order.id,
+
+                author_id:
+                  adminUserId,
+
+                note,
+
+                is_internal:
+                  false,
+              });
+          }
+
+          await createNotification(
+            ctx.supabaseAdmin,
+            {
+              order,
+
+              type:
+                'remaining_payment_requested',
+
+              payload: {
+                outstanding_kobo:
+                  outstanding,
+
+                due_at:
+                  dueAt,
+
+                message:
+                  note ||
+                  null,
+              },
+            },
+          );
+
+          await logAdminAction(
+            ctx.supabaseAdmin,
+            {
+              adminUserId,
+
+              orderId:
+                order.id,
+
+              action:
+                'remaining_payment_requested',
+
+              description:
+                `Remaining balance requested for ${order.reference}.`,
+
+              metadata: {
+                outstanding_kobo:
+                  outstanding,
+
+                due_at:
+                  dueAt,
+              },
+            },
+          );
+
+          return json({
+            success: true,
+
+            outstandingKobo:
+              outstanding,
+
+            dueAt,
           });
         }
 

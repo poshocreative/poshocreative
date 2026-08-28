@@ -423,6 +423,7 @@ export async function getAdminOrder(
     files,
     payments,
     history,
+    costs,
   ] =
     await Promise.all([
       supabase
@@ -509,6 +510,23 @@ export async function getAdminOrder(
               false,
           },
         ),
+
+      supabase
+        .from(
+          'project_cost_items',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
     ]);
 
   return {
@@ -532,6 +550,10 @@ export async function getAdminOrder(
 
     history:
       history.data ||
+      [],
+
+    costs:
+      costs.data ||
       [],
   };
 }

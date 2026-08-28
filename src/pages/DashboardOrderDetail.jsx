@@ -10,6 +10,7 @@ import {
   Clock3,
   FileText,
   Info,
+  ReceiptText,
   XCircle,
 } from 'lucide-react';
 
@@ -156,6 +157,21 @@ export default function DashboardOrderDetail() {
         ),
       0,
     );
+
+  const paid =
+    Number(
+      order
+        .paid_amount_kobo ||
+        0,
+    );
+
+  const activeCosts =
+    (order.costs || [])
+      .filter(
+        (cost) =>
+          cost.status ===
+          'active',
+      );
 
   const canPay =
     approved &&
@@ -594,6 +610,52 @@ export default function DashboardOrderDetail() {
                   </strong>
                 </div>
               </div>
+            </section>
+          )}
+
+          {approved &&
+            !cancelled &&
+            activeCosts.length > 0 && (
+            <section className="workspace-panel project-cost-breakdown">
+              <div className="workspace-panel-heading">
+                <div>
+                  <span>ADDITIONAL COSTS</span>
+                  <h3>Project additions</h3>
+                </div>
+                <ReceiptText size={20} />
+              </div>
+
+              <div className="project-cost-list">
+                {activeCosts.map((cost) => (
+                  <div key={cost.id}>
+                    <div>
+                      <strong>{cost.title}</strong>
+                      {cost.description && <span>{cost.description}</span>}
+                    </div>
+                    <strong>{formatMoney(cost.amount_kobo)}</strong>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {canPay &&
+            paid > 0 && (
+            <section className="workspace-panel project-payment-card project-balance-card">
+              <ReceiptText size={22} />
+              <span>PAYMENT DUE</span>
+              <h3>{formatMoney(outstanding)}</h3>
+              <p>
+                Your confirmed payments have been deducted. This is the current
+                remaining project balance, including approved additional costs.
+              </p>
+              <Link
+                to={`/dashboard/orders/${order.reference}/pay`}
+                className="button button-primary"
+              >
+                Pay remaining balance
+                <ArrowRight size={16} />
+              </Link>
             </section>
           )}
 
