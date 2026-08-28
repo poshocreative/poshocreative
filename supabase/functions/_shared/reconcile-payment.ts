@@ -193,6 +193,160 @@ async function diagnostic(
   }
 }
 
+export async function syncSuccessfulPaymentOrder(
+  admin: any,
+  orderId: string,
+) {
+  const {
+    data:
+      successfulPayments,
+    error:
+      totalError,
+  } =
+    await admin
+      .from(
+        'payment_transactions',
+      )
+      .select(
+        'amount_kobo',
+      )
+      .eq(
+        'order_id',
+        orderId,
+      )
+      .eq(
+        'status',
+        'successful',
+      );
+
+  if (totalError) {
+    throw totalError;
+  }
+
+  const totalPaid =
+    (
+      successfulPayments ||
+      []
+    ).reduce(
+      (
+        sum:
+          number,
+        row:
+          any,
+      ) =>
+        sum +
+        Number(
+          row.amount_kobo ||
+            0,
+        ),
+      0,
+    );
+
+  const {
+    data: order,
+    error:
+      orderError,
+  } =
+    await admin
+      .from(
+        'orders',
+      )
+      .select(`
+        id,
+        reference,
+        customer_id,
+        quoted_amount_kobo,
+        status
+      `)
+      .eq(
+        'id',
+        orderId,
+      )
+      .single();
+
+  if (orderError) {
+    throw orderError;
+  }
+
+  const quoteAmount =
+    Number(
+      order
+        .quoted_amount_kobo ||
+        0,
+    );
+
+  const fullyPaid =
+    quoteAmount > 0 &&
+    totalPaid >=
+      quoteAmount;
+
+  const remainingBalanceKobo =
+    Math.max(
+      quoteAmount -
+        totalPaid,
+      0,
+    );
+
+  const orderPatch:
+    any = {
+    paid_amount_kobo:
+      totalPaid,
+
+    payment_status:
+      fullyPaid
+        ? 'successful'
+        : 'processing',
+
+    customer_action_required:
+      !fullyPaid,
+
+    customer_action_label:
+      fullyPaid
+        ? null
+        : 'Payment received — remaining balance outstanding',
+  };
+
+  if (
+    fullyPaid &&
+    ![
+      'completed',
+      'cancelled',
+    ].includes(
+      order.status,
+    )
+  ) {
+    orderPatch.status =
+      'paid';
+  }
+
+  const {
+    error:
+      orderUpdateError,
+  } =
+    await admin
+      .from(
+        'orders',
+      )
+      .update(
+        orderPatch,
+      )
+      .eq(
+        'id',
+        order.id,
+      );
+
+  if (orderUpdateError) {
+    throw orderUpdateError;
+  }
+
+  return {
+    order,
+    totalPaid,
+    fullyPaid,
+    remainingBalanceKobo,
+  };
+}
+
 export async function reconcilePayment(
   admin: any,
   payment: any,
@@ -454,9 +608,18 @@ export async function reconcilePayment(
       charge,
     );
 
+  const providerSucceeded =
+    [
+      'succeeded',
+      'successful',
+    ].includes(
+      providerStatus,
+    );
+
   if (
-    providerStatus !==
-    'succeeded'
+    !providerSucceeded &&
+    payment.status !==
+      'successful'
   ) {
     let localStatus =
       'pending';
@@ -596,56 +759,9 @@ export async function reconcilePayment(
     };
   }
 
-  if (
+  const wasAlreadySuccessful =
     payment.status ===
-    'successful'
-  ) {
-    await admin
-      .from(
-        'payment_transactions',
-      )
-      .update({
-        provider_status:
-          'succeeded',
-
-        provider_response_code:
-          code,
-
-        actual_provider_fee_kobo:
-          providerFee,
-
-        actual_customer_total_kobo:
-          actualCustomerTotal,
-
-        provider_fees:
-          fees,
-
-        provider_payload:
-          safeProviderSummary(
-            charge,
-          ),
-
-        last_checked_at:
-          now,
-
-        attempt_stage:
-          'completed',
-
-        customer_message:
-          null,
-      })
-      .eq(
-        'id',
-        payment.id,
-      );
-
-    return {
-      success: true,
-
-      status:
-        'successful',
-    };
-  }
+    'successful';
 
   const {
     error:
@@ -716,7 +832,9 @@ export async function reconcilePayment(
     payment.id,
     {
       eventType:
-        'payment_verified',
+        wasAlreadySuccessful
+          ? 'payment_reconciled_again'
+          : 'payment_verified',
 
       stage:
         'completed',
@@ -737,149 +855,27 @@ export async function reconcilePayment(
     },
   );
 
-  const {
-    data:
-      successfulPayments,
-    error:
-      totalError,
-  } =
-    await admin
-      .from(
-        'payment_transactions',
-      )
-      .select(
-        'amount_kobo',
-      )
-      .eq(
-        'order_id',
-        payment.order_id,
-      )
-      .eq(
-        'status',
-        'successful',
-      );
-
-  if (
-    totalError
-  ) {
-    throw totalError;
-  }
-
-  const totalPaid =
-    (
-      successfulPayments ||
-      []
-    ).reduce(
-      (
-        sum:
-          number,
-        row: any,
-      ) =>
-        sum +
-        Number(
-          row.amount_kobo ||
-            0,
-        ),
-      0,
+  const projectState =
+    await syncSuccessfulPaymentOrder(
+      admin,
+      payment.order_id,
     );
 
-  const {
-    data: order,
-    error:
-      orderError,
-  } =
-    await admin
-      .from(
-        'orders',
-      )
-      .select(`
-        id,
-        customer_id,
-        quoted_amount_kobo,
-        status
-      `)
-      .eq(
-        'id',
-        payment.order_id,
-      )
-      .single();
-
-  if (
-    orderError
-  ) {
-    throw orderError;
-  }
-
-  const quoteAmount =
-    Number(
-      order
-        .quoted_amount_kobo ||
-        0,
-    );
-
-  const fullyPaid =
-    quoteAmount >
-      0 &&
-    totalPaid >=
-      quoteAmount;
-
-  const orderPatch:
-    any = {
-    paid_amount_kobo:
-      totalPaid,
-
-    payment_status:
-      fullyPaid
-        ? 'successful'
-        : 'processing',
-
-    customer_action_required:
-      !fullyPaid,
-
-    customer_action_label:
-      fullyPaid
-        ? null
-        : 'Payment balance outstanding',
-  };
-
-  if (
-    fullyPaid &&
-    ![
-      'completed',
-      'cancelled',
-    ].includes(
-      order.status,
-    )
-  ) {
-    orderPatch.status =
-      'paid';
-  }
-
-  await admin
-    .from(
-      'orders',
-    )
-    .update(
-      orderPatch,
-    )
-    .eq(
-      'id',
-      order.id,
-    );
-
-  if (
-    fullyPaid
-  ) {
+  if (!wasAlreadySuccessful) {
     await admin
       .from(
         'notification_events',
       )
       .insert({
         order_id:
-          order.id,
+          projectState
+            .order
+            .id,
 
         customer_id:
-          order.customer_id,
+          projectState
+            .order
+            .customer_id,
 
         channel:
           'internal',
@@ -891,6 +887,9 @@ export async function reconcilePayment(
           'pending',
 
         payload: {
+          payment_id:
+            payment.id,
+
           amount_kobo:
             expectedAmount,
 
@@ -905,25 +904,51 @@ export async function reconcilePayment(
 
           provider_transaction_id:
             charge.id,
+
+          project_fully_paid:
+            projectState
+              .fullyPaid,
+
+          remaining_balance_kobo:
+            projectState
+              .remainingBalanceKobo,
         },
       });
   }
 
   return {
-    success:
-      fullyPaid,
+    success: true,
 
     status:
-      fullyPaid
-        ? 'successful'
-        : 'processing',
+      'successful',
 
-    totalPaid,
+    projectFullyPaid:
+      projectState
+        .fullyPaid,
+
+    orderReference:
+      projectState
+        .order
+        .reference,
+
+    totalPaid:
+      projectState
+        .totalPaid,
+
+    remainingBalanceKobo:
+      projectState
+        .remainingBalanceKobo,
 
     providerFeeKobo:
       providerFee,
 
     customerTotalKobo:
       actualCustomerTotal,
+
+    message:
+      projectState
+        .fullyPaid
+        ? 'Flutterwave confirmed the payment. This project is fully paid.'
+        : 'Flutterwave confirmed this payment. The remaining project balance is still outstanding.',
   };
 }

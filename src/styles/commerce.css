@@ -236,6 +236,10 @@
   color: #14744b;
 }
 
+.payment-return-icon.pending svg {
+  animation: payment-return-spin 1s linear infinite;
+}
+
 .payment-return-card h1 {
   margin: 0;
   font-family: 'Manrope', sans-serif;
@@ -897,5 +901,55 @@
   .admin-project-hero {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+.payment-return-balance {
+  width: min(100%, 380px);
+  margin: -8px auto 26px;
+  padding: 14px 16px;
+  border: 1px solid rgba(108, 43, 217, 0.14);
+  border-radius: 12px;
+  background: rgba(108, 43, 217, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  text-align: left;
+}
+
+.payment-return-balance span {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.payment-return-balance strong {
+  color: var(--brand-primary);
+}
+
+.payment-return-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.payment-return-actions .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@keyframes payment-return-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payment-return-icon.pending svg {
+    animation-duration: 2s;
   }
 }

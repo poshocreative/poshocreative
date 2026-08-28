@@ -8,6 +8,7 @@ import {
 
 import {
   reconcilePayment,
+  syncSuccessfulPaymentOrder,
 } from '../_shared/reconcile-payment.ts';
 
 async function diagnostic(
@@ -139,14 +140,40 @@ export default {
           payment.status ===
           'successful'
         ) {
+          const projectState =
+            await syncSuccessfulPaymentOrder(
+              ctx.supabaseAdmin,
+              payment.order_id,
+            );
+
           return Response.json({
             success: true,
 
             status:
               'successful',
 
+            projectFullyPaid:
+              projectState
+                .fullyPaid,
+
+            orderReference:
+              projectState
+                .order
+                .reference,
+
+            totalPaid:
+              projectState
+                .totalPaid,
+
+            remainingBalanceKobo:
+              projectState
+                .remainingBalanceKobo,
+
             message:
-              'Payment has been confirmed.',
+              projectState
+                .fullyPaid
+                ? 'Flutterwave confirmed the payment. This project is fully paid.'
+                : 'Flutterwave confirmed this payment. The remaining project balance is still outstanding.',
           });
         }
 
