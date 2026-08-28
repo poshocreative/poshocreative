@@ -6,9 +6,28 @@ function financeError(error, fallback) {
   return new Error(error?.message || fallback);
 }
 
-export async function getPartPaymentRequests(orderId) {
+export const PART_PAYMENT_UNAVAILABLE_MESSAGE =
+  'Part-payment arrangements are temporarily unavailable while Management completes a payment update. Full secure payment is still available.';
+
+function isPartPaymentSchemaUnavailable(error) {
+  const code = String(error?.code || '').toUpperCase();
+  const message = String(error?.message || '').toLowerCase();
+
+  return (
+    ['42P01', '42883', 'PGRST202', 'PGRST205'].includes(code) ||
+    message.includes('part_payment_requests') ||
+    message.includes('request_project_part_payment') ||
+    message.includes('admin_review_part_payment') ||
+    message.includes('schema cache')
+  );
+}
+
+export async function getPartPaymentState(orderId) {
   if (!orderId) {
-    return [];
+    return {
+      available: true,
+      requests: [],
+    };
   }
 
   const { data, error } = await supabase
@@ -33,10 +52,25 @@ export async function getPartPaymentRequests(orderId) {
     .order('created_at', { ascending: false });
 
   if (error) {
+    if (isPartPaymentSchemaUnavailable(error)) {
+      return {
+        available: false,
+        requests: [],
+      };
+    }
+
     throw financeError(error, 'Part-payment requests could not be loaded.');
   }
 
-  return data || [];
+  return {
+    available: true,
+    requests: data || [],
+  };
+}
+
+export async function getPartPaymentRequests(orderId) {
+  const state = await getPartPaymentState(orderId);
+  return state.requests;
 }
 
 export async function requestProjectPartPayment({ orderId, reason }) {
@@ -49,6 +83,10 @@ export async function requestProjectPartPayment({ orderId, reason }) {
   );
 
   if (error) {
+    if (isPartPaymentSchemaUnavailable(error)) {
+      throw new Error(PART_PAYMENT_UNAVAILABLE_MESSAGE);
+    }
+
     throw financeError(
       error,
       'Your part-payment request could not be submitted.',
@@ -81,6 +119,10 @@ export async function reviewProjectPartPayment({
   );
 
   if (error) {
+    if (isPartPaymentSchemaUnavailable(error)) {
+      throw new Error(PART_PAYMENT_UNAVAILABLE_MESSAGE);
+    }
+
     throw financeError(
       error,
       'The part-payment decision could not be saved.',
@@ -89,4 +131,3 @@ export async function reviewProjectPartPayment({
 
   return data;
 }
-

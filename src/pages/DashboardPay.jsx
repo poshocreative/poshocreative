@@ -40,7 +40,7 @@ import {
 } from '../lib/payments';
 
 import {
-  getPartPaymentRequests,
+  getPartPaymentState,
 } from '../lib/projectFinance';
 
 import {
@@ -168,14 +168,14 @@ export default function DashboardPay() {
 
           const [
             quote,
-            partPaymentRequests,
+            partPaymentState,
           ] =
             await Promise.all([
               getPaymentFeeQuote(
                 loadedOrder.id,
               ),
 
-              getPartPaymentRequests(
+              getPartPaymentState(
                 loadedOrder.id,
               ),
             ]);
@@ -188,7 +188,7 @@ export default function DashboardPay() {
             new Date();
 
           const activeApproval =
-            partPaymentRequests.find(
+            partPaymentState.requests.find(
               (
                 request,
               ) =>

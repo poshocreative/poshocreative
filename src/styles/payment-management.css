@@ -585,6 +585,35 @@ font-size:1.1rem;
   color: var(--text-soft, #64748b) !important;
 }
 
+.finance-capability-notice {
+  margin-top: 16px;
+  padding: 14px 15px;
+  border: 1px solid rgba(108, 43, 217, 0.16);
+  border-radius: 13px;
+  background: rgba(108, 43, 217, 0.05);
+  color: var(--brand-primary, #6c2bd9);
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.finance-capability-notice > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.finance-capability-notice strong {
+  color: var(--text, #111827);
+  font-size: 0.82rem;
+}
+
+.finance-capability-notice p {
+  margin: 4px 0 0;
+  color: var(--text-soft, #64748b);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
 .finance-request-form,
 .finance-review-panel {
   margin-top: 18px;

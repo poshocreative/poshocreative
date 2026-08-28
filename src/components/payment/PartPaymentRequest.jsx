@@ -17,7 +17,8 @@ import Link from '../PortalLink';
 
 import { formatMoney } from '../../lib/orders';
 import {
-  getPartPaymentRequests,
+  getPartPaymentState,
+  PART_PAYMENT_UNAVAILABLE_MESSAGE,
   requestProjectPartPayment,
 } from '../../lib/projectFinance';
 
@@ -51,6 +52,7 @@ export default function PartPaymentRequest({
   outstandingKobo,
 }) {
   const [requests, setRequests] = useState([]);
+  const [available, setAvailable] = useState(true);
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -60,6 +62,7 @@ export default function PartPaymentRequest({
   const load = useCallback(async () => {
     if (!orderId) {
       setRequests([]);
+      setAvailable(true);
       setLoading(false);
       return;
     }
@@ -67,7 +70,9 @@ export default function PartPaymentRequest({
     try {
       setLoading(true);
       setError('');
-      setRequests(await getPartPaymentRequests(orderId));
+      const state = await getPartPaymentState(orderId);
+      setRequests(state.requests);
+      setAvailable(state.available);
     } catch (loadError) {
       setError(loadError.message);
     } finally {
@@ -148,6 +153,14 @@ export default function PartPaymentRequest({
 
       {loading ? (
         <p className="finance-muted-message">Checking your requests...</p>
+      ) : !available ? (
+        <div className="finance-capability-notice" role="status">
+          <Clock3 size={20} />
+          <div>
+            <strong>Payment arrangements are being activated</strong>
+            <p>{PART_PAYMENT_UNAVAILABLE_MESSAGE}</p>
+          </div>
+        </div>
       ) : latestRequest ? (
         <div
           className={`finance-request-state finance-request-state-${latestRequest.status}`}
@@ -203,7 +216,7 @@ export default function PartPaymentRequest({
         </div>
       ) : null}
 
-      {!loading && !activeRequest && outstandingKobo > 0 && (
+      {!loading && available && !activeRequest && outstandingKobo > 0 && (
         <form onSubmit={submit} className="finance-request-form">
           <label>
             <span>Why do you need a part-payment arrangement?</span>

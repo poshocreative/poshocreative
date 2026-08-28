@@ -17,7 +17,7 @@ import {
 } from '../../lib/orders';
 
 import {
-  getPartPaymentRequests,
+  getPartPaymentState,
   reviewProjectPartPayment,
 } from '../../lib/projectFinance';
 
@@ -40,6 +40,7 @@ export default function AdminPaymentRequestManager({
   onUpdated,
 }) {
   const [requests, setRequests] = useState([]);
+  const [available, setAvailable] = useState(true);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -56,6 +57,7 @@ export default function AdminPaymentRequestManager({
   const load = useCallback(async () => {
     if (!orderId) {
       setRequests([]);
+      setAvailable(true);
       setLoading(false);
       return;
     }
@@ -63,7 +65,9 @@ export default function AdminPaymentRequestManager({
     try {
       setLoading(true);
       setError('');
-      setRequests(await getPartPaymentRequests(orderId));
+      const state = await getPartPaymentState(orderId);
+      setRequests(state.requests);
+      setAvailable(state.available);
     } catch (loadError) {
       setError(loadError.message);
     } finally {
@@ -177,6 +181,17 @@ export default function AdminPaymentRequestManager({
 
       {loading ? (
         <p className="finance-muted-message">Loading payment requests...</p>
+      ) : !available ? (
+        <div className="finance-capability-notice" role="status">
+          <CalendarClock size={20} />
+          <div>
+            <strong>Part-payment setup is pending</strong>
+            <p>
+              The project database update has not reached this environment yet.
+              Other project controls remain available.
+            </p>
+          </div>
+        </div>
       ) : requests.length === 0 ? (
         <div className="admin-project-empty-state admin-project-empty-state-small">
           <span>No part-payment requests have been submitted for this project.</span>
