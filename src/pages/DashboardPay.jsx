@@ -34,6 +34,10 @@ import {
   verifyPayment,
 } from '../lib/payments';
 
+import {
+  getPartPaymentRequests,
+} from '../lib/projectFinance';
+
 function MethodIcon({
   method,
 }) {
@@ -115,6 +119,12 @@ export default function DashboardPay() {
   ] =
     useState('');
 
+  const [
+    checkoutBlocked,
+    setCheckoutBlocked,
+  ] =
+    useState(false);
+
   useEffect(() => {
     document.title =
       'Pay for Project | Posho Creative';
@@ -143,14 +153,62 @@ export default function DashboardPay() {
             return;
           }
 
-          const quote =
-            await getPaymentFeeQuote(
-              loadedOrder.id,
-            );
+          const [
+            quote,
+            partPaymentRequests,
+          ] =
+            await Promise.all([
+              getPaymentFeeQuote(
+                loadedOrder.id,
+              ),
+
+              getPartPaymentRequests(
+                loadedOrder.id,
+              ),
+            ]);
 
           setCheckout(
             quote,
           );
+
+          const now =
+            new Date();
+
+          const activeApproval =
+            partPaymentRequests.find(
+              (
+                request,
+              ) =>
+                request.status ===
+                  'approved' &&
+                (
+                  !request
+                    .approval_expires_at ||
+                  new Date(
+                    request
+                      .approval_expires_at,
+                  ) > now
+                ),
+            );
+
+          const installmentMismatch =
+            Boolean(
+              activeApproval,
+            ) &&
+            quote.paymentScope !==
+              'approved_installment';
+
+          setCheckoutBlocked(
+            installmentMismatch,
+          );
+
+          if (
+            installmentMismatch
+          ) {
+            setError(
+              'Your installment is approved, but the installment checkout is still being updated. Payment has been paused so you are not charged the full balance. Please try again shortly.',
+            );
+          }
 
           const firstAvailable =
             (
@@ -606,6 +664,7 @@ export default function DashboardPay() {
                 }
                 disabled={
                   submitting ||
+                  checkoutBlocked ||
                   !selected ||
                   !selected
                     .available
