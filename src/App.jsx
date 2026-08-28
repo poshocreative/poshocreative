@@ -13,6 +13,7 @@ import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import SeoManager from './components/SeoManager';
+import SignOutTransition from './components/SignOutTransition';
 
 import About from './pages/About';
 import AdminAccess from './pages/AdminAccess';
@@ -69,6 +70,8 @@ export default function App() {
       <SeoManager />
 
       <GlobalMotion />
+
+      <SignOutTransition />
 
       {!portalArea && (
         <Header />

@@ -110,6 +110,7 @@ export default function DashboardShell() {
     profile,
     user,
     signOut,
+    signingOut,
     customerPath,
   } =
     useAuth();
@@ -343,7 +344,14 @@ export default function DashboardShell() {
         false,
       );
 
-      await signOut();
+      const {
+        error,
+      } =
+        await signOut();
+
+      if (error) {
+        return;
+      }
 
       navigate(
         '/login',
@@ -462,12 +470,20 @@ export default function DashboardShell() {
             onClick={
               logout
             }
+            disabled={
+              signingOut
+            }
+            aria-busy={
+              signingOut
+            }
           >
             <LogOut
               size={17}
             />
 
-            Sign out
+            {signingOut
+              ? 'Signing out…'
+              : 'Sign out'}
           </button>
         </div>
       </aside>
@@ -681,12 +697,20 @@ export default function DashboardShell() {
           onClick={
             logout
           }
+          disabled={
+            signingOut
+          }
+          aria-busy={
+            signingOut
+          }
         >
           <LogOut
             size={18}
           />
 
-          Sign out of Client Workspace
+          {signingOut
+            ? 'Signing out…'
+            : 'Sign out of Client Workspace'}
         </button>
       </aside>
     </main>

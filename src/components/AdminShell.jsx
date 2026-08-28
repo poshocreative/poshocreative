@@ -83,6 +83,7 @@ function routeMatches(
 export default function AdminShell() {
   const {
     signOut,
+    signingOut,
     adminPath,
   } =
     useAuth();
@@ -215,7 +216,14 @@ export default function AdminShell() {
         false,
       );
 
-      await signOut();
+      const {
+        error,
+      } =
+        await signOut();
+
+      if (error) {
+        return;
+      }
 
       navigate(
         '/login',
@@ -295,13 +303,21 @@ export default function AdminShell() {
             onClick={
               logout
             }
+            disabled={
+              signingOut
+            }
+            aria-busy={
+              signingOut
+            }
             className="admin-pro-signout"
           >
             <LogOut
               size={17}
             />
 
-            Sign out
+            {signingOut
+              ? 'Signing out…'
+              : 'Sign out'}
           </button>
         </div>
       </aside>
@@ -493,12 +509,20 @@ export default function AdminShell() {
           onClick={
             logout
           }
+          disabled={
+            signingOut
+          }
+          aria-busy={
+            signingOut
+          }
         >
           <LogOut
             size={18}
           />
 
-          Sign out of Management
+          {signingOut
+            ? 'Signing out…'
+            : 'Sign out of Management'}
         </button>
       </aside>
     </main>

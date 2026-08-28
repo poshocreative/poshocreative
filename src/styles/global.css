@@ -2572,3 +2572,111 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+/* Secure sign-out feedback */
+.signout-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(109, 40, 217, 0.2), transparent 32%),
+    rgba(12, 9, 18, 0.92);
+  backdrop-filter: blur(14px);
+  animation: signout-fade-in 180ms ease-out both;
+}
+
+.signout-transition__card {
+  width: min(100%, 380px);
+  padding: 34px 30px 32px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  color: #fff;
+  text-align: center;
+  background: rgba(24, 18, 34, 0.94);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
+}
+
+.signout-transition__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.signout-transition__brand img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.signout-transition__spinner {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 22px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #7c3aed, #4c1d95);
+  box-shadow: 0 14px 36px rgba(109, 40, 217, 0.38);
+}
+
+.signout-transition__spinner span {
+  width: 23px;
+  height: 23px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: signout-spin 700ms linear infinite;
+}
+
+.signout-transition__card h2 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: clamp(1.4rem, 4vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.signout-transition__card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.94rem;
+}
+
+.client-pro-signout:disabled,
+.client-pro-mobile-signout:disabled,
+.admin-pro-signout:disabled,
+.admin-pro-mobile-signout:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+@keyframes signout-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes signout-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signout-transition,
+  .signout-transition__spinner span {
+    animation-duration: 1ms;
+  }
+}

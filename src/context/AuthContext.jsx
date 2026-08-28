@@ -46,6 +46,11 @@ export function AuthProvider({
   ] = useState(true);
 
   const [
+    signingOut,
+    setSigningOut,
+  ] = useState(false);
+
+  const [
     profileLoading,
     setProfileLoading,
   ] = useState(false);
@@ -384,31 +389,59 @@ export function AuthProvider({
     };
 
   const signOut =
-    async () => {
-      try {
-        const {
-          error,
-        } =
-          await supabase.auth
-            .signOut();
-
-        if (!error) {
-          clearPortalSession();
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setPortalSession(null);
+    useCallback(
+      async () => {
+        if (signingOut) {
+          return {
+            error: null,
+          };
         }
 
-        return {
-          error,
-        };
-      } catch (error) {
-        return {
-          error,
-        };
-      }
-    };
+        setSigningOut(true);
+
+        try {
+          const [
+            {
+              error,
+            },
+          ] =
+            await Promise.all([
+              supabase.auth
+                .signOut(),
+              new Promise(
+                (resolve) =>
+                  window.setTimeout(
+                    resolve,
+                    450,
+                  ),
+              ),
+            ]);
+
+          if (!error) {
+            clearPortalSession();
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+            setPortalSession(null);
+          }
+
+          setSigningOut(false);
+
+          return {
+            error,
+          };
+        } catch (error) {
+          setSigningOut(false);
+
+          return {
+            error,
+          };
+        }
+      },
+      [
+        signingOut,
+      ],
+    );
 
   const refreshProfile =
     useCallback(
@@ -444,6 +477,7 @@ export function AuthProvider({
 
         loading,
         profileLoading,
+        signingOut,
 
         isAuthenticated:
           Boolean(user),
@@ -474,7 +508,9 @@ export function AuthProvider({
         profile,
         loading,
         profileLoading,
+        signingOut,
         portalSession,
+        signOut,
         refreshProfile,
       ],
     );
