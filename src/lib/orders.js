@@ -239,6 +239,128 @@ export async function createProjectOrder({
   return data.order;
 }
 
+export async function uploadProjectFiles({
+  orderId,
+  files,
+  onStageChange,
+}) {
+  if (!orderId) {
+    throw new Error('A valid project is required.');
+  }
+
+  if (!Array.isArray(files) || files.length === 0) {
+    throw new Error('Select at least one project file.');
+  }
+
+  onStageChange?.('Preparing secure uploads...');
+
+  const {
+    data: prepared,
+    error: prepareError,
+  } = await supabase.functions.invoke(
+    'confirm-order-files',
+    {
+      body: {
+        action: 'prepare',
+        orderId,
+        files: files.map((file) => ({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        })),
+      },
+    },
+  );
+
+  if (prepareError) {
+    throw await readableFunctionError(
+      prepareError,
+      'The project files could not be prepared.',
+    );
+  }
+
+  const uploads =
+    Array.isArray(prepared?.uploads)
+      ? prepared.uploads
+      : [];
+
+  if (!prepared?.success || uploads.length !== files.length) {
+    throw new Error(
+      prepared?.message ||
+        'The secure upload details were incomplete.',
+    );
+  }
+
+  const uploadedIds = [];
+  const failedFiles = [];
+
+  for (let index = 0; index < uploads.length; index += 1) {
+    const upload = uploads[index];
+    const file = files[upload.clientIndex];
+
+    if (!file) {
+      continue;
+    }
+
+    onStageChange?.(`Uploading ${index + 1} of ${uploads.length}...`);
+
+    const {
+      error: uploadError,
+    } = await supabase.storage
+      .from('project-references')
+      .uploadToSignedUrl(
+        upload.path,
+        upload.token,
+        file,
+        {
+          contentType: file.type || undefined,
+        },
+      );
+
+    if (uploadError) {
+      failedFiles.push(file);
+    } else {
+      uploadedIds.push(upload.fileId);
+    }
+  }
+
+  let confirmed = 0;
+
+  if (uploadedIds.length > 0) {
+    onStageChange?.('Confirming uploaded files...');
+
+    const {
+      data: confirmation,
+      error: confirmationError,
+    } = await supabase.functions.invoke(
+      'confirm-order-files',
+      {
+        body: {
+          action: 'confirm',
+          orderId,
+          fileIds: uploads.map((upload) => upload.fileId),
+        },
+      },
+    );
+
+    if (confirmationError) {
+      throw await readableFunctionError(
+        confirmationError,
+        'The uploaded files could not be confirmed.',
+      );
+    }
+
+    confirmed = Number(confirmation?.confirmed || 0);
+  }
+
+  onStageChange?.('Upload complete.');
+
+  return {
+    confirmed,
+    failedFiles,
+  };
+}
+
 export async function getMyOrders() {
   const {
     data,

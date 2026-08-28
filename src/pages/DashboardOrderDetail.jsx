@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useState,
 } from 'react';
@@ -22,6 +23,7 @@ import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
 import PartPaymentRequest from '../components/payment/PartPaymentRequest';
+import ProjectFileUploader from '../components/ProjectFileUploader';
 
 import {
   formatMoney,
@@ -69,12 +71,15 @@ export default function DashboardOrderDetail() {
   ] =
     useState(true);
 
-  useEffect(() => {
-    getOrderByReference(
-      reference,
-    )
-      .then(
-        (result) => {
+  const load =
+    useCallback(
+      async () => {
+        try {
+          const result =
+            await getOrderByReference(
+              reference,
+            );
+
           setOrder(
             result,
           );
@@ -83,18 +88,25 @@ export default function DashboardOrderDetail() {
             document.title =
               `${result.reference} | Posho Creative`;
           }
-        },
-      )
-      .catch(
-        console.error,
-      )
-      .finally(() =>
-        setLoading(
-          false,
-        ),
-      );
+        } catch (loadError) {
+          console.error(
+            loadError,
+          );
+        } finally {
+          setLoading(
+            false,
+          );
+        }
+      },
+      [
+        reference,
+      ],
+    );
+
+  useEffect(() => {
+    load();
   }, [
-    reference,
+    load,
   ]);
 
   if (loading) {
@@ -508,6 +520,12 @@ export default function DashboardOrderDetail() {
                 size={20}
               />
             </div>
+
+            <ProjectFileUploader
+              orderId={order.id}
+              disabled={cancelled}
+              onUploaded={load}
+            />
 
             {order.files.length ===
             0 ? (

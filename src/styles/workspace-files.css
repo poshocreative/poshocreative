@@ -984,6 +984,120 @@
 }
 
 /* ==========================================================
+   EXISTING PROJECT FILE UPLOAD
+   ========================================================== */
+
+.project-file-uploader {
+  margin: 18px 22px;
+  padding: 16px;
+  border: 1px dashed rgba(108, 43, 217, 0.28);
+  border-radius: 15px;
+  background:
+    linear-gradient(135deg, rgba(108, 43, 217, 0.055), rgba(255, 255, 255, 0.9));
+}
+
+.project-file-uploader-copy {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.project-file-uploader-copy > div:first-child {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--brand-primary, #6c2bd9);
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+
+.project-file-uploader-copy > div:nth-child(2) {
+  min-width: 0;
+}
+
+.project-file-uploader-copy strong {
+  display: block;
+  color: var(--text, #111827);
+  font-size: 0.83rem;
+}
+
+.project-file-uploader-copy p {
+  margin: 4px 0 0;
+  color: var(--text-soft, #64748b);
+  font-size: 0.72rem !important;
+  line-height: 1.5 !important;
+}
+
+.project-file-uploader-copy > .button {
+  min-height: 39px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.project-file-upload-selection {
+  margin-top: 13px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(108, 43, 217, 0.12);
+}
+
+.project-file-upload-selection > div {
+  min-height: 47px;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  color: var(--brand-primary, #6c2bd9);
+}
+
+.project-file-upload-selection > div > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.project-file-upload-selection strong {
+  overflow: hidden;
+  color: var(--text, #111827);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-file-upload-selection span {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.66rem;
+}
+
+.project-file-upload-selection > div > button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 9px;
+  background: #fff0f0;
+  color: #a53232;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.project-file-upload-submit {
+  width: 100%;
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+/* ==========================================================
    TABLET
    ========================================================== */
 
@@ -1006,6 +1120,20 @@
 @media (
   max-width: 700px
 ) {
+  .project-file-uploader {
+    margin: 13px;
+    padding: 13px;
+  }
+
+  .project-file-uploader-copy {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .project-file-uploader-copy > .button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
   .workspace-files-heading {
     align-items: flex-start;
   }
