@@ -428,6 +428,14 @@ export default function DashboardPay() {
             {order.project_title}
           </p>
 
+          {checkout?.paymentScope ===
+            'approved_installment' && (
+            <div className="workspace-success-message">
+              Management approved this installment. This checkout charges only
+              the approved amount, not the full outstanding balance.
+            </div>
+          )}
+
           <div className="payment-cost-breakdown">
             <div className="payment-cost-heading">
               <div>
@@ -447,7 +455,10 @@ export default function DashboardPay() {
 
             <div className="payment-cost-row">
               <span>
-                Project amount
+                {checkout?.paymentScope ===
+                'approved_installment'
+                  ? 'Approved installment'
+                  : 'Project amount'}
               </span>
 
               <strong>

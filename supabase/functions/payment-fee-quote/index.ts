@@ -164,7 +164,7 @@ export default {
               0,
           );
 
-        const outstanding =
+        const fullOutstanding =
           Math.max(
             quoted -
               paid,
@@ -172,7 +172,7 @@ export default {
           );
 
         if (
-          outstanding <=
+          fullOutstanding <=
           0
         ) {
           return json(
@@ -185,6 +185,82 @@ export default {
             409,
           );
         }
+
+        const now =
+          new Date();
+
+        const {
+          data:
+            approvedRequests,
+          error:
+            partPaymentError,
+        } =
+          await ctx
+            .supabase
+            .from(
+              'part_payment_requests',
+            )
+            .select(`
+              id,
+              approved_amount_kobo,
+              approval_expires_at
+            `)
+            .eq(
+              'order_id',
+              order.id,
+            )
+            .eq(
+              'status',
+              'approved',
+            )
+            .order(
+              'reviewed_at',
+              {
+                ascending:
+                  false,
+              },
+            )
+            .limit(1);
+
+        if (partPaymentError) {
+          throw partPaymentError;
+        }
+
+        const approvedRequest =
+          approvedRequests?.[0] ||
+          null;
+
+        const approvalIsCurrent =
+          approvedRequest &&
+          Number(
+            approvedRequest
+              .approved_amount_kobo ||
+              0,
+          ) > 0 &&
+          (
+            !approvedRequest
+              .approval_expires_at ||
+            new Date(
+              approvedRequest
+                .approval_expires_at,
+            ) > now
+          );
+
+        const outstanding =
+          approvalIsCurrent
+            ? Math.min(
+                Number(
+                  approvedRequest
+                    .approved_amount_kobo,
+                ),
+                fullOutstanding,
+              )
+            : fullOutstanding;
+
+        const paymentScope =
+          approvalIsCurrent
+            ? 'approved_installment'
+            : 'full_balance';
 
         const currency =
           (
@@ -382,6 +458,16 @@ export default {
 
             baseAmountKobo:
               outstanding,
+
+            fullOutstandingKobo:
+              fullOutstanding,
+
+            paymentScope,
+
+            partPaymentRequestId:
+              approvalIsCurrent
+                ? approvedRequest.id
+                : null,
 
             currency,
 

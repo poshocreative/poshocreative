@@ -19,6 +19,7 @@ import {
 } from 'react-router-dom';
 
 import BrandLoader from '../components/BrandLoader';
+import PartPaymentRequest from '../components/payment/PartPaymentRequest';
 
 import {
   formatMoney,
@@ -347,6 +348,14 @@ export default function DashboardOrderDetail() {
             </Link>
           )}
         </section>
+      )}
+
+      {canPay && (
+        <PartPaymentRequest
+          orderId={order.id}
+          orderReference={order.reference}
+          outstandingKobo={outstanding}
+        />
       )}
 
       <div className="project-detail-grid">

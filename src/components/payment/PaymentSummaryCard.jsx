@@ -1,5 +1,3 @@
-import React from "react";
-
 const formatMoney = (amount = 0) =>
   new Intl.NumberFormat("en-NG", {
     style: "currency",

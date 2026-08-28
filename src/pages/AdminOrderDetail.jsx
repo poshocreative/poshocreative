@@ -27,6 +27,7 @@ import {
 
 import AdminPaymentAttempts from '../components/AdminPaymentAttempts';
 import BrandLoader from '../components/BrandLoader';
+import AdminPaymentRequestManager from '../components/payment/AdminPaymentRequestManager';
 
 import {
   getAdminOrder,
@@ -1609,6 +1610,15 @@ export default function AdminOrderDetail() {
               order.id
             }
           />
+
+          {approved &&
+            balance > 0 && (
+            <AdminPaymentRequestManager
+              orderId={order.id}
+              outstandingKobo={balance}
+              onUpdated={load}
+            />
+          )}
 
           {approved && (
             <>

@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -326,16 +327,16 @@ export default function DashboardNotifications() {
     useState('');
 
   const notifyShell =
-    () => {
+    useCallback(() => {
       window.dispatchEvent(
         new CustomEvent(
           'posho:notifications-changed',
         ),
       );
-    };
+    }, []);
 
   const loadNotifications =
-    async ({
+    useCallback(async ({
       showRefresh =
         false,
     } = {}) => {
@@ -378,14 +379,18 @@ export default function DashboardNotifications() {
           false,
         );
       }
-    };
+    }, [
+      notifyShell,
+    ]);
 
   useEffect(() => {
     document.title =
       'Updates | Posho Creative';
 
     loadNotifications();
-  }, []);
+  }, [
+    loadNotifications,
+  ]);
 
   const metrics =
     useMemo(() => {

@@ -65,7 +65,7 @@ import "./styles/admin-project-mobile-v3.css";
 // PAYMENT MANAGEMENT SYSTEM
 // ==========================================================
 
-import "./styles/payment/payment-management.css";
+import "./styles/payment-management.css";
 
 
 // ==========================================================

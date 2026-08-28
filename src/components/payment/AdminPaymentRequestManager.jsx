@@ -1,544 +1,335 @@
-import React, {
+import {
+  useCallback,
   useEffect,
   useState,
-} from "react";
+} from 'react';
 
 import {
-  supabase,
-} from "../../lib/supabase";
+  BadgeCheck,
+  CalendarClock,
+  HandCoins,
+  XCircle,
+} from 'lucide-react';
 
+import {
+  formatMoney,
+  formatOrderStatus,
+} from '../../lib/orders';
 
-const money = (value = 0) =>
-  new Intl.NumberFormat(
-    "en-NG",
-    {
-      style: "currency",
-      currency: "NGN",
-      maximumFractionDigits: 0,
-    }
-  ).format(value);
+import {
+  getPartPaymentRequests,
+  reviewProjectPartPayment,
+} from '../../lib/projectFinance';
 
+function toIsoDate(value) {
+  return value ? new Date(`${value}T23:59:59`).toISOString() : null;
+}
+function formatDate(value) {
+  if (!value) {
+    return 'Not specified';
+  }
 
+  return new Intl.DateTimeFormat('en-NG', {
+    dateStyle: 'medium',
+  }).format(new Date(value));
+}
 
 export default function AdminPaymentRequestManager({
-  projectId,
-  adminId,
+  orderId,
+  outstandingKobo,
+  onUpdated,
 }) {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [form, setForm] = useState({
+    amount: '',
+    approvalExpiry: '',
+    balanceDue: '',
+    note: '',
+    allowWorkToStart: false,
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-
-  const [requests, setRequests] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-
-  const [processing, setProcessing] =
-    useState(false);
-
-
-
-  const [selectedRequest, setSelectedRequest] =
-    useState(null);
-
-
-  const [initialPayment, setInitialPayment] =
-    useState("");
-
-  const [deadline, setDeadline] =
-    useState("");
-
-  const [terms, setTerms] =
-    useState("");
-
-  const [response, setResponse] =
-    useState("");
-
-
-
-  async function loadRequests() {
-
-    setLoading(true);
-
-
-    const {
-      data,
-      error,
-    } =
-      await supabase
-        .from(
-          "part_payment_requests"
-        )
-        .select("*")
-        .eq(
-          "project_id",
-          projectId
-        )
-        .order(
-          "created_at",
-          {
-            ascending:false,
-          }
-        );
-
-
-    if(!error){
-
-      setRequests(
-        data || []
-      );
-
-    }
-
-
-    setLoading(false);
-
-  }
-
-
-
-
-  useEffect(()=>{
-
-    if(projectId){
-
-      loadRequests();
-
-    }
-
-  },[
-    projectId
-  ]);
-
-
-
-
-
-  async function approveRequest(){
-
-
-    if(!selectedRequest){
-
+  const load = useCallback(async () => {
+    if (!orderId) {
+      setRequests([]);
+      setLoading(false);
       return;
-
     }
 
+    try {
+      setLoading(true);
+      setError('');
+      setRequests(await getPartPaymentRequests(orderId));
+    } catch (loadError) {
+      setError(loadError.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [orderId]);
 
-    setProcessing(true);
+  useEffect(() => {
+    load();
+  }, [load]);
 
+  const openReview = (request) => {
+    setSelectedRequest(request);
+    setForm({
+      amount: '',
+      approvalExpiry: '',
+      balanceDue: '',
+      note: '',
+      allowWorkToStart: false,
+    });
+    setError('');
+    setSuccess('');
+  };
 
+  const saveDecision = async (decision) => {
+    if (!selectedRequest) {
+      return;
+    }
 
-    const amount =
-      Number(initialPayment);
+    const amountKobo = Math.round(Number(form.amount) * 100);
 
+    if (
+      decision === 'approve' &&
+      (!Number.isFinite(amountKobo) ||
+        amountKobo <= 0 ||
+        amountKobo >= outstandingKobo)
+    ) {
+      setError(
+        'Enter an installment greater than zero and lower than the full outstanding balance.',
+      );
+      return;
+    }
 
+    if (decision === 'decline' && form.note.trim().length < 5) {
+      setError('Add a clear reason before declining the request.');
+      return;
+    }
 
-    const remaining =
-      Number(
-        selectedRequest.requested_project_amount ||
-        0
-      )
-      -
-      amount;
+    if (
+      decision === 'approve' &&
+      form.approvalExpiry &&
+      form.balanceDue &&
+      new Date(form.balanceDue) < new Date(form.approvalExpiry)
+    ) {
+      setError(
+        'The remaining-balance due date cannot be earlier than the installment expiry date.',
+      );
+      return;
+    }
 
+    try {
+      setProcessing(true);
+      setError('');
+      setSuccess('');
 
-
-    const {
-      error:planError
-    } =
-      await supabase
-      .from(
-        "project_payment_plans"
-      )
-      .insert({
-
-        project_id:
-        projectId,
-
-        original_amount:
-        selectedRequest.original_amount,
-
-        approved_initial_payment:
-        amount,
-
-        remaining_balance:
-        remaining > 0
-        ?
-        remaining
-        :
-        0,
-
-        payment_deadline:
-        deadline,
-
-        terms,
-
-        created_by:
-        adminId,
-
+      await reviewProjectPartPayment({
+        requestId: selectedRequest.id,
+        decision,
+        approvedAmountKobo: decision === 'approve' ? amountKobo : null,
+        approvalExpiresAt:
+          decision === 'approve' ? toIsoDate(form.approvalExpiry) : null,
+        balanceDueAt:
+          decision === 'approve' ? toIsoDate(form.balanceDue) : null,
+        adminNote: form.note,
+        allowWorkToStart: form.allowWorkToStart,
       });
 
-
-
-    if(planError){
-
-      alert(
-        planError.message
+      setSuccess(
+        decision === 'approve'
+          ? 'The installment has been approved and the customer can now pay it.'
+          : 'The request has been declined and the customer can see the reason.',
       );
-
+      setSelectedRequest(null);
+      await load();
+      await onUpdated?.();
+    } catch (decisionError) {
+      setError(decisionError.message);
+    } finally {
       setProcessing(false);
-
-      return;
-
     }
-
-
-
-
-    await supabase
-    .from(
-      "part_payment_requests"
-    )
-    .update({
-
-      status:
-      "approved",
-
-      admin_response:
-      response,
-
-      reviewed_by:
-      adminId,
-
-      reviewed_at:
-      new Date()
-      .toISOString(),
-
-    })
-    .eq(
-      "id",
-      selectedRequest.id
-    );
-
-
-
-    setProcessing(false);
-
-    setSelectedRequest(null);
-
-    loadRequests();
-
-
-
-  }
-
-
-
-
-
-  async function declineRequest(){
-
-
-    if(!selectedRequest){
-
-      return;
-
-    }
-
-
-    setProcessing(true);
-
-
-
-    await supabase
-    .from(
-      "part_payment_requests"
-    )
-    .update({
-
-      status:
-      "declined",
-
-      admin_response:
-      response,
-
-      reviewed_by:
-      adminId,
-
-      reviewed_at:
-      new Date()
-      .toISOString(),
-
-    })
-    .eq(
-      "id",
-      selectedRequest.id
-    );
-
-
-
-    setProcessing(false);
-
-    setSelectedRequest(null);
-
-    loadRequests();
-
-
-  }
-
-
-
-
-
-return (
-
-<section className="admin-payment-request-manager">
-
-
-<header>
-
-<h3>
-Part Payment Requests
-</h3>
-
-<p>
-Review customer payment arrangement requests.
-</p>
-
-</header>
-
-
-
-{
-loading ?
-
-<p>
-Loading payment requests...
-</p>
-
-:
-
-requests.length === 0 ?
-
-<p>
-No payment requests available.
-</p>
-
-
-:
-
-requests.map(
-(request)=>(
-
-
-<article
-key={request.id}
-className="admin-payment-request-card"
->
-
-
-<div>
-
-<strong>
-Requested Amount
-</strong>
-
-<h4>
-{
-money(
-request.requested_amount
-)
-}
-</h4>
-
-
-<p>
-{
-request.reason ||
-"No reason provided"
-}
-</p>
-
-
-</div>
-
-
-<span
-className={
-`payment-status ${request.status}`
-}
->
-{
-request.status
-}
-</span>
-
-
-
-{
-request.status === "pending"
-&&
-
-<button
-
-onClick={()=>{
-
-setSelectedRequest(
-request
-);
-
-}}
-
->
-Review Request
-</button>
-
-}
-
-
-</article>
-
-
-)
-
-)
-
-}
-
-
-
-
-
-{
-selectedRequest && (
-
-<div
-className="admin-payment-modal"
->
-
-
-<h3>
-Approve Payment Request
-</h3>
-
-
-<p>
-Requested:
-{
-money(
-selectedRequest.requested_amount
-)
-}
-</p>
-
-
-
-<input
-
-type="number"
-
-placeholder="Approved first payment"
-
-value={initialPayment}
-
-onChange={
-e=>
-setInitialPayment(
-e.target.value
-)
-}
-
-/>
-
-
-
-<input
-
-type="date"
-
-value={deadline}
-
-onChange={
-e=>
-setDeadline(
-e.target.value
-)
-}
-
-/>
-
-
-
-<textarea
-
-placeholder="Payment terms"
-
-value={terms}
-
-onChange={
-e=>
-setTerms(
-e.target.value
-)
-}
-
-/>
-
-
-
-<textarea
-
-placeholder="Customer response"
-
-value={response}
-
-onChange={
-e=>
-setResponse(
-e.target.value
-)
-}
-
-/>
-
-
-
-<div>
-
-<button
-
-disabled={processing}
-
-onClick={approveRequest}
-
->
-Approve
-</button>
-
-
-<button
-
-disabled={processing}
-
-onClick={declineRequest}
-
->
-Decline
-</button>
-
-</div>
-
-
-</div>
-
-)
-
-}
-
-
-
-</section>
-
-);
-
+  };
+
+  return (
+    <section className="admin-control-card admin-payment-request-manager">
+      <div className="finance-request-heading">
+        <div>
+          <span>PAYMENT ARRANGEMENTS</span>
+          <h2>Part-payment requests</h2>
+          <p className="admin-card-description">
+            Review the customer's reason, then approve a controlled installment
+            or decline it with a clear explanation.
+          </p>
+        </div>
+        <HandCoins size={22} />
+      </div>
+
+      <div className="finance-balance-strip">
+        <span>Outstanding project balance</span>
+        <strong>{formatMoney(outstandingKobo)}</strong>
+      </div>
+
+      {loading ? (
+        <p className="finance-muted-message">Loading payment requests...</p>
+      ) : requests.length === 0 ? (
+        <div className="admin-project-empty-state admin-project-empty-state-small">
+          <span>No part-payment requests have been submitted for this project.</span>
+        </div>
+      ) : (
+        <div className="finance-admin-request-list">
+          {requests.map((request) => (
+            <article key={request.id} className="finance-admin-request">
+              <div className="finance-admin-request-topline">
+                <span
+                  className={`finance-status-pill finance-status-pill-${request.status}`}
+                >
+                  {formatOrderStatus(request.status)}
+                </span>
+                <small>{formatDate(request.created_at)}</small>
+              </div>
+              <p>{request.reason}</p>
+              {request.approved_amount_kobo && (
+                <strong className="finance-approved-amount">
+                  Approved: {formatMoney(request.approved_amount_kobo)}
+                </strong>
+              )}
+              {request.status === 'pending' && (
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={() => openReview(request)}
+                >
+                  Review request
+                </button>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+
+      {selectedRequest && (
+        <div className="finance-review-panel">
+          <div className="finance-request-heading">
+            <div>
+              <span>MANAGEMENT DECISION</span>
+              <h3>Set the installment terms</h3>
+            </div>
+            <CalendarClock size={21} />
+          </div>
+
+          <div className="finance-review-grid">
+            <label>
+              <span>Approved installment in Naira</span>
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                value={form.amount}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    amount: event.target.value,
+                  }))
+                }
+                placeholder="e.g. 50000"
+              />
+            </label>
+            <label>
+              <span>Installment approval expires</span>
+              <input
+                type="date"
+                value={form.approvalExpiry}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    approvalExpiry: event.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label>
+              <span>Remaining balance due</span>
+              <input
+                type="date"
+                value={form.balanceDue}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    balanceDue: event.target.value,
+                  }))
+                }
+              />
+            </label>
+          </div>
+
+          <label>
+            <span>Note to customer</span>
+            <textarea
+              value={form.note}
+              maxLength="3000"
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  note: event.target.value,
+                }))
+              }
+              placeholder="Explain the approved terms, or provide the reason for declining."
+            />
+          </label>
+
+          <label className="finance-checkbox-row">
+            <input
+              type="checkbox"
+              checked={form.allowWorkToStart}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  allowWorkToStart: event.target.checked,
+                }))
+              }
+            />
+            <span>Work may begin after this installment is confirmed.</span>
+          </label>
+
+          <div className="finance-review-actions">
+            <button
+              type="button"
+              className="button button-secondary"
+              onClick={() => setSelectedRequest(null)}
+              disabled={processing}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="finance-decline-button"
+              onClick={() => saveDecision('decline')}
+              disabled={processing}
+            >
+              <XCircle size={17} />
+              Decline
+            </button>
+            <button
+              type="button"
+              className="button button-primary"
+              onClick={() => saveDecision('approve')}
+              disabled={processing}
+            >
+              <BadgeCheck size={17} />
+              {processing ? 'Saving...' : 'Approve installment'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {success && <div className="finance-success-message">{success}</div>}
+      {error && <div className="finance-error-message">{error}</div>}
+    </section>
+  );
 }

@@ -731,14 +731,14 @@ export default {
               0,
           );
 
-        const outstanding =
+        const fullOutstanding =
           quotedAmount -
           paidAmount;
 
         if (
           quotedAmount <=
             0 ||
-          outstanding <=
+          fullOutstanding <=
             0
         ) {
           return Response.json(
@@ -746,7 +746,7 @@ export default {
               success: false,
 
               message:
-                outstanding <=
+                fullOutstanding <=
                 0
                   ? 'This project has already been paid.'
                   : 'A payable quotation has not been issued for this project yet.',
@@ -755,6 +755,143 @@ export default {
               status: 409,
             },
           );
+        }
+
+        const currentTime =
+          new Date();
+
+        const {
+          data:
+            approvedRequests,
+          error:
+            partPaymentError,
+        } =
+          await ctx
+            .supabase
+            .from(
+              'part_payment_requests',
+            )
+            .select(`
+              id,
+              approved_amount_kobo,
+              approval_expires_at
+            `)
+            .eq(
+              'order_id',
+              order.id,
+            )
+            .eq(
+              'status',
+              'approved',
+            )
+            .order(
+              'reviewed_at',
+              {
+                ascending:
+                  false,
+              },
+            )
+            .limit(1);
+
+        if (partPaymentError) {
+          throw partPaymentError;
+        }
+
+        const approvedRequest =
+          approvedRequests?.[0] ||
+          null;
+
+        const approvalIsCurrent =
+          approvedRequest &&
+          Number(
+            approvedRequest
+              .approved_amount_kobo ||
+              0,
+          ) > 0 &&
+          (
+            !approvedRequest
+              .approval_expires_at ||
+            new Date(
+              approvedRequest
+                .approval_expires_at,
+            ) > currentTime
+          );
+
+        const outstanding =
+          approvalIsCurrent
+            ? Math.min(
+                Number(
+                  approvedRequest
+                    .approved_amount_kobo,
+                ),
+                fullOutstanding,
+              )
+            : fullOutstanding;
+
+        const paymentScope =
+          approvalIsCurrent
+            ? 'approved_installment'
+            : 'full_balance';
+
+        if (approvalIsCurrent) {
+          const recentAttemptCutoff =
+            new Date(
+              currentTime.getTime() -
+                60 *
+                  60 *
+                  1000,
+            ).toISOString();
+
+          const {
+            data:
+              openAttempts,
+            error:
+              openAttemptError,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'payment_transactions',
+              )
+              .select(`
+                id,
+                status,
+                created_at
+              `)
+              .eq(
+                'part_payment_request_id',
+                approvedRequest.id,
+              )
+              .in(
+                'status',
+                [
+                  'processing',
+                  'pending',
+                ],
+              )
+              .gte(
+                'created_at',
+                recentAttemptCutoff,
+              )
+              .limit(1);
+
+          if (openAttemptError) {
+            throw openAttemptError;
+          }
+
+          if (openAttempts?.length) {
+            return Response.json(
+              {
+                success: false,
+
+                message:
+                  'An installment payment is already in progress. Complete it or wait for the current payment session to expire before trying again.',
+              },
+              {
+                status: 409,
+              },
+            );
+          }
         }
 
         /*
@@ -842,6 +979,14 @@ export default {
               amount_kobo:
                 outstanding,
 
+              part_payment_request_id:
+                approvalIsCurrent
+                  ? approvedRequest.id
+                  : null,
+
+              payment_scope:
+                paymentScope,
+
               base_amount_kobo:
                 outstanding,
 
@@ -886,6 +1031,17 @@ export default {
               payment_metadata: {
                 order_reference:
                   order.reference,
+
+                payment_scope:
+                  paymentScope,
+
+                full_outstanding_kobo:
+                  fullOutstanding,
+
+                part_payment_request_id:
+                  approvalIsCurrent
+                    ? approvedRequest.id
+                    : null,
 
                 fee_quote: feeQuote
                   ? {
