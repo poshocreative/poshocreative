@@ -6,6 +6,10 @@ import {
   runAutomations,
 } from '../_shared/ops.ts';
 
+import {
+  flutterwaveRequest,
+} from '../_shared/flutterwave.ts';
+
 const allowedStatuses =
   new Set([
     'under_review',
@@ -247,6 +251,7 @@ export default {
             'record_manual_payment',
             'review_part_payment',
             'waive_project_cost',
+            'cancel_payment',
           ]);
 
         if (
@@ -2026,6 +2031,373 @@ export default {
             success: true,
             reversal: result,
           });
+        }
+
+        /* ====================================================
+           CANCEL PAYMENT — void a pending/processing payment
+           ==================================================== */
+
+        if (
+          action ===
+          'cancel_payment'
+        ) {
+          const paymentId =
+            clean(
+              body?.paymentId,
+              100,
+            );
+
+          if (
+            !paymentId
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'A payment reference is required.',
+              },
+              400,
+            );
+          }
+
+          const reason =
+            clean(
+              body?.reason,
+              2000,
+            );
+
+          const {
+            data: payment,
+            error:
+              paymentFetchError,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'payment_transactions',
+              )
+              .select(
+                '*',
+              )
+              .eq(
+                'id',
+                paymentId,
+              )
+              .maybeSingle();
+
+          if (
+            paymentFetchError ||
+            !payment
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'Payment not found.',
+              },
+              404,
+            );
+          }
+
+          if (
+            payment.order_id !==
+            order.id
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'This payment does not belong to the current project.',
+              },
+              400,
+            );
+          }
+
+          if (
+            ![
+              'pending',
+              'processing',
+            ].includes(
+              payment.status,
+            )
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  `This payment is already ${payment.status} and cannot be cancelled.`,
+              },
+              400,
+            );
+          }
+
+          let
+            providerVoided =
+              false;
+
+          let
+            providerNote =
+              '';
+
+          if (
+            payment.provider_transaction_id
+          ) {
+            try {
+              if (
+                payment.provider_transaction_id.startsWith(
+                  'chg_',
+                )
+              ) {
+                await flutterwaveRequest(
+                  `/charges/${payment.provider_transaction_id}/void`,
+                  {
+                    method:
+                      'POST',
+                  },
+                );
+              }
+
+              providerVoided =
+                true;
+
+              providerNote =
+                'Flutterwave charge voided.';
+            } catch (
+              voidError
+            ) {
+              console.error(
+                'cancel-payment flutterwave void:',
+                voidError,
+              );
+
+              providerNote =
+                `Flutterwave void attempt: ${voidError?.message || 'unknown error'}. Local status updated regardless.`;
+            }
+          }
+
+          const now =
+            new Date().toISOString();
+
+          const {
+            error:
+              updateError,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'payment_transactions',
+              )
+              .update(
+                {
+                  status:
+                    'cancelled',
+
+                  attempt_stage:
+                    'cancelled',
+
+                  failure_code:
+                    'ADMIN_CANCELLED',
+
+                  customer_message:
+                    reason ||
+                    'Payment cancelled by management.',
+
+                  last_checked_at:
+                    now,
+                },
+              )
+              .eq(
+                'id',
+                paymentId,
+              );
+
+          if (
+            updateError
+          ) {
+            throw updateError;
+          }
+
+          await ctx
+            .supabaseAdmin
+            .from(
+              'payment_attempt_diagnostics',
+            )
+            .insert(
+              {
+                payment_id:
+                  paymentId,
+
+                event:
+                  'admin_cancel',
+
+                detail:
+                  reason ||
+                  'Payment cancelled by management.',
+
+                provider_status:
+                  providerNote ||
+                  null,
+              },
+            );
+
+          await logAdminAction(
+            ctx.supabaseAdmin,
+            {
+              adminUserId,
+
+              orderId:
+                order.id,
+
+              action:
+                'payment_cancelled',
+
+              description:
+                `Payment ${paymentId.slice(
+                  0,
+                  8,
+                )}… cancelled.${
+                  reason
+                    ? ` Reason: ${reason}`
+                    : ''
+                }`,
+
+              metadata:
+                {
+                  paymentId,
+
+                  providerVoided,
+
+                  previousStatus:
+                    payment.status,
+                },
+            },
+          );
+
+          /* Recalculate order paid total */
+
+          const {
+            data:
+              remainingPayments,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'payment_transactions',
+              )
+              .select(
+                'amount_kobo, base_amount_kobo, status, is_reversed, payment_type',
+              )
+              .eq(
+                'order_id',
+                order.id,
+              );
+
+          let
+            confirmedPaid =
+              0;
+
+          for (
+            const p of remainingPayments ||
+              []
+          ) {
+            if (
+              p.is_reversed
+            ) {
+              continue;
+            }
+
+            if (
+              p.status !==
+              'successful'
+            ) {
+              continue;
+            }
+
+            if (
+              p.payment_type ===
+              'adjustment'
+            ) {
+              confirmedPaid +=
+                Number(
+                  p.amount_kobo,
+                );
+            } else {
+              confirmedPaid +=
+                Number(
+                  p.base_amount_kobo ??
+                    p.amount_kobo ??
+                    0,
+                );
+            }
+          }
+
+          const {
+            data:
+              refreshedOrder,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'orders',
+              )
+              .select(
+                'quoted_amount_kobo',
+              )
+              .eq(
+                'id',
+                order.id,
+              )
+              .maybeSingle();
+
+          const
+            totalKobo =
+              Number(
+                refreshedOrder?.quoted_amount_kobo ||
+                  order.quoted_amount_kobo,
+              );
+
+          const
+            fullyPaid =
+              confirmedPaid >=
+              totalKobo;
+
+          await ctx
+            .supabaseAdmin
+            .from(
+              'orders',
+            )
+            .update(
+              {
+                paid_amount_kobo:
+                  confirmedPaid,
+
+                payment_status:
+                  fullyPaid
+                    ? 'successful'
+                    : confirmedPaid >
+                        0
+                      ? 'processing'
+                      : 'pending',
+              },
+            )
+            .eq(
+              'id',
+              order.id,
+            );
+
+          return json(
+            {
+              success: true,
+
+              cancelled: true,
+
+              providerVoided,
+            },
+          );
         }
 
         if (

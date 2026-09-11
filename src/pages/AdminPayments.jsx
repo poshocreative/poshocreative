@@ -20,6 +20,7 @@ import {
   getAdminPaymentAttempts,
   getPaymentMethodSettings,
   recheckAdminPayment,
+  cancelAdminPayment,
   updatePaymentMethodEnabled,
 } from '../lib/adminPayments';
 
@@ -361,6 +362,59 @@ export default function AdminPayments() {
 
         setSuccess(
           'Transaction status refreshed successfully.',
+        );
+
+        await load();
+      } catch (
+        actionError
+      ) {
+        setError(
+          actionError.message,
+        );
+      } finally {
+        setBusy('');
+      }
+    };
+
+  const cancelPayment =
+    async (
+      payment,
+    ) => {
+      const confirmed =
+        window.confirm(
+          `Cancel this ${payment.status} payment? This will attempt to void the Flutterwave charge.`,
+        );
+
+      if (
+        !confirmed
+      ) {
+        return;
+      }
+
+      try {
+        setBusy(
+          payment.id,
+        );
+
+        setError('');
+        setSuccess('');
+
+        const result =
+          await cancelAdminPayment(
+            {
+              orderId:
+                payment.order_id,
+              paymentId:
+                payment.id,
+              reason:
+                'Cancelled by management via admin panel.',
+            },
+          );
+
+        setSuccess(
+          result.providerVoided
+            ? 'Payment cancelled and Flutterwave charge voided.'
+            : 'Payment cancelled locally.',
         );
 
         await load();
@@ -974,6 +1028,7 @@ export default function AdminPayments() {
                   ].includes(
                     payment.status,
                   ) && (
+                    <>
                     <button
                       type="button"
                       className="admin-payment-recheck"
@@ -996,6 +1051,36 @@ export default function AdminPayments() {
                         ? 'Checking transaction...'
                         : 'Recheck transaction'}
                     </button>
+
+                    <button
+                      type="button"
+                      className="admin-payment-recheck"
+                      onClick={() =>
+                        cancelPayment(
+                          payment,
+                        )
+                      }
+                      disabled={
+                        busy ===
+                        payment.id
+                      }
+                      style={{
+                        color:
+                          '#a33434',
+                        borderColor:
+                          'rgba(174, 48, 48, 0.2)',
+                      }}
+                    >
+                      <XCircle
+                        size={16}
+                      />
+
+                      {busy ===
+                      payment.id
+                        ? 'Cancelling...'
+                        : 'Cancel payment'}
+                    </button>
+                    </>
                   )}
                 </article>
               );

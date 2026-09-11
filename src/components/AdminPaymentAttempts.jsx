@@ -17,6 +17,7 @@ import {
 import {
   getAdminPaymentAttempts,
   recheckAdminPayment,
+  cancelAdminPayment,
 } from '../lib/adminPayments';
 
 import {
@@ -243,6 +244,58 @@ export default function AdminPaymentAttempts({
         setMessage(
           result.message ||
             'Payment status refreshed.',
+        );
+
+        await load();
+      } catch (
+        actionError
+      ) {
+        setError(
+          actionError.message,
+        );
+      } finally {
+        setBusyId('');
+      }
+    };
+
+  const cancelPayment =
+    async (
+      payment,
+    ) => {
+      const confirmed =
+        window.confirm(
+          `Cancel this ${payment.status} payment of ₦${((Number(payment.base_amount_kobo ?? payment.amount_kobo ?? 0)) / 100).toLocaleString('en-NG', { minimumFractionDigits: 2 })}? This will void the Flutterwave charge if possible.`,
+        );
+
+      if (
+        !confirmed
+      ) {
+        return;
+      }
+
+      try {
+        setBusyId(
+          payment.id,
+        );
+
+        setError('');
+        setMessage('');
+
+        const result =
+          await cancelAdminPayment(
+            {
+              orderId,
+              paymentId:
+                payment.id,
+              reason:
+                'Cancelled by management via admin panel.',
+            },
+          );
+
+        setMessage(
+          result.providerVoided
+            ? 'Payment cancelled and Flutterwave charge voided.'
+            : 'Payment cancelled locally. Flutterwave void was not applicable.',
         );
 
         await load();
@@ -600,6 +653,36 @@ export default function AdminPaymentAttempts({
                         payment.id
                           ? 'Checking...'
                           : 'Recheck transaction'}
+                      </button>
+                    )}
+
+                    {canRecheck && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          cancelPayment(
+                            payment,
+                          )
+                        }
+                        disabled={
+                          busyId ===
+                          payment.id
+                        }
+                        style={{
+                          color:
+                            '#a33434',
+                          borderColor:
+                            'rgba(174, 48, 48, 0.2)',
+                        }}
+                      >
+                        <XCircle
+                          size={16}
+                        />
+
+                        {busyId ===
+                        payment.id
+                          ? 'Cancelling...'
+                          : 'Cancel payment'}
                       </button>
                     )}
 

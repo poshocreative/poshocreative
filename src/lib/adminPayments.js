@@ -256,3 +256,45 @@ export async function recheckAdminPayment(
 
   return data;
 }
+
+export async function cancelAdminPayment(
+  {
+    orderId,
+    paymentId,
+    reason = '',
+  },
+) {
+  const {
+    data,
+    error,
+  } =
+    await supabase.functions
+      .invoke(
+        'admin-order-action',
+        {
+          body: {
+            action:
+              'cancel_payment',
+            orderId,
+            paymentId,
+            reason,
+          },
+        },
+      );
+
+  if (error) {
+    throw await functionError(
+      error,
+      'The payment could not be cancelled.',
+    );
+  }
+
+  if (!data?.success) {
+    throw new Error(
+      data?.message ||
+        'The payment could not be cancelled.',
+    );
+  }
+
+  return data;
+}
