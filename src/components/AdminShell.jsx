@@ -555,7 +555,7 @@ export default function AdminShell() {
               label,
               badge,
               icon:
-                Icon,
+                iconName,
             }) => (
               <NavLink
                 key={
@@ -566,6 +566,7 @@ export default function AdminShell() {
               >
                 <span>
                   <Icon
+                    name={iconName}
                     size={18}
                   />
                 </span>
@@ -601,7 +602,7 @@ export default function AdminShell() {
                   to,
                   label,
                   icon:
-                    Icon,
+                    iconName,
                 }) => (
                   <NavLink
                     key={
@@ -611,6 +612,7 @@ export default function AdminShell() {
                   >
                     <span>
                       <Icon
+                        name={iconName}
                         size={17}
                       />
                     </span>
@@ -710,7 +712,7 @@ export default function AdminShell() {
             label,
             badge,
             icon:
-              Icon,
+              iconName,
           }) => (
             <NavLink
               key={
@@ -720,6 +722,7 @@ export default function AdminShell() {
               end={end}
             >
               <Icon
+                name={iconName}
                 size={20}
               />
 
@@ -824,7 +827,7 @@ export default function AdminShell() {
               badge,
               hint,
               icon:
-                Icon,
+                iconName,
             }) => (
               <NavLink
                 key={
@@ -834,6 +837,7 @@ export default function AdminShell() {
               >
                 <span>
                   <Icon
+                    name={iconName}
                     size={19}
                   />
                 </span>

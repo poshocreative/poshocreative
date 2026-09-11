@@ -413,7 +413,7 @@ export default function DashboardShell() {
               end,
               label,
               icon:
-                Icon,
+                iconName,
             }) => (
               <NavLink
                 key={
@@ -428,6 +428,7 @@ export default function DashboardShell() {
               >
                 <span className="client-pro-nav-icon">
                   <Icon
+                    name={iconName}
                     size={18}
                   />
 
@@ -531,7 +532,7 @@ export default function DashboardShell() {
             end,
             label,
             icon:
-              Icon,
+              iconName,
           }) => (
             <NavLink
               key={
@@ -545,6 +546,7 @@ export default function DashboardShell() {
               }
             >
               <Icon
+                name={iconName}
                 size={20}
               />
 
@@ -643,25 +645,26 @@ export default function DashboardShell() {
         </div>
 
         <nav className="client-pro-sheet-links">
-          {mobileSecondary.map(
-            ({
-              to,
-              label,
-              icon:
-                Icon,
-            }) => (
-              <NavLink
-                key={
-                  to
-                }
-                to={
-                  to
-                }
-              >
-                <span>
-                  <Icon
-                    size={19}
-                  />
+        {mobileSecondary.map(
+          ({
+            to,
+            label,
+            icon:
+              iconName,
+          }) => (
+            <NavLink
+              key={
+                to
+              }
+              to={
+                to
+              }
+            >
+              <span>
+                <Icon
+                  name={iconName}
+                  size={19}
+                />
 
                   {label ===
                     'Updates' &&
