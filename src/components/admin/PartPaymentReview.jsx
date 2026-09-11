@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { BadgeCheck, XCircle } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { useEscapeClose } from '../ui/useEscapeClose';
 import { reviewProjectPartPayment } from '../../lib/projectFinance';
@@ -232,10 +232,10 @@ export default function PartPaymentReview({ order, finance, onChanged }) {
                 Cancel
               </button>
               <button type="button" className="finance-decline-button" onClick={() => decide('decline')} disabled={busy}>
-                <XCircle size={17} /> Decline
+                <Icon name="cancel" size={17} /> Decline
               </button>
               <button type="button" className="button button-primary" onClick={() => decide('approve')} disabled={busy} aria-busy={busy}>
-                <BadgeCheck size={17} /> {busy ? 'Saving…' : 'Approve arrangement'}
+                <Icon name="verified" size={17} /> {busy ? 'Saving…' : 'Approve arrangement'}
               </button>
             </div>
           </div>

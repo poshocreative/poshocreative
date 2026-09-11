@@ -3,13 +3,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  FilePlus2,
-  FileText,
-  Trash2,
-  UploadCloud,
-} from 'lucide-react';
 
+import Icon from './ui/Icon';
 import {
   uploadProjectFiles,
 } from '../lib/orders';
@@ -134,7 +129,7 @@ export default function ProjectFileUploader({
     <div className="project-file-uploader">
       <div className="project-file-uploader-copy">
         <div>
-          <FilePlus2 size={19} />
+          <Icon name="note_add" size={19} />
         </div>
         <div>
           <strong>Add more project files</strong>
@@ -149,7 +144,7 @@ export default function ProjectFileUploader({
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
         >
-          <UploadCloud size={16} />
+          <Icon name="cloud_upload" size={16} />
           Choose files
         </button>
         <input
@@ -166,7 +161,7 @@ export default function ProjectFileUploader({
         <div className="project-file-upload-selection">
           {files.map((file, index) => (
             <div key={`${file.name}-${file.size}-${file.lastModified}`}>
-              <FileText size={16} />
+              <Icon name="article" size={16} />
               <div>
                 <strong>{file.name}</strong>
                 <span>{formatFileSize(file.size)}</span>
@@ -177,7 +172,7 @@ export default function ProjectFileUploader({
                 disabled={uploading}
                 aria-label={`Remove ${file.name}`}
               >
-                <Trash2 size={15} />
+                <Icon name="delete" size={15} />
               </button>
             </div>
           ))}
@@ -188,7 +183,7 @@ export default function ProjectFileUploader({
             onClick={upload}
             disabled={uploading}
           >
-            <UploadCloud size={16} />
+            <Icon name="cloud_upload" size={16} />
             {uploading ? stage || 'Uploading files...' : `Upload ${files.length} file${files.length === 1 ? '' : 's'}`}
           </button>
         </div>

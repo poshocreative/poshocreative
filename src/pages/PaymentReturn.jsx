@@ -3,12 +3,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  CheckCircle2,
-  CircleAlert,
-  RefreshCw,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import {
   useSearchParams,
 } from 'react-router-dom';
@@ -269,7 +265,7 @@ export default function PaymentReturn() {
         'success' ? (
           <>
             <div className="payment-return-icon success">
-              <CheckCircle2
+              <Icon name="check_circle" 
                 size={36}
               />
             </div>
@@ -312,12 +308,10 @@ export default function PaymentReturn() {
               className={`payment-return-icon ${status === 'pending' ? 'pending' : ''}`}
             >
               {status === 'pending' ? (
-                <RefreshCw
-                  size={34}
+                <Icon name="autorenew"                   size={34}
                 />
               ) : (
-                <CircleAlert
-                  size={36}
+                <Icon name="error"                   size={36}
                 />
               )}
             </div>
@@ -347,7 +341,7 @@ export default function PaymentReturn() {
                 }
                 disabled={autoChecking}
               >
-                <RefreshCw size={16} />
+                <Icon name="autorenew" size={16} />
                 {autoChecking
                   ? 'Checking automatically…'
                   : 'Check again now'}

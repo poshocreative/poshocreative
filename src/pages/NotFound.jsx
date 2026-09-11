@@ -2,12 +2,9 @@ import {
   useEffect,
 } from 'react';
 
-import {
-  ArrowUpRight,
-  Compass,
-  Home,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   Link,
   useLocation,
@@ -80,7 +77,7 @@ export default function NotFound() {
               to="/"
               className="button button-primary"
             >
-              <Home
+              <Icon name="home" 
                 size={17}
               />
 
@@ -91,13 +88,13 @@ export default function NotFound() {
               to="/services"
               className="button button-secondary"
             >
-              <Compass
+              <Icon name="explore" 
                 size={17}
               />
 
               Explore services
 
-              <ArrowUpRight
+              <Icon name="north_east" 
                 size={16}
               />
             </Link>

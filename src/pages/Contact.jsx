@@ -1,20 +1,13 @@
-import {
-  ArrowRight,
-  BriefcaseBusiness,
-  CheckCircle2,
-  Mail,
-  MessageCircle,
-  Phone,
-  Sparkles,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   Link,
 } from 'react-router-dom';
 
 const contactOptions = [
   {
-    icon: Mail,
+    icon: 'mail',
     label: 'Email',
     value: 'poshocreative@gmail.com',
     description:
@@ -25,8 +18,7 @@ const contactOptions = [
       'Send an email',
   },
   {
-    icon:
-      MessageCircle,
+    icon: 'chat_bubble',
     label:
       'WhatsApp',
     value:
@@ -39,7 +31,7 @@ const contactOptions = [
       'Open WhatsApp',
   },
   {
-    icon: Phone,
+    icon: 'phone',
     label:
       'Phone',
     value:
@@ -85,7 +77,7 @@ export default function Contact() {
           </div>
 
           <aside className="contact-hero-aside">
-            <Sparkles
+            <Icon name="auto_awesome" 
               size={24}
             />
 
@@ -107,7 +99,7 @@ export default function Contact() {
             >
               Start a project
 
-              <ArrowRight
+              <Icon name="arrow_forward" 
                 size={17}
               />
             </Link>
@@ -186,7 +178,7 @@ export default function Contact() {
                   <strong>
                     {action}
 
-                    <ArrowRight
+                    <Icon name="arrow_forward" 
                       size={16}
                     />
                   </strong>
@@ -200,7 +192,7 @@ export default function Contact() {
       <section className="contact-project-section">
         <div className="container contact-project-grid">
           <div>
-            <BriefcaseBusiness
+            <Icon name="corporate_fare" 
               size={24}
             />
 
@@ -318,7 +310,7 @@ export default function Contact() {
 
       <section className="contact-assurance-section">
         <div className="container contact-assurance-card">
-          <CheckCircle2
+          <Icon name="check_circle" 
             size={24}
           />
 

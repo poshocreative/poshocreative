@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { X } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { EmptyState, ErrorBlock } from '../ui/StateBlocks';
 import StatusBadge from '../ui/StatusBadge';
@@ -120,7 +120,7 @@ export default function RevisionsPanel({ order, work, onChanged }) {
           <form role="dialog" aria-modal="true" aria-label="Respond to revision" className="posho-modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
             <div className="posho-modal-heading">
               <h3>Respond to revision</h3>
-              <button type="button" onClick={() => setResponding(null)} aria-label="Close" disabled={busy}><X size={19} /></button>
+              <button type="button" onClick={() => setResponding(null)} aria-label="Close" disabled={busy}><Icon name="close" size={19} /></button>
             </div>
             <p className="posho-modal-description">{responding.description}</p>
             <div className="posho-form-grid">

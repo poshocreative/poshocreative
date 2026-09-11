@@ -1,5 +1,5 @@
-import { X } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useEscapeClose } from '../ui/useEscapeClose';
 import StatusBadge from '../ui/StatusBadge';
 import { formatKobo } from '../../lib/money';
@@ -50,7 +50,7 @@ export default function ClientPreview({ open, order, work, finance, onClose }) {
             <span className="posho-section-label">Preview as client · read-only</span>
             <h3 className="posho-long-value">{order.project_title}</h3>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close preview"><X size={19} /></button>
+          <button type="button" onClick={onClose} aria-label="Close preview"><Icon name="close" size={19} /></button>
         </div>
 
         <p className="posho-modal-description">

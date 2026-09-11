@@ -4,18 +4,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  AlertTriangle,
-  Banknote,
-  CheckCircle2,
-  Clock3,
-  RefreshCw,
-  Search,
-  Settings2,
-  Smartphone,
-  XCircle,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   getAdminPaymentAttempts,
   getPaymentMethodSettings,
@@ -531,7 +522,7 @@ export default function AdminPayments() {
       <section className="admin-payment-method-settings">
         <div className="admin-payment-method-settings-heading">
           <div>
-            <Settings2
+            <Icon name="tune" 
               size={20}
             />
 
@@ -571,11 +562,11 @@ export default function AdminPayments() {
                   {setting
                     .method_key ===
                   'opay' ? (
-                    <Smartphone
+                    <Icon name="smartphone" 
                       size={20}
                     />
                   ) : (
-                    <Banknote
+                    <Icon name="account_balance_wallet" 
                       size={20}
                     />
                   )}
@@ -628,7 +619,7 @@ export default function AdminPayments() {
 
       <div className="admin-payment-overview">
         <article>
-          <Clock3
+          <Icon name="schedule" 
             size={18}
           />
 
@@ -642,7 +633,7 @@ export default function AdminPayments() {
         </article>
 
         <article>
-          <CheckCircle2
+          <Icon name="check_circle" 
             size={18}
           />
 
@@ -656,7 +647,7 @@ export default function AdminPayments() {
         </article>
 
         <article>
-          <XCircle
+          <Icon name="cancel" 
             size={18}
           />
 
@@ -670,7 +661,7 @@ export default function AdminPayments() {
         </article>
 
         <article>
-          <Banknote
+          <Icon name="account_balance_wallet" 
             size={18}
           />
 
@@ -702,7 +693,7 @@ export default function AdminPayments() {
 
       <div className="admin-payment-toolbar">
         <div className="admin-search">
-          <Search
+          <Icon name="search" 
             size={17}
           />
 
@@ -795,11 +786,11 @@ export default function AdminPayments() {
                       <div>
                         {payment.payment_method ===
                         'opay' ? (
-                          <Smartphone
+                          <Icon name="smartphone" 
                             size={19}
                           />
                         ) : (
-                          <Banknote
+                          <Icon name="account_balance_wallet" 
                             size={19}
                           />
                         )}
@@ -982,7 +973,7 @@ export default function AdminPayments() {
 
                   {payment.failure_code && (
                     <div className="admin-payment-failure-code">
-                      <AlertTriangle
+                      <Icon name="warning" 
                         size={16}
                       />
 
@@ -1006,7 +997,7 @@ export default function AdminPayments() {
 
                   {diagnostic?.internal_message && (
                     <div className="admin-payment-internal-message">
-                      <AlertTriangle
+                      <Icon name="warning" 
                         size={16}
                       />
 
@@ -1042,7 +1033,7 @@ export default function AdminPayments() {
                         payment.id
                       }
                     >
-                      <RefreshCw
+                      <Icon name="autorenew" 
                         size={16}
                       />
 
@@ -1071,7 +1062,7 @@ export default function AdminPayments() {
                           'rgba(174, 48, 48, 0.2)',
                       }}
                     >
-                      <XCircle
+                      <Icon name="cancel" 
                         size={16}
                       />
 
@@ -1109,7 +1100,7 @@ export default function AdminPayments() {
 
 function ReceiptTextFallback() {
   return (
-    <Banknote
+    <Icon name="account_balance_wallet" 
       size={18}
     />
   );

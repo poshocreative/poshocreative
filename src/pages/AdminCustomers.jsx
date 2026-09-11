@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Search, X } from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
 import Link from '../components/PortalLink';
 import PageHeader from '../components/ui/PageHeader';
@@ -217,7 +217,7 @@ export default function AdminCustomers() {
         <>
           <div className="posho-search-row">
             <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Search size={17} aria-hidden="true" />
+              <Icon name="search" size={17} aria-hidden="true" />
               <input
                 type="search"
                 value={query}
@@ -520,7 +520,7 @@ export default function AdminCustomers() {
               </div>
 
               <button type="button" onClick={() => setDetail(null)} aria-label="Close history" disabled={busy}>
-                <X size={19} />
+                <Icon name="close" size={19} />
               </button>
             </div>
 
@@ -643,7 +643,7 @@ export default function AdminCustomers() {
               <h3>{orgForm.id ? 'Rename organization' : 'New organization'}</h3>
 
               <button type="button" onClick={() => setOrgForm(null)} aria-label="Close" disabled={busy}>
-                <X size={19} />
+                <Icon name="close" size={19} />
               </button>
             </div>
 
@@ -717,7 +717,7 @@ export default function AdminCustomers() {
               <h3>Add member</h3>
 
               <button type="button" onClick={() => setMemberForm(null)} aria-label="Close" disabled={busy}>
-                <X size={19} />
+                <Icon name="close" size={19} />
               </button>
             </div>
 
@@ -831,7 +831,7 @@ export default function AdminCustomers() {
               <h3>{retainerForm.id ? 'Edit retainer' : 'New retainer'}</h3>
 
               <button type="button" onClick={() => setRetainerForm(null)} aria-label="Close" disabled={busy}>
-                <X size={19} />
+                <Icon name="close" size={19} />
               </button>
             </div>
 

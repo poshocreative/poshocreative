@@ -1,6 +1,7 @@
+import Icon from './Icon';
+
 import { useEffect, useRef } from 'react';
 
-import { X } from 'lucide-react';
 
 /**
  * Accessible modal confirmation — replaces window.confirm / alert.
@@ -55,7 +56,7 @@ export default function ConfirmDialog({
         <div className="posho-modal-heading">
           <h3>{title}</h3>
           <button type="button" onClick={onClose} aria-label="Close dialog" disabled={busy}>
-            <X size={19} />
+            <Icon name="close" size={19} />
           </button>
         </div>
 

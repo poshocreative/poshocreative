@@ -4,16 +4,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  AlertTriangle,
-  Banknote,
-  CheckCircle2,
-  Clock3,
-  RefreshCw,
-  Smartphone,
-  XCircle,
-} from 'lucide-react';
 
+
+import Icon from './ui/Icon';
 import {
   getAdminPaymentAttempts,
   recheckAdminPayment,
@@ -115,7 +108,7 @@ function statusIcon(
     'successful'
   ) {
     return (
-      <CheckCircle2
+      <Icon name="check_circle" 
         size={18}
       />
     );
@@ -126,7 +119,7 @@ function statusIcon(
     'failed'
   ) {
     return (
-      <XCircle
+      <Icon name="cancel" 
         size={18}
       />
     );
@@ -137,14 +130,14 @@ function statusIcon(
     'cancelled'
   ) {
     return (
-      <AlertTriangle
+      <Icon name="warning" 
         size={18}
       />
     );
   }
 
   return (
-    <Clock3
+    <Icon name="schedule" 
       size={18}
     />
   );
@@ -366,7 +359,7 @@ export default function AdminPaymentAttempts({
       {attempts.length ===
       0 ? (
         <div className="admin-payment-empty">
-          <Banknote
+          <Icon name="account_balance_wallet" 
             size={22}
           />
 
@@ -413,11 +406,11 @@ export default function AdminPaymentAttempts({
                       <div>
                         {payment.payment_method ===
                         'opay' ? (
-                          <Smartphone
+                          <Icon name="smartphone" 
                             size={19}
                           />
                         ) : (
-                          <Banknote
+                          <Icon name="account_balance_wallet" 
                             size={19}
                           />
                         )}
@@ -591,7 +584,7 @@ export default function AdminPaymentAttempts({
 
                   {payment.failure_code && (
                     <div className="admin-payment-failure-code">
-                      <AlertTriangle
+                      <Icon name="warning" 
                         size={16}
                       />
 
@@ -615,7 +608,7 @@ export default function AdminPaymentAttempts({
 
                   {latestDiagnostic?.internal_message && (
                     <div className="admin-payment-internal-message">
-                      <AlertTriangle
+                      <Icon name="warning" 
                         size={16}
                       />
 
@@ -645,7 +638,7 @@ export default function AdminPaymentAttempts({
                           payment.id
                         }
                       >
-                        <RefreshCw
+                        <Icon name="autorenew" 
                           size={16}
                         />
 
@@ -675,7 +668,7 @@ export default function AdminPaymentAttempts({
                             'rgba(174, 48, 48, 0.2)',
                         }}
                       >
-                        <XCircle
+                        <Icon name="cancel" 
                           size={16}
                         />
 

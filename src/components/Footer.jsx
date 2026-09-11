@@ -1,10 +1,6 @@
-import {
-  ArrowUpRight,
-  Mail,
-  MessageCircle,
-  Phone,
-} from 'lucide-react';
 
+
+import Icon from './ui/Icon';
 import {
   Link,
 } from 'react-router-dom';
@@ -97,7 +93,7 @@ export default function Footer() {
 
           <div className="footer-contact-links">
             <a href="mailto:poshocreative@gmail.com">
-              <Mail
+              <Icon name="mail" 
                 size={15}
               />
 
@@ -105,7 +101,7 @@ export default function Footer() {
             </a>
 
             <a href="tel:+2347060833927">
-              <Phone
+              <Icon name="phone" 
                 size={15}
               />
 
@@ -117,7 +113,7 @@ export default function Footer() {
               target="_blank"
               rel="noreferrer"
             >
-              <MessageCircle
+              <Icon name="chat_bubble" 
                 size={15}
               />
 
@@ -131,7 +127,7 @@ export default function Footer() {
           >
             Start a project
 
-            <ArrowUpRight
+            <Icon name="north_east" 
               size={18}
             />
           </Link>

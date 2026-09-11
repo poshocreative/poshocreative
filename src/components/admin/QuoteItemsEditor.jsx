@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { PlusCircle, Trash2 } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { EmptyState, ErrorBlock } from '../ui/StateBlocks';
 import { formatKobo } from '../../lib/money';
@@ -146,14 +146,14 @@ export default function QuoteItemsEditor({ order, onChanged }) {
                   <input type="number" min="0" step="0.01" value={item.unitPrice} onChange={(e) => set(index, 'unitPrice', e.target.value)} />
                 </label>
                 <button type="button" className="button button-secondary" onClick={() => remove(index)} aria-label={`Remove item ${index + 1}`}>
-                  <Trash2 size={15} />
+                  <Icon name="delete" size={15} />
                 </button>
               </div>
             </div>
           ))}
 
           <button type="button" className="button button-secondary" onClick={add}>
-            <PlusCircle size={17} /> Add item
+            <Icon name="add_circle" size={17} /> Add item
           </button>
 
           <div className="posho-preview-box" role="status">

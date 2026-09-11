@@ -6,10 +6,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  Search,
-} from 'lucide-react';
 
+import Icon from './ui/Icon';
 import {
   useNavigate,
 } from 'react-router-dom';
@@ -596,8 +594,7 @@ export default function CommandPalette() {
         }
         aria-label="Open command palette (Control K)"
       >
-        <Search
-          size={16}
+        <Icon name="search"           size={16}
         />
 
         <span>
@@ -630,8 +627,7 @@ export default function CommandPalette() {
             }
           >
             <div className="posho-palette-input-row">
-              <Search
-                size={18}
+              <Icon name="search"                 size={18}
               />
 
               <input

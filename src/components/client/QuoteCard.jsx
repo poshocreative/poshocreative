@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { CheckCircle2, XCircle } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import StatusBadge from '../ui/StatusBadge';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -92,10 +92,10 @@ export default function QuoteCard({ order, onChanged }) {
       {quote.status === 'sent' && (
         <div className="finance-review-actions">
           <button type="button" className="button button-primary" onClick={() => setConfirming('accept')} disabled={busy}>
-            <CheckCircle2 size={17} /> Accept quote
+            <Icon name="check_circle" size={17} /> Accept quote
           </button>
           <button type="button" className="button button-secondary" onClick={() => setConfirming('decline')} disabled={busy}>
-            <XCircle size={17} /> Decline
+            <Icon name="cancel" size={17} /> Decline
           </button>
         </div>
       )}

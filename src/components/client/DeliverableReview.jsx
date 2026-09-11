@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { CheckCircle2, Download, MessageSquareText, X } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { EmptyState, ErrorBlock } from '../ui/StateBlocks';
 import StatusBadge from '../ui/StatusBadge';
@@ -184,7 +184,7 @@ export default function DeliverableReview({ order, work, onChanged }) {
                       disabled={downloading === version.id}
                       aria-busy={downloading === version.id}
                     >
-                      <Download size={15} /> {downloading === version.id ? 'Preparing…' : 'Download'}
+                      <Icon name="download" size={15} /> {downloading === version.id ? 'Preparing…' : 'Download'}
                     </button>
 
                     <button
@@ -197,7 +197,7 @@ export default function DeliverableReview({ order, work, onChanged }) {
                       }
                       aria-expanded={annotating === version.id}
                     >
-                      <MessageSquareText size={15} />{' '}
+                      <Icon name="chat_bubble" size={15} />{' '}
                       {annotating === version.id ? 'Hide comments' : 'Comment on file'}
                     </button>
                   </div>
@@ -219,7 +219,7 @@ export default function DeliverableReview({ order, work, onChanged }) {
                         onClick={() => setApproving({ versionId: version.id, label: `${deliverable.title} V${version.version_number}` })}
                         disabled={busy}
                       >
-                        <CheckCircle2 size={15} /> Approve
+                        <Icon name="check_circle" size={15} /> Approve
                       </button>
                       <button
                         type="button"
@@ -227,7 +227,7 @@ export default function DeliverableReview({ order, work, onChanged }) {
                         onClick={() => { setRevising({ deliverableId: deliverable.id, versionId: version.id, label: `${deliverable.title} V${version.version_number}` }); setFeedback(''); }}
                         disabled={busy}
                       >
-                        <MessageSquareText size={15} /> Request revision
+                        <Icon name="chat_bubble" size={15} /> Request revision
                       </button>
                     </div>
                   )}
@@ -256,7 +256,7 @@ export default function DeliverableReview({ order, work, onChanged }) {
           <form role="dialog" aria-modal="true" aria-label="Request revision" className="posho-modal" onClick={(e) => e.stopPropagation()} onSubmit={submitRevision}>
             <div className="posho-modal-heading">
               <h3>Request revision</h3>
-              <button type="button" onClick={() => setRevising(null)} aria-label="Close" disabled={busy}><X size={19} /></button>
+              <button type="button" onClick={() => setRevising(null)} aria-label="Close" disabled={busy}><Icon name="close" size={19} /></button>
             </div>
             <p className="posho-modal-description">
               {revising.label} — describe exactly what should change. Specific

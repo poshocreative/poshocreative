@@ -5,19 +5,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowRight,
-  Bell,
-  CircleDollarSign,
-  ClipboardList,
-  Clock3,
-  FileText,
-  FolderKanban,
-  Plus,
-  ReceiptText,
-  Sparkles,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
@@ -46,8 +36,7 @@ const quickLinks = [
     description:
       'View every project and its current status.',
 
-    icon:
-      FolderKanban,
+    icon: 'folder_special',
   },
   {
     to:
@@ -59,8 +48,7 @@ const quickLinks = [
     description:
       'Review transactions and payment history.',
 
-    icon:
-      ReceiptText,
+    icon: 'receipt',
   },
   {
     to:
@@ -72,8 +60,7 @@ const quickLinks = [
     description:
       'Access project references and delivered files.',
 
-    icon:
-      FileText,
+    icon: 'article',
   },
   {
     to:
@@ -85,8 +72,7 @@ const quickLinks = [
     description:
       'Small tasks, updates and support requests.',
 
-    icon:
-      ClipboardList,
+    icon: 'assignment',
   },
   {
     to:
@@ -98,8 +84,7 @@ const quickLinks = [
     description:
       'See recent project and account updates.',
 
-    icon:
-      Bell,
+    icon: 'notifications',
   },
 ];
 
@@ -349,8 +334,7 @@ export default function Dashboard() {
       detail:
         'Currently open',
 
-      icon:
-        FolderKanban,
+      icon: 'folder_special',
 
       className:
         'projects',
@@ -367,8 +351,7 @@ export default function Dashboard() {
           ? 'Needs your response'
           : 'Items need your response',
 
-      icon:
-        Clock3,
+      icon: 'schedule',
 
       className:
         'attention',
@@ -385,8 +368,7 @@ export default function Dashboard() {
       detail:
         'Across your projects',
 
-      icon:
-        CircleDollarSign,
+      icon: 'monetization_on',
 
       className:
         'money',
@@ -401,8 +383,7 @@ export default function Dashboard() {
       detail:
         'Delivered projects',
 
-      icon:
-        Sparkles,
+      icon: 'auto_awesome',
 
       className:
         'completed',
@@ -438,8 +419,7 @@ export default function Dashboard() {
           (
             metric,
           ) => {
-            const Icon =
-              metric.icon;
+            const iconName = metric.icon;
 
             return (
               <article
@@ -449,8 +429,7 @@ export default function Dashboard() {
                 className={`workspace-stat-card workspace-stat-card-v3 workspace-stat-${metric.className}`}
               >
                 <div className="workspace-stat-icon">
-                  <Icon
-                    size={19}
+                  <Icon name={iconName} size={19}
                   />
                 </div>
 
@@ -520,7 +499,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="workspace-priority-arrow">
-                  <ArrowRight size={17} />
+                  <Icon name="arrow_forward" size={17} />
                 </div>
               </Link>
             ))}
@@ -561,7 +540,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="workspace-priority-arrow">
-                  <ArrowRight size={17} />
+                  <Icon name="arrow_forward" size={17} />
                 </div>
               </Link>
             </div>
@@ -642,7 +621,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="workspace-priority-arrow">
-                    <ArrowRight
+                    <Icon name="arrow_forward" 
                       size={17}
                     />
                   </div>
@@ -672,7 +651,7 @@ export default function Dashboard() {
             >
               View all
 
-              <ArrowRight
+              <Icon name="arrow_forward" 
                 size={15}
               />
             </Link>
@@ -682,7 +661,7 @@ export default function Dashboard() {
           0 ? (
             <div className="workspace-empty workspace-dashboard-empty">
               <div className="workspace-empty-icon">
-                <FolderKanban
+                <Icon name="folder_special"
                   size={20}
                 />
               </div>
@@ -699,7 +678,7 @@ export default function Dashboard() {
                 to="/order"
                 className="button button-primary"
               >
-                <Plus
+                <Icon name="add" 
                   size={17}
                 />
 
@@ -762,7 +741,7 @@ export default function Dashboard() {
                       </span>
 
                       <div className="workspace-project-arrow-v3">
-                        <ArrowRight
+                        <Icon name="arrow_forward" 
                           size={17}
                         />
                       </div>
@@ -793,8 +772,7 @@ export default function Dashboard() {
               (
                 item,
               ) => {
-                const Icon =
-                  item.icon;
+                const iconName = item.icon;
 
                 return (
                   <Link
@@ -806,8 +784,7 @@ export default function Dashboard() {
                     }
                   >
                     <div className="workspace-quick-link-icon">
-                      <Icon
-                        size={17}
+                      <Icon name={iconName} size={17}
                       />
                     </div>
 
@@ -821,7 +798,7 @@ export default function Dashboard() {
                       </span>
                     </div>
 
-                    <ArrowRight
+                    <Icon name="arrow_forward" 
                       size={15}
                     />
                   </Link>
@@ -834,7 +811,7 @@ export default function Dashboard() {
             to="/order"
             className="workspace-quick-new-project"
           >
-            <Plus
+            <Icon name="add" 
               size={17}
             />
 

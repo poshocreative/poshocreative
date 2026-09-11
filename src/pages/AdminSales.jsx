@@ -5,14 +5,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  CalendarClock,
-  FileText,
-  Plus,
-  Search,
-  X,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
 import PageHeader from '../components/ui/PageHeader';
 import MetricCard from '../components/ui/MetricCard';
@@ -1035,8 +1029,7 @@ export default function AdminSales() {
                 })
               }
             >
-              <CalendarClock
-                size={17}
+              <Icon name="schedule"                 size={17}
               />
               Schedule meeting
             </button>
@@ -1050,8 +1043,7 @@ export default function AdminSales() {
                 })
               }
             >
-              <Plus
-                size={17}
+              <Icon name="add"                 size={17}
               />
               New lead
             </button>
@@ -1167,8 +1159,7 @@ export default function AdminSales() {
                 gap: 8,
               }}
             >
-              <Search
-                size={17}
+              <Icon name="search"                 size={17}
                 aria-hidden="true"
               />
 
@@ -1459,8 +1450,7 @@ export default function AdminSales() {
                 ]);
               }}
             >
-              <FileText
-                size={17}
+              <Icon name="article"                 size={17}
               />
               New proposal
             </button>
@@ -1916,8 +1906,7 @@ export default function AdminSales() {
                   leadBusy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -2371,8 +2360,7 @@ export default function AdminSales() {
                   stageBusy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -2887,8 +2875,7 @@ export default function AdminSales() {
                   proposalBusy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -3356,8 +3343,7 @@ export default function AdminSales() {
                         )
                       }
                     >
-                      <X
-                        size={15}
+                      <Icon name="close"                         size={15}
                       />
                     </button>
                   </div>
@@ -3467,8 +3453,7 @@ export default function AdminSales() {
                 }
                 aria-label="Close preview"
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -3624,8 +3609,7 @@ export default function AdminSales() {
                   meetingBusy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>

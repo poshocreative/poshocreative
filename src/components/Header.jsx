@@ -3,6 +3,7 @@ import {
   useState,
 } from 'react';
 
+import Icon from './ui/Icon';
 import {
   NavLink,
   useLocation,
@@ -10,20 +11,7 @@ import {
 
 import Link from './PortalLink';
 
-import {
-  BriefcaseBusiness,
-  CircleUserRound,
-  ContactRound,
-  Home,
-  LayoutDashboard,
-  LogIn,
-  LogOut,
-  Menu,
-  PanelsTopLeft,
-  ShieldCheck,
-  UserRound,
-  X,
-} from 'lucide-react';
+
 
 import {
   isAdminEmail,
@@ -265,7 +253,7 @@ export default function Header() {
                   to="/login"
                   className="header-login-link"
                 >
-                  <LogIn
+                  <Icon name="login" 
                     size={16}
                   />
 
@@ -304,11 +292,11 @@ export default function Header() {
                   </span>
 
                   {adminAccount ? (
-                    <ShieldCheck
+                    <Icon name="verified_user" 
                       size={16}
                     />
                   ) : (
-                    <UserRound
+                    <Icon name="person" 
                       size={16}
                     />
                   )}
@@ -339,11 +327,11 @@ export default function Header() {
                       }
                     >
                       {adminAccount ? (
-                        <ShieldCheck
+                        <Icon name="verified_user" 
                           size={17}
                         />
                       ) : (
-                        <LayoutDashboard
+                        <Icon name="dashboard" 
                           size={17}
                         />
                       )}
@@ -359,7 +347,7 @@ export default function Header() {
                         handleSignOut
                       }
                     >
-                      <LogOut
+                      <Icon name="logout" 
                         size={17}
                       />
 
@@ -387,7 +375,7 @@ export default function Header() {
                   );
                 }}
               >
-                <Menu
+                <Icon name="menu" 
                   size={23}
                 />
               </button>
@@ -451,7 +439,7 @@ export default function Header() {
               }
               aria-label="Close navigation menu"
             >
-              <X
+              <Icon name="close" 
                 size={21}
               />
             </button>
@@ -482,7 +470,7 @@ export default function Header() {
           ) : (
             <div className="mobile-sidebar-welcome">
               <div className="mobile-sidebar-welcome-icon">
-                <CircleUserRound
+                <Icon name="account_circle" 
                   size={20}
                 />
               </div>
@@ -514,7 +502,7 @@ export default function Header() {
                   }
                 >
                   <span className="mobile-sidebar-nav-icon">
-                    <Home
+                    <Icon name="home" 
                       size={18}
                     />
                   </span>
@@ -531,7 +519,7 @@ export default function Header() {
                   }
                 >
                   <span className="mobile-sidebar-nav-icon">
-                    <PanelsTopLeft
+                    <Icon name="web" 
                       size={18}
                     />
                   </span>
@@ -548,7 +536,7 @@ export default function Header() {
                   }
                 >
                   <span className="mobile-sidebar-nav-icon">
-                    <BriefcaseBusiness
+                    <Icon name="corporate_fare" 
                       size={18}
                     />
                   </span>
@@ -565,7 +553,7 @@ export default function Header() {
                   }
                 >
                   <span className="mobile-sidebar-nav-icon">
-                    <ContactRound
+                    <Icon name="contacts" 
                       size={18}
                     />
                   </span>
@@ -596,11 +584,11 @@ export default function Header() {
                   >
                     <span className="mobile-sidebar-nav-icon">
                       {adminAccount ? (
-                        <ShieldCheck
+                        <Icon name="verified_user" 
                           size={18}
                         />
                       ) : (
-                        <LayoutDashboard
+                        <Icon name="dashboard" 
                           size={18}
                         />
                       )}
@@ -640,7 +628,7 @@ export default function Header() {
                   handleSignOut
                 }
               >
-                <LogOut
+                <Icon name="logout" 
                   size={17}
                 />
 
@@ -654,7 +642,7 @@ export default function Header() {
                   closeMenus
                 }
               >
-                <LogIn
+                <Icon name="login" 
                   size={17}
                 />
 

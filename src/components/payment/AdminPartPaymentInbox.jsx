@@ -4,15 +4,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  BadgeCheck,
-  BellRing,
-  CalendarClock,
-  ExternalLink,
-  RefreshCw,
-  XCircle,
-} from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import Link from '../PortalLink';
 
 import {
@@ -205,7 +198,7 @@ export default function AdminPartPaymentInbox() {
 
         <div className="admin-part-payment-inbox-actions">
           <span className="admin-request-count">
-            <BellRing size={17} />
+            <Icon name="notifications_active" size={17} />
             {requests.length} pending
           </span>
 
@@ -215,7 +208,7 @@ export default function AdminPartPaymentInbox() {
             disabled={refreshing}
             aria-label="Refresh part-payment requests"
           >
-            <RefreshCw size={17} />
+            <Icon name="autorenew" size={17} />
           </button>
         </div>
       </div>
@@ -227,7 +220,7 @@ export default function AdminPartPaymentInbox() {
         <p className="finance-muted-message">Loading customer requests...</p>
       ) : requests.length === 0 ? (
         <div className="admin-part-payment-empty">
-          <BadgeCheck size={22} />
+          <Icon name="verified" size={22} />
           <div>
             <strong>No pending part-payment requests</strong>
             <p>New customer requests will be shown here and counted in the Management navigation.</p>
@@ -264,7 +257,7 @@ export default function AdminPartPaymentInbox() {
                     to={adminPath(`orders/${order.reference}`)}
                     className="admin-part-payment-project-link"
                   >
-                    Open full project <ExternalLink size={14} />
+                    Open full project <Icon name="open_in_new" size={14} />
                   </Link>
                 </div>
 
@@ -304,7 +297,7 @@ export default function AdminPartPaymentInbox() {
                 onClick={() => setReviewing(null)}
                 aria-label="Close review"
               >
-                <XCircle size={21} />
+                <Icon name="cancel" size={21} />
               </button>
             </div>
 
@@ -439,7 +432,7 @@ export default function AdminPartPaymentInbox() {
                 onClick={() => decide('decline')}
                 disabled={processing}
               >
-                <XCircle size={17} /> Decline
+                <Icon name="cancel" size={17} /> Decline
               </button>
               <button
                 type="button"
@@ -447,7 +440,7 @@ export default function AdminPartPaymentInbox() {
                 onClick={() => decide('approve')}
                 disabled={processing}
               >
-                <CalendarClock size={17} />
+                <Icon name="schedule" size={17} />
                 {processing ? 'Saving...' : 'Approve installment'}
               </button>
             </div>

@@ -1,5 +1,5 @@
-import { ArrowRight } from 'lucide-react';
 
+import Icon from './Icon';
 import Link from '../PortalLink';
 import MoneyDisplay from './MoneyDisplay';
 import StatusBadge from './StatusBadge';
@@ -23,7 +23,7 @@ export function ProjectCard({ to, reference, title, subtitle, status, meta = [] 
       </div>
       <span className="posho-result-side">
         {status && <StatusBadge value={status} />}
-        <ArrowRight size={17} aria-hidden="true" />
+        <Icon name="arrow_forward" size={17} aria-hidden="true" />
       </span>
     </Link>
   );

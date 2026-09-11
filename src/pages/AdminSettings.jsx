@@ -4,12 +4,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  Plus,
-  Trash2,
-  X,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
 import PageHeader from '../components/ui/PageHeader';
 import Tabs from '../components/ui/Tabs';
@@ -669,8 +665,7 @@ export default function AdminSettings() {
                 })
               }
             >
-              <Plus
-                size={17}
+              <Icon name="add"                 size={17}
               />
               New SOP
             </button>
@@ -769,8 +764,7 @@ export default function AdminSettings() {
                           }
                         }}
                       >
-                        <Trash2
-                          size={15}
+                        <Icon name="delete"                           size={15}
                         />
                       </button>
                     </div>
@@ -823,8 +817,7 @@ export default function AdminSettings() {
                       busy
                     }
                   >
-                    <X
-                      size={19}
+                    <Icon name="close"                       size={19}
                     />
                   </button>
                 </div>

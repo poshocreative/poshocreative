@@ -3,15 +3,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  Link2,
-  Pencil,
-  PlusCircle,
-  Timer,
-  Trash2,
-  X,
-} from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import {
   useToast,
 } from '../ui/Toast';
@@ -833,8 +826,7 @@ export default function TasksPanel({
               )
             }
           >
-            <Pencil
-              size={15}
+            <Icon name="edit"               size={15}
             />{' '}
             Edit
           </button>
@@ -848,8 +840,7 @@ export default function TasksPanel({
               )
             }
           >
-            <Trash2
-              size={15}
+            <Icon name="delete"               size={15}
             />{' '}
             Remove
           </button>
@@ -968,8 +959,7 @@ export default function TasksPanel({
                     )
                   }
                 >
-                  <Link2
-                    size={15}
+                  <Icon name="link"                     size={15}
                   />
                   Add
                 </button>
@@ -1022,8 +1012,7 @@ export default function TasksPanel({
                     )
                   }
                 >
-                  <Timer
-                    size={15}
+                  <Icon name="timer"                     size={15}
                   />
                   Log
                 </button>
@@ -1071,8 +1060,7 @@ export default function TasksPanel({
             openNew
           }
         >
-          <PlusCircle
-            size={17}
+          <Icon name="add_circle"             size={17}
           />{' '}
           Add task
         </button>
@@ -1175,8 +1163,7 @@ export default function TasksPanel({
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -1517,8 +1504,7 @@ export default function TasksPanel({
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>

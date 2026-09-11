@@ -5,13 +5,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  MessageSquare,
-  Plus,
-  Search,
-  X,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
 import PageHeader from '../components/ui/PageHeader';
 import MetricCard from '../components/ui/MetricCard';
@@ -874,8 +869,7 @@ export default function AdminRequests() {
               )
             }
           >
-            <Plus
-              size={17}
+            <Icon name="add"               size={17}
             />
             New request
           </button>
@@ -949,8 +943,7 @@ export default function AdminRequests() {
             gap: 8,
           }}
         >
-          <Search
-            size={17}
+          <Icon name="search"             size={17}
             aria-hidden="true"
           />
 
@@ -1118,8 +1111,7 @@ export default function AdminRequests() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -1487,8 +1479,7 @@ export default function AdminRequests() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -2107,8 +2098,7 @@ export default function AdminRequests() {
                     busy
                   }
                 >
-                  <MessageSquare
-                    size={15}
+                  <Icon name="chat"                     size={15}
                   />
                   Post comment
                 </button>
@@ -2159,8 +2149,7 @@ export default function AdminRequests() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>

@@ -4,13 +4,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  BadgeCheck,
-  CalendarClock,
-  HandCoins,
-  XCircle,
-} from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import {
   formatMoney,
   formatOrderStatus,
@@ -180,7 +175,7 @@ export default function AdminPaymentRequestManager({
             decline it with a clear explanation.
           </p>
         </div>
-        <HandCoins size={22} />
+        <Icon name="handshake" size={22} />
       </div>
 
       <div className="finance-balance-strip">
@@ -192,7 +187,7 @@ export default function AdminPaymentRequestManager({
         <p className="finance-muted-message">Loading payment requests...</p>
       ) : !available ? (
         <div className="finance-capability-notice" role="status">
-          <CalendarClock size={20} />
+          <Icon name="schedule" size={20} />
           <div>
             <strong>Part-payment setup is pending</strong>
             <p>
@@ -249,7 +244,7 @@ export default function AdminPaymentRequestManager({
               <span>MANAGEMENT DECISION</span>
               <h3>Set the installment terms</h3>
             </div>
-            <CalendarClock size={21} />
+            <Icon name="schedule" size={21} />
           </div>
 
           {selectedRequest.requested_amount_kobo > 0 && (
@@ -353,7 +348,7 @@ export default function AdminPaymentRequestManager({
               onClick={() => saveDecision('decline')}
               disabled={processing}
             >
-              <XCircle size={17} />
+              <Icon name="cancel" size={17} />
               Decline
             </button>
             <button
@@ -362,7 +357,7 @@ export default function AdminPaymentRequestManager({
               onClick={() => saveDecision('approve')}
               disabled={processing}
             >
-              <BadgeCheck size={17} />
+              <Icon name="verified" size={17} />
               {processing ? 'Saving...' : 'Approve installment'}
             </button>
           </div>

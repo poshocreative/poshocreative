@@ -5,20 +5,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  Bell,
-  ClipboardList,
-  FileText,
-  FolderKanban,
-  LayoutDashboard,
-  LogOut,
-  MoreHorizontal,
-  ReceiptText,
-  Settings,
-  ShieldCheck,
-  X,
-} from 'lucide-react';
 
+
+import Icon from './ui/Icon';
 import {
   NavLink,
   Outlet,
@@ -44,8 +33,7 @@ const navigationItems = [
     label:
       'Overview',
 
-    icon:
-      LayoutDashboard,
+    icon: 'dashboard',
   },
   {
     suffix: 'orders',
@@ -53,8 +41,7 @@ const navigationItems = [
     label:
       'Projects',
 
-    icon:
-      FolderKanban,
+    icon: 'folder_special',
   },
   {
     suffix: 'payments',
@@ -62,8 +49,7 @@ const navigationItems = [
     label:
       'Payments',
 
-    icon:
-      ReceiptText,
+    icon: 'receipt',
   },
   {
     suffix: 'files',
@@ -71,8 +57,7 @@ const navigationItems = [
     label:
       'Files',
 
-    icon:
-      FileText,
+    icon: 'article',
   },
   {
     suffix: 'requests',
@@ -80,8 +65,7 @@ const navigationItems = [
     label:
       'Requests',
 
-    icon:
-      ClipboardList,
+    icon: 'assignment',
   },
   {
     suffix: 'notifications',
@@ -89,8 +73,7 @@ const navigationItems = [
     label:
       'Updates',
 
-    icon:
-      Bell,
+    icon: 'notifications',
   },
   {
     suffix: 'profile',
@@ -98,8 +81,7 @@ const navigationItems = [
     label:
       'Profile',
 
-    icon:
-      Settings,
+    icon: 'settings',
   },
 ];
 
@@ -469,7 +451,7 @@ export default function DashboardShell() {
 
         <div className="client-pro-sidebar-footer">
           <div className="client-pro-security">
-            <ShieldCheck
+            <Icon name="verified_user" 
               size={17}
             />
 
@@ -497,7 +479,7 @@ export default function DashboardShell() {
               signingOut
             }
           >
-            <LogOut
+            <Icon name="logout" 
               size={17}
             />
 
@@ -590,7 +572,7 @@ export default function DashboardShell() {
             moreOpen
           }
         >
-          <MoreHorizontal
+          <Icon name="more_horiz" 
             size={21}
           />
 
@@ -654,7 +636,7 @@ export default function DashboardShell() {
             }
             aria-label="Close workspace menu"
           >
-            <X
+            <Icon name="close" 
               size={19}
             />
           </button>
@@ -727,7 +709,7 @@ export default function DashboardShell() {
             signingOut
           }
         >
-          <LogOut
+          <Icon name="logout" 
             size={18}
           />
 

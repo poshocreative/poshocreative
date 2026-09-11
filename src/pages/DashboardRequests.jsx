@@ -4,12 +4,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  MessageSquare,
-  Plus,
-  X,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
 import PageHeader from '../components/ui/PageHeader';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -140,7 +136,7 @@ export default function DashboardRequests() {
             className="button button-primary"
             onClick={() => setCreateOpen(true)}
           >
-            <Plus size={17} />
+            <Icon name="add" size={17} />
             New request
           </button>
         }
@@ -199,7 +195,7 @@ export default function DashboardRequests() {
                   className="button button-secondary"
                   onClick={() => setDetail(request)}
                 >
-                  <MessageSquare size={15} /> Details
+                  <Icon name="chat" size={15} /> Details
                 </button>
               </div>
             </article>
@@ -229,7 +225,7 @@ export default function DashboardRequests() {
                 aria-label="Close"
                 disabled={busy}
               >
-                <X size={19} />
+                <Icon name="close" size={19} />
               </button>
             </div>
 
@@ -331,7 +327,7 @@ export default function DashboardRequests() {
                 onClick={() => setDetail(null)}
                 aria-label="Close"
               >
-                <X size={19} />
+                <Icon name="close" size={19} />
               </button>
             </div>
 

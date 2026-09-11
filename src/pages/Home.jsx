@@ -1,11 +1,8 @@
 import { Link } from 'react-router-dom';
 
-import {
-  ArrowRight,
-  ArrowUpRight,
-  BadgeCheck,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import { services } from '../data/services';
 
 export default function Home() {
@@ -40,7 +37,7 @@ export default function Home() {
                 className="button button-primary"
               >
                 Start a project
-                <ArrowRight size={18} />
+                <Icon name="arrow_forward" size={18} />
               </Link>
 
               <Link
@@ -53,12 +50,12 @@ export default function Home() {
 
             <div className="hero-trust">
               <div>
-                <BadgeCheck size={20} />
+                <Icon name="verified" size={20} />
                 Professional service
               </div>
 
               <div>
-                <BadgeCheck size={20} />
+                <Icon name="verified" size={20} />
                 Built around your goals
               </div>
             </div>
@@ -71,7 +68,7 @@ export default function Home() {
                   POSHO CREATIVE
                 </span>
 
-                <ArrowUpRight size={20} />
+                <Icon name="north_east" size={20} />
               </div>
 
               <div className="hero-card-message">
@@ -140,14 +137,14 @@ export default function Home() {
                 className="text-link"
               >
                 View all services
-                <ArrowUpRight size={18} />
+                <Icon name="north_east" size={18} />
               </Link>
             </div>
           </div>
 
           <div className="services-grid">
             {services.map((service) => {
-              const Icon = service.icon;
+              const iconName = service.icon;
 
               return (
                 <article
@@ -156,7 +153,7 @@ export default function Home() {
                 >
                   <div className="service-card-top">
                     <div className="service-icon">
-                      <Icon size={24} />
+                      <Icon name={iconName} size={24} />
                     </div>
 
                     <span>
@@ -177,7 +174,7 @@ export default function Home() {
                     aria-label={`Explore ${service.title}`}
                   >
                     Learn more
-                    <ArrowUpRight size={17} />
+                    <Icon name="north_east" size={17} />
                   </Link>
                 </article>
               );
@@ -215,7 +212,7 @@ export default function Home() {
               className="button button-dark"
             >
               Discover Posho Creative
-              <ArrowUpRight size={18} />
+              <Icon name="north_east" size={18} />
             </Link>
           </div>
 
@@ -375,7 +372,7 @@ export default function Home() {
                 Start a project
               </span>
 
-              <ArrowUpRight size={24} />
+              <Icon name="north_east" size={24} />
             </Link>
           </div>
         </div>

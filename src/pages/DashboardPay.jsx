@@ -4,18 +4,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowLeft,
-  Building2,
-  Check,
-  Copy,
-  ExternalLink,
-  Info,
-  ReceiptText,
-  ShieldCheck,
-  Smartphone,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   useParams,
 } from 'react-router-dom';
@@ -55,14 +46,14 @@ function MethodIcon({
     'opay'
   ) {
     return (
-      <Smartphone
+      <Icon name="smartphone" 
         size={23}
       />
     );
   }
 
   return (
-    <Building2
+    <Icon name="apartment" 
       size={23}
     />
   );
@@ -486,7 +477,7 @@ export default function DashboardPay() {
         to={`/dashboard/orders/${reference}`}
         className="workspace-back-link"
       >
-        <ArrowLeft
+        <Icon name="arrow_back" 
           size={17}
         />
 
@@ -554,7 +545,7 @@ export default function DashboardPay() {
           <div className="payment-cost-breakdown">
             <div className="payment-cost-heading">
               <div>
-                <ReceiptText
+                <Icon name="receipt" 
                   size={19}
                 />
 
@@ -617,7 +608,7 @@ export default function DashboardPay() {
             </div>
 
             <div className="payment-cost-note">
-              <Info
+              <Icon name="info" 
                 size={15}
               />
 
@@ -735,7 +726,7 @@ export default function DashboardPay() {
 
                 {!submitting &&
                   selected && (
-                    <ExternalLink
+                    <Icon name="open_in_new" 
                       size={17}
                     />
                   )}
@@ -748,7 +739,7 @@ export default function DashboardPay() {
             'bank_transfer' && (
             <div className="bank-transfer-panel">
               <div className="bank-transfer-heading">
-                <Check
+                <Icon name="check" 
                   size={18}
                 />
 
@@ -789,7 +780,7 @@ export default function DashboardPay() {
                       copyAccount
                     }
                   >
-                    <Copy
+                    <Icon name="content_copy" 
                       size={15}
                     />
 
@@ -867,7 +858,7 @@ export default function DashboardPay() {
         </section>
 
         <aside className="payment-security-card">
-          <ShieldCheck
+          <Icon name="verified_user" 
             size={24}
           />
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { CheckCircle2, Pencil, PlusCircle, Trash2, X } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { EmptyState, ErrorBlock } from '../ui/StateBlocks';
 import StatusBadge from '../ui/StatusBadge';
@@ -229,7 +229,7 @@ export default function MilestonesPanel({ order, work, onChanged }) {
             </small>
           )}
           <button type="button" className="button button-secondary" onClick={openNew}>
-            <PlusCircle size={17} /> Add milestone
+            <Icon name="add_circle" size={17} /> Add milestone
           </button>
         </div>
       </div>
@@ -259,14 +259,14 @@ export default function MilestonesPanel({ order, work, onChanged }) {
                 <div className="finance-review-actions" style={{ marginTop: 8 }}>
                   {milestone.status !== 'done' && (
                     <button type="button" className="button button-secondary" onClick={() => markDone(milestone)} disabled={busy}>
-                      <CheckCircle2 size={15} /> Mark done
+                      <Icon name="check_circle" size={15} /> Mark done
                     </button>
                   )}
                   <button type="button" className="button button-secondary" onClick={() => openEdit(milestone)}>
-                    <Pencil size={15} /> Edit
+                    <Icon name="edit" size={15} /> Edit
                   </button>
                   <button type="button" className="button button-secondary" onClick={() => setDeleteTarget(milestone)}>
-                    <Trash2 size={15} /> Remove
+                    <Icon name="delete" size={15} /> Remove
                   </button>
                 </div>
               </div>
@@ -280,7 +280,7 @@ export default function MilestonesPanel({ order, work, onChanged }) {
           <form role="dialog" aria-modal="true" aria-label={form.milestoneId ? 'Edit milestone' : 'Add milestone'} className="posho-modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
             <div className="posho-modal-heading">
               <h3>{form.milestoneId ? 'Edit milestone' : 'Add milestone'}</h3>
-              <button type="button" onClick={() => setFormOpen(false)} aria-label="Close" disabled={busy}><X size={19} /></button>
+              <button type="button" onClick={() => setFormOpen(false)} aria-label="Close" disabled={busy}><Icon name="close" size={19} /></button>
             </div>
             <div className="posho-form-grid">
               <label>
@@ -327,7 +327,7 @@ export default function MilestonesPanel({ order, work, onChanged }) {
           <div role="dialog" aria-modal="true" aria-label="Remove milestone" className="posho-modal" onClick={(e) => e.stopPropagation()}>
             <div className="posho-modal-heading">
               <h3>Remove milestone</h3>
-              <button type="button" onClick={() => setDeleteTarget(null)} aria-label="Close" disabled={busy}><X size={19} /></button>
+              <button type="button" onClick={() => setDeleteTarget(null)} aria-label="Close" disabled={busy}><Icon name="close" size={19} /></button>
             </div>
             <p className="posho-modal-description">
               Remove “{deleteTarget.title}”? Linked tasks keep their history but lose the milestone link.

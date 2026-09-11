@@ -4,13 +4,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowLeft,
-  CheckCircle2,
-  HelpCircle,
-  XCircle,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import {
   Link,
   useParams,
@@ -155,7 +150,7 @@ export default function DashboardProposal() {
     return (
       <div className="workspace-view">
         <Link to="/dashboard/orders" className="workspace-back-link">
-          <ArrowLeft size={17} /> Projects
+          <Icon name="arrow_back" size={17} /> Projects
         </Link>
 
         <div style={{ marginTop: 16 }}>
@@ -177,7 +172,7 @@ export default function DashboardProposal() {
   return (
     <div className="workspace-view page-reveal">
       <Link to="/dashboard/orders" className="workspace-back-link">
-        <ArrowLeft size={17} /> Projects
+        <Icon name="arrow_back" size={17} /> Projects
       </Link>
 
       <div className="project-detail-hero">
@@ -323,7 +318,7 @@ export default function DashboardProposal() {
                 setNote('');
               }}
             >
-              <CheckCircle2 size={17} /> Accept proposal
+              <Icon name="check_circle" size={17} /> Accept proposal
             </button>
 
             <button
@@ -334,7 +329,7 @@ export default function DashboardProposal() {
                 setNote('');
               }}
             >
-              <XCircle size={17} /> Decline
+              <Icon name="cancel" size={17} /> Decline
             </button>
 
             <button
@@ -345,7 +340,7 @@ export default function DashboardProposal() {
                 setNote('');
               }}
             >
-              <HelpCircle size={17} /> Ask a question
+              <Icon name="help" size={17} /> Ask a question
             </button>
           </div>
         </section>

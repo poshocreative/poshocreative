@@ -5,11 +5,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  MessageSquare,
-  X,
-} from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import {
   useToast,
 } from '../ui/Toast';
@@ -598,8 +595,7 @@ export default function ProofingPanel({
                 )
               }
             >
-              <X
-                size={14}
+              <Icon name="close"                 size={14}
               />{' '}
               Remove pin
             </button>
@@ -826,8 +822,7 @@ export default function ProofingPanel({
                             );
                           }}
                         >
-                          <MessageSquare
-                            size={14}
+                          <Icon name="chat"                             size={14}
                           />
                           Reply
                         </button>

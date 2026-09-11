@@ -4,23 +4,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  CheckCircle2,
-  FileText,
-  LockKeyhole,
-  Mail,
-  Paperclip,
-  Phone,
-  RotateCcw,
-  ShieldCheck,
-  Trash2,
-  UploadCloud,
-  UserRound,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   useSearchParams,
 } from 'react-router-dom';
@@ -1294,7 +1280,7 @@ export default function Order() {
         <div className="container">
           <div className="order-success-card">
             <div className="order-success-icon">
-              <CheckCircle2
+              <Icon name="check_circle" 
                 size={38}
               />
             </div>
@@ -1386,7 +1372,7 @@ export default function Order() {
               >
                 Open project
 
-                <ArrowRight
+                <Icon name="arrow_forward" 
                   size={18}
                 />
               </Link>
@@ -1455,7 +1441,7 @@ export default function Order() {
                   <div className="order-progress-circle">
                     {currentStep >
                     step.id ? (
-                      <Check
+                      <Icon name="check" 
                         size={15}
                       />
                     ) : (
@@ -1567,8 +1553,7 @@ export default function Order() {
                   (
                     service,
                   ) => {
-                    const Icon =
-                      service.icon;
+                    const iconName = service.icon;
 
                     const selected =
                       form.service ===
@@ -1593,13 +1578,12 @@ export default function Order() {
                       >
                         <div className="order-service-option-top">
                           <div className="order-option-icon">
-                            <Icon
-                              size={22}
+                            <Icon name={iconName} size={22}
                             />
                           </div>
 
                           <div className="order-option-check">
-                            <Check
+                            <Icon name="check" 
                               size={14}
                             />
                           </div>
@@ -2020,7 +2004,7 @@ export default function Order() {
                 <div className="order-upload-block">
                   <div className="order-upload-copy">
                     <div className="order-upload-icon">
-                      <UploadCloud
+                      <Icon name="cloud_upload" 
                         size={22}
                       />
                     </div>
@@ -2037,7 +2021,7 @@ export default function Order() {
                   </div>
 
                   <label className="order-upload-button">
-                    <Paperclip
+                    <Icon name="attach_file" 
                       size={16}
                     />
 
@@ -2067,7 +2051,7 @@ export default function Order() {
                           className="order-file-item"
                         >
                           <div className="order-file-details">
-                            <FileText
+                            <Icon name="article" 
                               size={18}
                             />
 
@@ -2093,7 +2077,7 @@ export default function Order() {
                             }
                             aria-label={`Remove ${file.name}`}
                           >
-                            <Trash2
+                            <Icon name="delete" 
                               size={16}
                             />
                           </button>
@@ -2259,7 +2243,7 @@ export default function Order() {
                     </label>
 
                     <div className="order-input-icon-wrapper">
-                      <UserRound
+                      <Icon name="person" 
                         size={17}
                       />
 
@@ -2289,7 +2273,7 @@ export default function Order() {
                     </label>
 
                     <div className="order-input-icon-wrapper">
-                      <Mail
+                      <Icon name="mail" 
                         size={17}
                       />
 
@@ -2317,7 +2301,7 @@ export default function Order() {
                     </label>
 
                     <div className="order-input-icon-wrapper">
-                      <Phone
+                      <Icon name="phone" 
                         size={17}
                       />
 
@@ -2589,7 +2573,7 @@ export default function Order() {
                   />
 
                   <span className="order-checkbox">
-                    <Check
+                    <Icon name="check" 
                       size={14}
                     />
                   </span>
@@ -2615,7 +2599,7 @@ export default function Order() {
                     '24px 0 0',
                 }}
               >
-                <ShieldCheck
+                <Icon name="verified_user" 
                   size={18}
                 />
 
@@ -2643,7 +2627,7 @@ export default function Order() {
                     submitting
                   }
                 >
-                  <ArrowLeft
+                  <Icon name="arrow_back" 
                     size={17}
                   />
 
@@ -2664,7 +2648,7 @@ export default function Order() {
                 >
                   Continue
 
-                  <ArrowRight
+                  <Icon name="arrow_forward" 
                     size={17}
                   />
                 </button>
@@ -2684,7 +2668,7 @@ export default function Order() {
                     : 'Create project'}
 
                   {!submitting && (
-                    <ArrowRight
+                    <Icon name="arrow_forward" 
                       size={17}
                     />
                   )}
@@ -2705,7 +2689,7 @@ export default function Order() {
                   resetOrder
                 }
               >
-                <RotateCcw
+                <Icon name="restart_alt" 
                   size={13}
                 />
 
@@ -2800,7 +2784,7 @@ export default function Order() {
             </div>
 
             <div className="order-summary-note">
-              <LockKeyhole
+              <Icon name="lock" 
                 size={17}
               />
 

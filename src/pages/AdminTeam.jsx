@@ -5,11 +5,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  Plus,
-  X,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
 import PageHeader from '../components/ui/PageHeader';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -756,8 +753,7 @@ export default function AdminTeam() {
               })
             }
           >
-            <Plus
-              size={17}
+            <Icon name="add"               size={17}
             />
             Add member
           </button>
@@ -1054,8 +1050,7 @@ export default function AdminTeam() {
                 })
               }
             >
-              <Plus
-                size={17}
+              <Icon name="add"                 size={17}
               />
               Allocate
             </button>
@@ -1263,8 +1258,7 @@ export default function AdminTeam() {
                 })
               }
             >
-              <Plus
-                size={17}
+              <Icon name="add"                 size={17}
               />
               Log time
             </button>
@@ -1402,8 +1396,7 @@ export default function AdminTeam() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -1735,8 +1728,7 @@ export default function AdminTeam() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -1996,8 +1988,7 @@ export default function AdminTeam() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>

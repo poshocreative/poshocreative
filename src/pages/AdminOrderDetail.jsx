@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import { useParams } from 'react-router-dom';
 
 import Link from '../components/PortalLink';
@@ -281,7 +281,7 @@ export default function AdminOrderDetail() {
     return (
       <div className="admin-view">
         <Link to="./.." className="button button-secondary">
-          <ArrowLeft size={17} /> Back to projects
+          <Icon name="arrow_back" size={17} /> Back to projects
         </Link>
         <div style={{ marginTop: 16 }}>
           <ErrorBlock message={loadError} onRetry={() => { setLoading(true); load(); }} />
@@ -294,7 +294,7 @@ export default function AdminOrderDetail() {
     return (
       <div className="admin-view">
         <Link to="./.." className="button button-secondary">
-          <ArrowLeft size={17} /> Back to projects
+          <Icon name="arrow_back" size={17} /> Back to projects
         </Link>
         <div style={{ marginTop: 16 }}>
           <EmptyState title="Project not found" body="It may have been permanently deleted." />
@@ -319,7 +319,7 @@ export default function AdminOrderDetail() {
   return (
     <div className="admin-view page-reveal">
       <Link to="./.." className="button button-secondary" style={{ marginBottom: 12 }}>
-        <ArrowLeft size={17} /> Back to projects
+        <Icon name="arrow_back" size={17} /> Back to projects
       </Link>
 
       <div style={{ marginBottom: 12 }}>
@@ -350,10 +350,10 @@ export default function AdminOrderDetail() {
               <p>Review the full brief below, then approve or decline with a customer-facing reason.</p>
               <div className="finance-review-actions">
                 <button type="button" className="button button-primary" onClick={approve} disabled={actionBusy === 'approve'} aria-busy={actionBusy === 'approve'}>
-                  <CheckCircle2 size={17} /> {actionBusy === 'approve' ? 'Approving…' : 'Approve request'}
+                  <Icon name="check_circle" size={17} /> {actionBusy === 'approve' ? 'Approving…' : 'Approve request'}
                 </button>
                 <button type="button" className="finance-decline-button" onClick={() => setDeclineOpen(true)}>
-                  <XCircle size={17} /> Decline
+                  <Icon name="cancel" size={17} /> Decline
                 </button>
               </div>
             </div>

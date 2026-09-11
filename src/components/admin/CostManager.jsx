@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { PlusCircle } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { EmptyState } from '../ui/StateBlocks';
 import { useEscapeClose } from '../ui/useEscapeClose';
@@ -95,7 +95,7 @@ export default function CostManager({ order, finance, onChanged }) {
           </p>
         </div>
         <button type="button" className="button button-secondary" onClick={() => setOpen(true)}>
-          <PlusCircle size={17} /> Add cost
+          <Icon name="add_circle" size={17} /> Add cost
         </button>
       </div>
 

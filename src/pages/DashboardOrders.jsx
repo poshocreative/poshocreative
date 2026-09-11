@@ -4,19 +4,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  AlertCircle,
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  CircleDollarSign,
-  Clock3,
-  FolderKanban,
-  Plus,
-  Search,
-  SlidersHorizontal,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
@@ -355,8 +345,7 @@ export default function DashboardOrders() {
       value:
         metrics.total,
 
-      icon:
-        FolderKanban,
+      icon: 'folder_special',
     },
     {
       label:
@@ -365,8 +354,7 @@ export default function DashboardOrders() {
       value:
         metrics.active,
 
-      icon:
-        Clock3,
+      icon: 'schedule',
     },
     {
       label:
@@ -375,8 +363,7 @@ export default function DashboardOrders() {
       value:
         metrics.attention,
 
-      icon:
-        AlertCircle,
+      icon: 'notification_important',
     },
     {
       label:
@@ -385,8 +372,7 @@ export default function DashboardOrders() {
       value:
         metrics.completed,
 
-      icon:
-        CheckCircle2,
+      icon: 'check_circle',
     },
   ];
 
@@ -411,7 +397,7 @@ export default function DashboardOrders() {
           to="/order"
           className="button button-primary project-directory-new"
         >
-          <Plus
+          <Icon name="add" 
             size={17}
           />
 
@@ -424,8 +410,7 @@ export default function DashboardOrders() {
           (
             metric,
           ) => {
-            const Icon =
-              metric.icon;
+            const iconName = metric.icon;
 
             return (
               <article
@@ -434,8 +419,7 @@ export default function DashboardOrders() {
                 }
               >
                 <div>
-                  <Icon
-                    size={17}
+                  <Icon name={iconName} size={17}
                   />
                 </div>
 
@@ -454,7 +438,7 @@ export default function DashboardOrders() {
 
       <section className="project-directory-controls">
         <div className="project-directory-search">
-          <Search
+          <Icon name="search" 
             size={17}
           />
 
@@ -477,7 +461,7 @@ export default function DashboardOrders() {
         </div>
 
         <label className="project-directory-sort">
-          <SlidersHorizontal
+          <Icon name="tune" 
             size={15}
           />
 
@@ -551,7 +535,7 @@ export default function DashboardOrders() {
       {visibleOrders.length ===
       0 ? (
         <section className="workspace-panel project-directory-empty">
-          <FolderKanban
+          <Icon name="folder_special"
             size={26}
           />
 
@@ -567,7 +551,7 @@ export default function DashboardOrders() {
             to="/order"
             className="button button-primary"
           >
-            <Plus
+            <Icon name="add" 
               size={17}
             />
 
@@ -683,7 +667,7 @@ export default function DashboardOrders() {
                     order.review_decision ===
                       'approved' && (
                     <div className="project-directory-action">
-                      <AlertCircle
+                      <Icon name="notification_important"
                         size={16}
                       />
 
@@ -756,7 +740,7 @@ export default function DashboardOrders() {
 
                   <div className="project-directory-meta">
                     <div>
-                      <CalendarDays
+                      <Icon name="calendar_month" 
                         size={15}
                       />
 
@@ -774,7 +758,7 @@ export default function DashboardOrders() {
                     </div>
 
                     <div>
-                      <CircleDollarSign
+                      <Icon name="monetization_on" 
                         size={15}
                       />
 
@@ -795,7 +779,7 @@ export default function DashboardOrders() {
                     </div>
 
                     <div>
-                      <Clock3
+                      <Icon name="schedule"
                         size={15}
                       />
 
@@ -828,7 +812,7 @@ export default function DashboardOrders() {
                     >
                       Open project
 
-                      <ArrowRight
+                      <Icon name="arrow_forward" 
                         size={16}
                       />
                     </Link>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { CheckCircle2, PackageCheck } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import { formatKobo } from '../../lib/money';
@@ -105,7 +105,7 @@ export default function CloseoutPanel({ order, work, finance, onChanged }) {
             <textarea value={deliveryNote} maxLength={3000} onChange={(e) => setDeliveryNote(e.target.value)} placeholder="Everything is ready — download links and next steps." />
           </label>
           <button type="button" className="button button-primary" onClick={() => setDelivering(true)} disabled={busy}>
-            <PackageCheck size={17} /> Mark delivered
+            <Icon name="package_2" size={17} /> Mark delivered
           </button>
         </form>
       )}
@@ -113,7 +113,7 @@ export default function CloseoutPanel({ order, work, finance, onChanged }) {
       {!completed && (
         <div className="finance-review-actions" style={{ marginTop: 12 }}>
           <button type="button" className="button button-primary" onClick={() => setCompleting(true)} disabled={busy}>
-            <CheckCircle2 size={17} /> Complete project
+            <Icon name="check_circle" size={17} /> Complete project
           </button>
         </div>
       )}

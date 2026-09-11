@@ -1,11 +1,8 @@
 import { Link } from 'react-router-dom';
 
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Layers3,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import { services } from '../data/services';
 import SocialPlatformGrid from '../components/SocialPlatformGrid';
 
@@ -38,7 +35,7 @@ export default function Services() {
               className="button button-primary"
             >
               Start a project
-              <ArrowRight size={18} />
+              <Icon name="arrow_forward" size={18} />
             </Link>
           </div>
         </div>
@@ -60,7 +57,7 @@ export default function Services() {
             </div>
 
             <div className="directory-count">
-              <Layers3 size={20} />
+              <Icon name="layers" size={20} />
 
               <span>
                 {services.length} core service categories
@@ -70,7 +67,7 @@ export default function Services() {
 
           <div className="service-directory-list">
             {services.map((service) => {
-              const Icon = service.icon;
+              const iconName = service.icon;
 
               return (
                 <Link
@@ -83,7 +80,7 @@ export default function Services() {
                   </div>
 
                   <div className="directory-icon">
-                    <Icon size={24} />
+                    <Icon name={iconName} size={24} />
                   </div>
 
                   <div className="directory-copy">
@@ -97,7 +94,7 @@ export default function Services() {
                   </div>
 
                   <div className="directory-arrow">
-                    <ArrowUpRight size={22} />
+                    <Icon name="north_east" size={22} />
                   </div>
                 </Link>
               );
@@ -125,7 +122,7 @@ export default function Services() {
                 className="button button-primary"
               >
                 Order social growth
-                <ArrowRight size={18} />
+                <Icon name="arrow_forward" size={18} />
               </Link>
 
               <Link
@@ -207,7 +204,7 @@ export default function Services() {
               className="button button-primary"
             >
               Start your project
-              <ArrowUpRight size={18} />
+              <Icon name="north_east" size={18} />
             </Link>
           </div>
         </div>

@@ -3,17 +3,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowRight,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
-  Phone,
-  UserRound,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   Navigate,
   useSearchParams,
@@ -175,7 +167,7 @@ export default function Signup() {
         <div className="container auth-confirmation-container">
           <div className="auth-confirmation-card">
             <div className="auth-confirmation-icon">
-              <CheckCircle2 size={34} />
+              <Icon name="check_circle" size={34} />
             </div>
 
             <span className="section-kicker">
@@ -204,7 +196,7 @@ export default function Signup() {
               className="button button-primary"
             >
               Go to sign in
-              <ArrowRight size={18} />
+              <Icon name="arrow_forward" size={18} />
             </Link>
           </div>
         </div>
@@ -285,7 +277,7 @@ export default function Signup() {
                   </label>
 
                   <div className="auth-input-wrapper">
-                    <UserRound size={18} />
+                    <Icon name="person" size={18} />
 
                     <input
                       id="fullName"
@@ -309,7 +301,7 @@ export default function Signup() {
                   </label>
 
                   <div className="auth-input-wrapper">
-                    <Phone size={18} />
+                    <Icon name="phone" size={18} />
 
                     <input
                       id="phone"
@@ -354,7 +346,7 @@ export default function Signup() {
                 </label>
 
                 <div className="auth-input-wrapper">
-                  <Mail size={18} />
+                  <Icon name="mail" size={18} />
 
                   <input
                     id="signupEmail"
@@ -379,7 +371,7 @@ export default function Signup() {
                   </label>
 
                   <div className="auth-input-wrapper">
-                    <LockKeyhole size={18} />
+                    <Icon name="lock" size={18} />
 
                     <input
                       id="signupPassword"
@@ -410,9 +402,9 @@ export default function Signup() {
                       }
                     >
                       {showPassword ? (
-                        <EyeOff size={17} />
+                        <Icon name="visibility_off" size={17} />
                       ) : (
-                        <Eye size={17} />
+                        <Icon name="visibility" size={17} />
                       )}
                     </button>
                   </div>
@@ -461,7 +453,7 @@ export default function Signup() {
                   : 'Create account'}
 
                 {!submitting && (
-                  <ArrowRight size={18} />
+                  <Icon name="arrow_forward" size={18} />
                 )}
               </button>
             </form>

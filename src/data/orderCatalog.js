@@ -1,19 +1,10 @@
-import {
-  BriefcaseBusiness,
-  Globe2,
-  Megaphone,
-  Palette,
-  Share2,
-  Sparkles,
-} from 'lucide-react';
-
 export const orderCatalog = [
   {
     slug: 'website-development',
     title: 'Website Development',
     description:
       'Websites, landing pages, online platforms and digital experiences.',
-    icon: Globe2,
+    icon: 'public',
     projectTypes: [
       {
         id: 'business-website',
@@ -71,7 +62,7 @@ export const orderCatalog = [
     title: 'Graphic Design & Branding',
     description:
       'Professional visual design for brands, campaigns and businesses.',
-    icon: Palette,
+    icon: 'palette',
     projectTypes: [
       {
         id: 'logo-design',
@@ -129,7 +120,7 @@ export const orderCatalog = [
     title: 'Social Media Management & Growth',
     description:
       'Management, content support and growth services for social platforms.',
-    icon: Share2,
+    icon: 'share',
     projectTypes: [
       {
         id: 'follower-growth',
@@ -229,7 +220,7 @@ export const orderCatalog = [
     title: 'Advertising & Promotion',
     description:
       'Digital campaigns and promotional services designed around your goals.',
-    icon: Megaphone,
+    icon: 'campaign',
     projectTypes: [
       {
         id: 'social-media-ads',
@@ -287,7 +278,7 @@ export const orderCatalog = [
     title: 'Business Services',
     description:
       'Business support, management, registration assistance and promotion.',
-    icon: BriefcaseBusiness,
+    icon: 'corporate_fare',
     projectTypes: [
       {
         id: 'cac-registration',
@@ -345,7 +336,7 @@ export const orderCatalog = [
     title: 'Custom Creative Solutions',
     description:
       'For ideas that combine multiple services or require something different.',
-    icon: Sparkles,
+    icon: 'auto_awesome',
     projectTypes: [
       {
         id: 'brand-launch',

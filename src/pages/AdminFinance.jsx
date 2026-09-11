@@ -5,10 +5,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowRight,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
@@ -243,21 +241,21 @@ export default function AdminFinance() {
               to="/admin/payments"
               className="button button-secondary"
             >
-              Transactions <ArrowRight size={15} />
+              Transactions <Icon name="arrow_forward" size={15} />
             </Link>
 
             <Link
               to="/admin/quotes"
               className="button button-secondary"
             >
-              Quotes <ArrowRight size={15} />
+              Quotes <Icon name="arrow_forward" size={15} />
             </Link>
 
             <Link
               to="/admin/pricing"
               className="button button-secondary"
             >
-              Pricing <ArrowRight size={15} />
+              Pricing <Icon name="arrow_forward" size={15} />
             </Link>
           </>
         }

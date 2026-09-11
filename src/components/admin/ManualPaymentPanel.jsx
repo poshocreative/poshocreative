@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 
-import { BadgeCheck, HandCoins, RotateCcw, SlidersHorizontal } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import { useToast } from '../ui/Toast';
 import { useEscapeClose } from '../ui/useEscapeClose';
@@ -140,7 +140,7 @@ export default function ManualPaymentPanel({ order, finance, onChanged }) {
             entries. Provider-verified payments are never edited here.
           </p>
         </div>
-        <HandCoins size={22} />
+        <Icon name="handshake" size={22} />
       </div>
 
       <div className="finance-balance-strip">
@@ -150,10 +150,10 @@ export default function ManualPaymentPanel({ order, finance, onChanged }) {
 
       <div className="finance-review-actions">
         <button type="button" className="button button-primary" onClick={() => setOpen(true)}>
-          <BadgeCheck size={17} /> Record manual payment
+          <Icon name="verified" size={17} /> Record manual payment
         </button>
         <button type="button" className="button button-secondary" onClick={() => setAdjustOpen(true)}>
-          <SlidersHorizontal size={17} /> Adjustment
+          <Icon name="tune" size={17} /> Adjustment
         </button>
       </div>
 
@@ -186,7 +186,7 @@ export default function ManualPaymentPanel({ order, finance, onChanged }) {
                     className="button button-secondary"
                     onClick={() => setReverseTarget({ id: entry.id, reason: '' })}
                   >
-                    <RotateCcw size={15} /> Reverse
+                    <Icon name="restart_alt" size={15} /> Reverse
                   </button>
                 )}
             </article>

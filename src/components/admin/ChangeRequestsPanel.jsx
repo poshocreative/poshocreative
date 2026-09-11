@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { PlusCircle, X } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { EmptyState, ErrorBlock } from '../ui/StateBlocks';
 import StatusBadge from '../ui/StatusBadge';
@@ -110,7 +110,7 @@ export default function ChangeRequestsPanel({ order, work, onChanged }) {
           </p>
         </div>
         <button type="button" className="button button-secondary" onClick={() => setCreateOpen(true)}>
-          <PlusCircle size={17} /> New change request
+          <Icon name="add_circle" size={17} /> New change request
         </button>
       </div>
 
@@ -165,7 +165,7 @@ export default function ChangeRequestsPanel({ order, work, onChanged }) {
           <form role="dialog" aria-modal="true" aria-label="New change request" className="posho-modal" onClick={(e) => e.stopPropagation()} onSubmit={submitCreate}>
             <div className="posho-modal-heading">
               <h3>New change request</h3>
-              <button type="button" onClick={() => setCreateOpen(false)} aria-label="Close" disabled={busy}><X size={19} /></button>
+              <button type="button" onClick={() => setCreateOpen(false)} aria-label="Close" disabled={busy}><Icon name="close" size={19} /></button>
             </div>
             <div className="posho-form-grid">
               <label>

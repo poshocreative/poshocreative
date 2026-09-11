@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { Star } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { submitFeedback } from '../../lib/projectWork';
 
@@ -92,8 +92,7 @@ export default function FeedbackForm({ order, work, onChanged }) {
                   minHeight: 44,
                 }}
               >
-                <Star
-                  size={26}
+                <Icon name="star"                   size={26}
                   fill={(hover || rating) >= value ? '#6C2BD9' : 'none'}
                   color="#6C2BD9"
                 />

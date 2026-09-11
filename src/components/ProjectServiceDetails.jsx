@@ -1,11 +1,5 @@
-import {
-  CalendarDays,
-  ExternalLink,
-  Target,
-  UsersRound,
-  WalletCards,
-} from 'lucide-react';
 
+import Icon from './ui/Icon';
 import {
   getSocialPlatform,
 } from '../data/socialPlatforms';
@@ -59,7 +53,7 @@ export default function ProjectServiceDetails({
       <div className="project-service-detail-grid">
         {details.quantity > 0 && (
           <div>
-            <UsersRound size={17} />
+            <Icon name="people" size={17} />
             <span>Requested quantity</span>
             <strong>
               {Number(details.quantity).toLocaleString('en-NG')}
@@ -69,7 +63,7 @@ export default function ProjectServiceDetails({
 
         {details.duration_days > 0 && (
           <div>
-            <CalendarDays size={17} />
+            <Icon name="calendar_month" size={17} />
             <span>Campaign duration</span>
             <strong>{details.duration_days} days</strong>
           </div>
@@ -77,7 +71,7 @@ export default function ProjectServiceDetails({
 
         {details.media_budget_kobo > 0 && (
           <div>
-            <WalletCards size={17} />
+            <Icon name="wallet" size={17} />
             <span>Requested media budget</span>
             <strong>{formatMoney(details.media_budget_kobo)}</strong>
           </div>
@@ -85,7 +79,7 @@ export default function ProjectServiceDetails({
 
         {details.target_audience && (
           <div>
-            <Target size={17} />
+            <Icon name="target" size={17} />
             <span>Target audience</span>
             <strong>{details.target_audience}</strong>
           </div>
@@ -99,7 +93,7 @@ export default function ProjectServiceDetails({
           rel="noreferrer"
           className="project-service-link"
         >
-          <ExternalLink size={16} />
+          <Icon name="open_in_new" size={16} />
           Open campaign destination
         </a>
       )}

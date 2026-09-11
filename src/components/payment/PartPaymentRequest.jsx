@@ -5,14 +5,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  BadgeCheck,
-  Clock3,
-  HandCoins,
-  Send,
-  XCircle,
-} from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import Link from '../PortalLink';
 
 import { formatMoney } from '../../lib/orders';
@@ -160,7 +154,7 @@ export default function PartPaymentRequest({
             review that exact amount before payment is enabled.
           </p>
         </div>
-        <HandCoins size={23} />
+        <Icon name="handshake" size={23} />
       </div>
 
       <div className="finance-balance-strip">
@@ -172,7 +166,7 @@ export default function PartPaymentRequest({
         <p className="finance-muted-message">Checking your requests...</p>
       ) : !available ? (
         <div className="finance-capability-notice" role="status">
-          <Clock3 size={20} />
+          <Icon name="schedule" size={20} />
           <div>
             <strong>Payment arrangements are being activated</strong>
             <p>{PART_PAYMENT_UNAVAILABLE_MESSAGE}</p>
@@ -184,11 +178,11 @@ export default function PartPaymentRequest({
         >
           <div className="finance-request-state-heading">
             {latestRequest.status === 'approved' ? (
-              <BadgeCheck size={20} />
+              <Icon name="verified" size={20} />
             ) : latestRequest.status === 'declined' ? (
-              <XCircle size={20} />
+              <Icon name="cancel" size={20} />
             ) : (
-              <Clock3 size={20} />
+              <Icon name="schedule" size={20} />
             )}
             <div>
               <strong>{statusTitle(latestRequest.status)}</strong>
@@ -272,7 +266,7 @@ export default function PartPaymentRequest({
             />
           </label>
           <button type="submit" disabled={submitting}>
-            <Send size={17} />
+            <Icon name="send" size={17} />
             {submitting ? 'Sending request...' : 'Send request to Management'}
           </button>
         </form>

@@ -4,23 +4,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  AlertCircle,
-  ArrowRight,
-  Banknote,
-  CheckCircle2,
-  CircleDollarSign,
-  Clock3,
-  Copy,
-  FileCheck2,
-  ReceiptText,
-  RefreshCw,
-  Search,
-  ShieldCheck,
-  Smartphone,
-  XCircle,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
@@ -614,8 +600,7 @@ export default function DashboardPayments() {
       detail:
         `${metrics.successful} confirmed ${metrics.successful === 1 ? 'payment' : 'payments'}`,
 
-      icon:
-        FileCheck2,
+      icon: 'task_alt',
 
       type:
         'value',
@@ -632,8 +617,7 @@ export default function DashboardPayments() {
       detail:
         'Confirmed transaction fees',
 
-      icon:
-        ReceiptText,
+      icon: 'receipt',
 
       type:
         'fees',
@@ -650,8 +634,7 @@ export default function DashboardPayments() {
       detail:
         'Including recorded fees',
 
-      icon:
-        CircleDollarSign,
+      icon: 'monetization_on',
 
       type:
         'paid',
@@ -666,8 +649,7 @@ export default function DashboardPayments() {
       detail:
         'Awaiting confirmation',
 
-      icon:
-        Clock3,
+      icon: 'schedule',
 
       type:
         'open',
@@ -692,7 +674,7 @@ export default function DashboardPayments() {
         </div>
 
         <div className="workspace-payment-secure-badge">
-          <ShieldCheck
+          <Icon name="verified_user" 
             size={16}
           />
 
@@ -705,8 +687,7 @@ export default function DashboardPayments() {
           (
             metric,
           ) => {
-            const Icon =
-              metric.icon;
+            const iconName = metric.icon;
 
             return (
               <article
@@ -716,8 +697,7 @@ export default function DashboardPayments() {
                 className={`workspace-payment-metric workspace-payment-metric-${metric.type}`}
               >
                 <div>
-                  <Icon
-                    size={18}
+                  <Icon name={iconName} size={18}
                   />
                 </div>
 
@@ -739,7 +719,7 @@ export default function DashboardPayments() {
       </div>
 
       <section className="workspace-payment-security-note">
-        <ShieldCheck
+        <Icon name="verified_user" 
           size={19}
         />
 
@@ -756,7 +736,7 @@ export default function DashboardPayments() {
 
       <div className="workspace-payment-controls">
         <div className="workspace-payment-search">
-          <Search
+          <Icon name="search" 
             size={17}
           />
 
@@ -815,7 +795,7 @@ export default function DashboardPayments() {
 
       {message && (
         <div className="workspace-success-message">
-          <CheckCircle2
+          <Icon name="check_circle" 
             size={17}
           />
 
@@ -827,7 +807,7 @@ export default function DashboardPayments() {
       0 ? (
         <section className="workspace-panel workspace-payment-empty">
           <div>
-            <ReceiptText
+            <Icon name="receipt"
               size={25}
             />
           </div>
@@ -854,7 +834,7 @@ export default function DashboardPayments() {
             >
               View projects
 
-              <ArrowRight
+              <Icon name="arrow_forward" 
                 size={16}
               />
             </Link>
@@ -877,12 +857,12 @@ export default function DashboardPayments() {
                   payment,
                 );
 
-              const MethodIcon =
+              const methodIcon =
                 payment
                   .payment_method ===
                 'opay'
-                  ? Smartphone
-                  : Banknote;
+                  ? 'smartphone'
+                  : 'account_balance_wallet';
 
               const canCheck =
                 [
@@ -910,7 +890,8 @@ export default function DashboardPayments() {
                   <div className="workspace-payment-card-heading">
                     <div className="workspace-payment-project">
                       <div className="workspace-payment-method-icon">
-                        <MethodIcon
+                        <Icon
+                          name={methodIcon}
                           size={20}
                         />
                       </div>
@@ -943,18 +924,18 @@ export default function DashboardPayments() {
                     >
                       {state.key ===
                       'successful' ? (
-                        <CheckCircle2
+                        <Icon name="check_circle" 
                           size={14}
                         />
                       ) : state.key ===
                         'failed' ||
                         state.key ===
                           'cancelled' ? (
-                        <XCircle
+                        <Icon name="cancel" 
                           size={14}
                         />
                       ) : (
-                        <Clock3
+                        <Icon name="schedule"
                           size={14}
                         />
                       )}
@@ -1068,18 +1049,18 @@ export default function DashboardPayments() {
                   >
                     {state.key ===
                     'successful' ? (
-                      <CheckCircle2
+                      <Icon name="check_circle" 
                         size={17}
                       />
                     ) : state.key ===
                       'failed' ||
                       state.key ===
                         'cancelled' ? (
-                      <AlertCircle
+                      <Icon name="notification_important" 
                         size={17}
                       />
                     ) : (
-                      <Clock3
+                      <Icon name="schedule"
                         size={17}
                       />
                     )}
@@ -1109,7 +1090,7 @@ export default function DashboardPayments() {
                         )
                       }
                     >
-                      <Copy
+                      <Icon name="content_copy" 
                         size={14}
                       />
 
@@ -1124,13 +1105,13 @@ export default function DashboardPayments() {
                     'successful' && (
                     <details className="workspace-payment-receipt">
                       <summary>
-                        <ReceiptText
+                        <Icon name="receipt"
                           size={15}
                         />
 
                         Receipt details
 
-                        <ArrowRight
+                        <Icon name="arrow_forward" 
                           size={14}
                         />
                       </summary>
@@ -1147,7 +1128,7 @@ export default function DashboardPayments() {
                             </strong>
                           </div>
 
-                          <CheckCircle2
+                          <Icon name="check_circle" 
                             size={22}
                           />
                         </div>
@@ -1252,7 +1233,7 @@ export default function DashboardPayments() {
                         </div>
 
                         <div className="workspace-payment-receipt-confirmation">
-                          <ShieldCheck
+                          <Icon name="verified_user" 
                             size={16}
                           />
 
@@ -1277,7 +1258,7 @@ export default function DashboardPayments() {
                           payment.id
                         }
                       >
-                        <RefreshCw
+                        <Icon name="autorenew" 
                           size={15}
                         />
 
@@ -1296,7 +1277,7 @@ export default function DashboardPayments() {
                       >
                         Open project
 
-                        <ArrowRight
+                        <Icon name="arrow_forward" 
                           size={15}
                         />
                       </Link>

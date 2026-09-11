@@ -4,11 +4,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  Plus,
-  X,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
 import PageHeader from '../components/ui/PageHeader';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -549,8 +546,7 @@ export default function AdminAutomations() {
               })
             }
           >
-            <Plus
-              size={17}
+            <Icon name="add"               size={17}
             />
             New rule
           </button>
@@ -965,8 +961,7 @@ export default function AdminAutomations() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -1446,8 +1441,7 @@ export default function AdminAutomations() {
                       )
                     }
                   >
-                    <X
-                      size={15}
+                    <Icon name="close"                       size={15}
                     />
                     Remove
                   </button>
@@ -1883,8 +1877,7 @@ export default function AdminAutomations() {
                       )
                     }
                   >
-                    <X
-                      size={15}
+                    <Icon name="close"                       size={15}
                     />
                     Remove
                   </button>

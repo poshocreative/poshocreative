@@ -1,19 +1,10 @@
-import {
-  Globe2,
-  Palette,
-  Share2,
-  Megaphone,
-  BriefcaseBusiness,
-  Sparkles,
-} from 'lucide-react';
-
 export const services = [
   {
     slug: 'website-development',
     number: '01',
     title: 'Website Development',
     shortTitle: 'Websites',
-    icon: Globe2,
+    icon: 'public',
 
     tagline: 'Web experiences built to move businesses forward.',
 
@@ -66,7 +57,7 @@ export const services = [
     number: '02',
     title: 'Graphic Design & Branding',
     shortTitle: 'Design',
-    icon: Palette,
+    icon: 'palette',
 
     tagline: 'Visual identity people can recognise and remember.',
 
@@ -119,7 +110,7 @@ export const services = [
     number: '03',
     title: 'Social Media Management & Growth',
     shortTitle: 'Social Media',
-    icon: Share2,
+    icon: 'share',
 
     tagline: 'Build a stronger and more consistent digital presence.',
 
@@ -172,7 +163,7 @@ export const services = [
     number: '04',
     title: 'Advertising & Promotion',
     shortTitle: 'Advertising',
-    icon: Megaphone,
+    icon: 'campaign',
 
     tagline: 'Put your business in front of more of the right people.',
 
@@ -225,7 +216,7 @@ export const services = [
     number: '05',
     title: 'Business Services',
     shortTitle: 'Business',
-    icon: BriefcaseBusiness,
+    icon: 'corporate_fare',
 
     tagline: 'Practical support for starting, presenting and growing a business.',
 
@@ -278,7 +269,7 @@ export const services = [
     number: '06',
     title: 'Custom Creative Solutions',
     shortTitle: 'Creative Solutions',
-    icon: Sparkles,
+    icon: 'auto_awesome',
 
     tagline: 'Not every great idea fits inside a predefined service.',
 

@@ -4,24 +4,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  Archive,
-  ArrowRight,
-  AudioLines,
-  Download,
-  Eye,
-  File,
-  FileImage,
-  FileSpreadsheet,
-  FileText,
-  FolderKanban,
-  Image,
-  PackageCheck,
-  Search,
-  SlidersHorizontal,
-  Video,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
@@ -133,7 +118,7 @@ function FileKindIcon({
     'image'
   ) {
     return (
-      <FileImage
+      <Icon name="image" 
         size={size}
       />
     );
@@ -146,7 +131,7 @@ function FileKindIcon({
     'document'
   ) {
     return (
-      <FileText
+      <Icon name="article" 
         size={size}
       />
     );
@@ -157,7 +142,7 @@ function FileKindIcon({
     'spreadsheet'
   ) {
     return (
-      <FileSpreadsheet
+      <Icon name="table_chart" 
         size={size}
       />
     );
@@ -168,7 +153,7 @@ function FileKindIcon({
     'archive'
   ) {
     return (
-      <Archive
+      <Icon name="archive"
         size={size}
       />
     );
@@ -179,7 +164,7 @@ function FileKindIcon({
     'video'
   ) {
     return (
-      <Video
+      <Icon name="videocam" 
         size={size}
       />
     );
@@ -190,14 +175,14 @@ function FileKindIcon({
     'audio'
   ) {
     return (
-      <AudioLines
+      <Icon name="graphic_eq" 
         size={size}
       />
     );
   }
 
   return (
-    <File
+    <Icon name="description" 
       size={size}
     />
   );
@@ -484,8 +469,7 @@ export default function DashboardFiles() {
       value:
         metrics.total,
 
-      icon:
-        FolderKanban,
+      icon: 'folder_special',
 
       type:
         'files',
@@ -497,8 +481,7 @@ export default function DashboardFiles() {
       value:
         metrics.deliverables,
 
-      icon:
-        PackageCheck,
+      icon: 'package_2',
 
       type:
         'deliverables',
@@ -510,8 +493,7 @@ export default function DashboardFiles() {
       value:
         metrics.references,
 
-      icon:
-        Image,
+      icon: 'image',
 
       type:
         'references',
@@ -525,8 +507,7 @@ export default function DashboardFiles() {
           metrics.storage,
         ),
 
-      icon:
-        Archive,
+      icon: 'archive',
 
       type:
         'storage',
@@ -551,7 +532,7 @@ export default function DashboardFiles() {
         </div>
 
         <div className="workspace-files-security">
-          <FolderKanban
+          <Icon name="folder_special"
             size={16}
           />
 
@@ -564,8 +545,7 @@ export default function DashboardFiles() {
           (
             metric,
           ) => {
-            const Icon =
-              metric.icon;
+            const iconName = metric.icon;
 
             return (
               <article
@@ -575,8 +555,7 @@ export default function DashboardFiles() {
                 className={`workspace-file-metric workspace-file-metric-${metric.type}`}
               >
                 <div>
-                  <Icon
-                    size={18}
+                  <Icon name={iconName} size={18}
                   />
                 </div>
 
@@ -596,7 +575,7 @@ export default function DashboardFiles() {
       {latestDeliverable && (
         <section className="workspace-latest-delivery">
           <div className="workspace-latest-delivery-icon">
-            <PackageCheck
+            <Icon name="package_2"
               size={24}
             />
           </div>
@@ -641,7 +620,7 @@ export default function DashboardFiles() {
                   `${latestDeliverable.id}-preview`
                 }
               >
-                <Eye
+                <Icon name="visibility" 
                   size={15}
                 />
 
@@ -666,7 +645,7 @@ export default function DashboardFiles() {
                 `${latestDeliverable.id}-download`
               }
             >
-              <Download
+              <Icon name="download" 
                 size={15}
               />
 
@@ -681,7 +660,7 @@ export default function DashboardFiles() {
 
       <section className="workspace-file-controls">
         <div className="workspace-file-search">
-          <Search
+          <Icon name="search" 
             size={17}
           />
 
@@ -704,7 +683,7 @@ export default function DashboardFiles() {
         </div>
 
         <label className="workspace-file-sort">
-          <SlidersHorizontal
+          <Icon name="tune" 
             size={15}
           />
 
@@ -779,7 +758,7 @@ export default function DashboardFiles() {
       0 ? (
         <section className="workspace-panel workspace-files-empty">
           <div>
-            <FileText
+            <Icon name="article" 
               size={25}
             />
           </div>
@@ -806,7 +785,7 @@ export default function DashboardFiles() {
             >
               View projects
 
-              <ArrowRight
+              <Icon name="arrow_forward" 
                 size={16}
               />
             </Link>
@@ -863,7 +842,7 @@ export default function DashboardFiles() {
                       >
                         Open project
 
-                        <ArrowRight
+                        <Icon name="arrow_forward" 
                           size={14}
                         />
                       </Link>
@@ -995,7 +974,7 @@ export default function DashboardFiles() {
                                   previewKey
                                 }
                               >
-                                <Eye
+                                <Icon name="visibility" 
                                   size={15}
                                 />
 
@@ -1020,7 +999,7 @@ export default function DashboardFiles() {
                                 downloadKey
                               }
                             >
-                              <Download
+                              <Icon name="download" 
                                 size={15}
                               />
 

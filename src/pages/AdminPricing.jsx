@@ -3,10 +3,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  Save,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
 import { ErrorBlock } from '../components/ui/StateBlocks';
 import { useToast } from '../components/ui/Toast';
@@ -341,7 +340,7 @@ export default function AdminPricing() {
                   save(item)
                 }
               >
-                <Save
+                <Icon name="save" 
                   size={16}
                 />
 

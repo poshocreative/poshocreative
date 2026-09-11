@@ -4,17 +4,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowRight,
-  Banknote,
-  CheckCircle2,
-  Clock3,
-  FolderKanban,
-  RefreshCw,
-  UsersRound,
-  XCircle,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
@@ -484,7 +476,7 @@ export default function AdminDashboard() {
             refreshing
           }
         >
-          <RefreshCw
+          <Icon name="autorenew" 
             size={17}
             className={
               refreshing
@@ -506,7 +498,7 @@ export default function AdminDashboard() {
       <div className="admin-dashboard-stat-grid">
         <article className="admin-dashboard-stat admin-dashboard-stat-priority">
           <div>
-            <Clock3
+            <Icon name="schedule" 
               size={20}
             />
           </div>
@@ -528,7 +520,7 @@ export default function AdminDashboard() {
 
         <article className="admin-dashboard-stat">
           <div>
-            <FolderKanban
+            <Icon name="folder_special" 
               size={20}
             />
           </div>
@@ -550,7 +542,7 @@ export default function AdminDashboard() {
 
         <article className="admin-dashboard-stat">
           <div>
-            <Banknote
+            <Icon name="account_balance_wallet" 
               size={20}
             />
           </div>
@@ -572,7 +564,7 @@ export default function AdminDashboard() {
 
         <article className="admin-dashboard-stat">
           <div>
-            <UsersRound
+            <Icon name="people" 
               size={20}
             />
           </div>
@@ -594,7 +586,7 @@ export default function AdminDashboard() {
 
         <article className="admin-dashboard-stat admin-dashboard-stat-money">
           <div>
-            <CheckCircle2
+            <Icon name="check_circle" 
               size={20}
             />
           </div>
@@ -618,7 +610,7 @@ export default function AdminDashboard() {
 
         <article className="admin-dashboard-stat admin-dashboard-stat-money">
           <div>
-            <Banknote
+            <Icon name="account_balance_wallet" 
               size={20}
             />
           </div>
@@ -662,7 +654,7 @@ export default function AdminDashboard() {
             .length ===
             0 ? (
             <div className="admin-clean-state">
-              <CheckCircle2
+              <Icon name="check_circle" 
                 size={24}
               />
 
@@ -763,7 +755,7 @@ export default function AdminDashboard() {
 
             <Link to="/admin/reports">
               Reports
-              <ArrowRight
+              <Icon name="arrow_forward" 
                 size={16}
               />
             </Link>
@@ -816,7 +808,7 @@ export default function AdminDashboard() {
                       )}
                     </div>
 
-                    <ArrowRight
+                    <Icon name="arrow_forward" 
                       size={17}
                     />
                   </Link>
@@ -843,7 +835,7 @@ export default function AdminDashboard() {
             >
               View all
 
-              <ArrowRight
+              <Icon name="arrow_forward" 
                 size={16}
               />
             </Link>
@@ -889,7 +881,7 @@ export default function AdminDashboard() {
                         Review
                       </span>
 
-                      <ArrowRight
+                      <Icon name="arrow_forward" 
                         size={17}
                       />
                     </Link>
@@ -898,7 +890,7 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="admin-clean-state">
-              <CheckCircle2
+              <Icon name="check_circle" 
                 size={24}
               />
 
@@ -928,7 +920,7 @@ export default function AdminDashboard() {
 
           <div className="admin-decision-summary-row">
             <div className="decision-icon approved">
-              <CheckCircle2
+              <Icon name="check_circle" 
                 size={17}
               />
             </div>
@@ -946,7 +938,7 @@ export default function AdminDashboard() {
 
           <div className="admin-decision-summary-row">
             <div className="decision-icon declined">
-              <XCircle
+              <Icon name="cancel" 
                 size={17}
               />
             </div>
@@ -1017,7 +1009,7 @@ export default function AdminDashboard() {
                   )}
                 </span>
 
-                <ArrowRight
+                <Icon name="arrow_forward" 
                   size={17}
                 />
               </Link>

@@ -1,4 +1,5 @@
-import { FileText } from 'lucide-react';
+import Icon from './Icon';
+
 
 export function fileKindLabel(file) {
   if (!file) {
@@ -32,7 +33,7 @@ export default function FileCard({ file, onPreview, onDownload, busy = false }) 
         <small className="posho-long-value">{fileKindLabel(file)}</small>
       </header>
       <strong className="posho-long-value" title={name}>
-        <FileText size={15} aria-hidden="true" /> {name}
+        <Icon name="article" size={15} aria-hidden="true" /> {name}
       </strong>
       <p>
         {file.size_bytes ? `${(Number(file.size_bytes) / 1024).toFixed(1)} KB · ` : ''}

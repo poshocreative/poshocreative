@@ -5,25 +5,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  BadgeDollarSign,
-  BellRing,
-  Briefcase,
-  CalendarClock,
-  ClipboardList,
-  FolderKanban,
-  LayoutDashboard,
-  LineChart,
-  LogOut,
-  MoreHorizontal,
-  ReceiptText,
-  Settings2,
-  ShieldCheck,
-  UsersRound,
-  Workflow,
-  X,
-} from 'lucide-react';
 
+
+import Icon from './ui/Icon';
 import {
   NavLink,
   Outlet,
@@ -54,52 +38,45 @@ const primaryNav = [
     suffix: '',
     end: true,
     label: 'Overview',
-    icon:
-      LayoutDashboard,
+    icon: 'dashboard',
     capability: null,
   },
   {
     suffix: 'orders',
     label: 'Projects',
-    icon:
-      FolderKanban,
+    icon: 'folder_special',
     capability: null,
   },
   {
     suffix: 'work',
     label: 'Work',
-    icon:
-      ClipboardList,
+    icon: 'assignment',
     capability: null,
   },
   {
     suffix: 'customers',
     label: 'Clients',
-    icon:
-      UsersRound,
+    icon: 'people',
     capability: null,
   },
   {
     suffix: 'sales',
     label: 'Sales',
-    icon:
-      Briefcase,
+    icon: 'work',
     capability:
       'sales.manage',
   },
   {
     suffix: 'finance',
     label: 'Finance',
-    icon:
-      ReceiptText,
+    icon: 'receipt',
     capability:
       'finance.manage',
   },
   {
     suffix: 'reports',
     label: 'Reports',
-    icon:
-      LineChart,
+    icon: 'show_chart',
     capability:
       'reports.view',
   },
@@ -110,8 +87,7 @@ const moreNav = [
     suffix: 'requests',
     label: 'Requests',
     hint: 'Service request queue',
-    icon:
-      CalendarClock,
+    icon: 'schedule',
     capability:
       'requests.manage',
   },
@@ -119,8 +95,7 @@ const moreNav = [
     suffix: 'services',
     label: 'Services',
     hint: 'Catalog, packages and intake',
-    icon:
-      Settings2,
+    icon: 'tune',
     capability:
       'services.manage',
   },
@@ -128,8 +103,7 @@ const moreNav = [
     suffix: 'team',
     label: 'Team',
     hint: 'Members and capacity',
-    icon:
-      UsersRound,
+    icon: 'people',
     capability:
       'team.manage',
   },
@@ -137,8 +111,7 @@ const moreNav = [
     suffix: 'automations',
     label: 'Automations',
     hint: 'Rules and run history',
-    icon:
-      Workflow,
+    icon: 'account_tree',
     capability:
       'automations.manage',
   },
@@ -146,8 +119,7 @@ const moreNav = [
     suffix: 'activity',
     label: 'Activity',
     hint: 'Operational feed and audit',
-    icon:
-      BellRing,
+    icon: 'notifications_active',
     capability:
       'reports.view',
   },
@@ -155,8 +127,7 @@ const moreNav = [
     suffix: 'settings',
     label: 'Settings',
     hint: 'Business rules and system',
-    icon:
-      Settings2,
+    icon: 'tune',
     capability:
       'settings.manage',
   },
@@ -164,8 +135,7 @@ const moreNav = [
     suffix: 'quotes',
     label: 'Quotes',
     hint: 'Manage project quotations',
-    icon:
-      BadgeDollarSign,
+    icon: 'paid',
     capability:
       'finance.manage',
   },
@@ -173,8 +143,7 @@ const moreNav = [
     suffix: 'payments',
     label: 'Payments',
     hint: 'Review payment activity',
-    icon:
-      ReceiptText,
+    icon: 'receipt',
     capability:
       'finance.manage',
   },
@@ -182,8 +151,7 @@ const moreNav = [
     suffix: 'pricing',
     label: 'Pricing',
     hint: 'Manage service pricing',
-    icon:
-      BadgeDollarSign,
+    icon: 'paid',
     capability:
       'services.manage',
   },
@@ -608,7 +576,7 @@ export default function AdminShell() {
 
                 {badge > 0 && (
                   <span className="admin-pro-nav-badge" aria-label={`${badge} pending part-payment requests`}>
-                    <BellRing size={12} />
+                    <Icon name="notifications_active" size={12} />
                     {badge > 99 ? '99+' : badge}
                   </span>
                 )}
@@ -659,7 +627,7 @@ export default function AdminShell() {
 
         <div className="admin-pro-sidebar-footer">
           <div className="admin-pro-security">
-            <ShieldCheck
+            <Icon name="verified_user" 
               size={17}
             />
 
@@ -687,7 +655,7 @@ export default function AdminShell() {
             }
             className="admin-pro-signout"
           >
-            <LogOut
+            <Icon name="logout" 
               size={17}
             />
 
@@ -785,7 +753,7 @@ export default function AdminShell() {
             moreOpen
           }
         >
-          <MoreHorizontal
+          <Icon name="more_horiz" 
             size={21}
           />
 
@@ -842,7 +810,7 @@ export default function AdminShell() {
             }
             aria-label="Close management controls"
           >
-            <X
+            <Icon name="close" 
               size={19}
             />
           </button>
@@ -905,7 +873,7 @@ export default function AdminShell() {
             signingOut
           }
         >
-          <LogOut
+          <Icon name="logout" 
             size={18}
           />
 

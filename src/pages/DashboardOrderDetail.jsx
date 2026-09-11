@@ -1,16 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  FileText,
-  Info,
-  ReceiptText,
-  XCircle,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import { useParams } from 'react-router-dom';
 
 import Link from '../components/PortalLink';
@@ -108,7 +99,7 @@ export default function DashboardOrderDetail() {
     return (
       <div className="workspace-view">
         <Link to="/dashboard/orders" className="workspace-back-link">
-          <ArrowLeft size={17} /> Projects
+          <Icon name="arrow_back" size={17} /> Projects
         </Link>
         <div style={{ marginTop: 16 }}>
           <ErrorBlock message={loadError} onRetry={() => { setLoading(true); load(); }} />
@@ -121,7 +112,7 @@ export default function DashboardOrderDetail() {
     return (
       <div className="workspace-view">
         <Link to="/dashboard/orders" className="workspace-back-link">
-          <ArrowLeft size={17} /> Projects
+          <Icon name="arrow_back" size={17} /> Projects
         </Link>
         <div className="workspace-empty">Project not found.</div>
       </div>
@@ -263,7 +254,7 @@ export default function DashboardOrderDetail() {
   return (
     <div className="workspace-view page-reveal">
       <Link to="/dashboard/orders" className="workspace-back-link">
-        <ArrowLeft size={17} /> Projects
+        <Icon name="arrow_back" size={17} /> Projects
       </Link>
 
       <div className="project-detail-hero">
@@ -324,7 +315,7 @@ export default function DashboardOrderDetail() {
                 {action.body && <p>{action.body}</p>}
                 {action.to && (
                   <Link to={action.to} className="button button-primary">
-                    {action.cta} <ArrowRight size={16} />
+                    {action.cta} <Icon name="arrow_forward" size={16} />
                   </Link>
                 )}
               </div>
@@ -335,7 +326,7 @@ export default function DashboardOrderDetail() {
 
       {pending && (
         <section className="project-review-banner pending">
-          <Clock3 size={22} />
+          <Icon name="schedule" size={22} />
           <div>
             <span>REQUEST RECEIVED</span>
             <h3>Your project is being reviewed.</h3>
@@ -348,7 +339,7 @@ export default function DashboardOrderDetail() {
 
       {approved && !cancelled && (
         <section className="project-review-banner approved">
-          <CheckCircle2 size={22} />
+          <Icon name="check_circle" size={22} />
           <div>
             <span>PROJECT APPROVED</span>
             <h3>Your request has been accepted.</h3>
@@ -361,7 +352,7 @@ export default function DashboardOrderDetail() {
 
       {declined && (
         <section className="project-review-banner declined">
-          <XCircle size={22} />
+          <Icon name="cancel" size={22} />
           <div>
             <span>MANAGEMENT DECISION</span>
             <h3>We are unable to proceed with this request.</h3>
@@ -375,7 +366,7 @@ export default function DashboardOrderDetail() {
 
       {cancelled && (
         <section className="project-review-banner declined">
-          <XCircle size={22} />
+          <Icon name="cancel" size={22} />
           <div>
             <span>PROJECT STATUS</span>
             <h3>This project has been closed.</h3>
@@ -389,7 +380,7 @@ export default function DashboardOrderDetail() {
 
       {awaitingClient && (
         <section className="project-review-banner pending">
-          <Info size={22} />
+          <Icon name="info" size={22} />
           <div>
             <span>YOUR RESPONSE IS NEEDED</span>
             <h3>{order.customer_action_label || 'We need information from you.'}</h3>
@@ -403,7 +394,7 @@ export default function DashboardOrderDetail() {
 
       {order.delivered_at && order.status !== 'completed' && (
         <section className="project-review-banner approved">
-          <CheckCircle2 size={22} />
+          <Icon name="check_circle" size={22} />
           <div>
             <span>PROJECT DELIVERED</span>
             <h3>Your finished work is ready.</h3>
@@ -417,7 +408,7 @@ export default function DashboardOrderDetail() {
 
       {order.status === 'completed' && (
         <section className="project-review-banner approved">
-          <CheckCircle2 size={22} />
+          <Icon name="check_circle" size={22} />
           <div>
             <span>PROJECT COMPLETED</span>
             <h3>Thank you for working with Posho Creative.</h3>
@@ -464,7 +455,7 @@ export default function DashboardOrderDetail() {
               <span>PAYMENT ARRANGEMENT</span>
               <h3>Installment approved</h3>
             </div>
-            <CheckCircle2 size={20} />
+            <Icon name="check_circle" size={20} />
           </div>
           <div className="project-summary-list">
             <div>
@@ -595,7 +586,7 @@ export default function DashboardOrderDetail() {
                 <span>FILES</span>
                 <h3>Project files</h3>
               </div>
-              <FileText size={20} />
+              <Icon name="article" size={20} />
             </div>
             <ProjectFileUploader
               orderId={order.id}
@@ -613,7 +604,7 @@ export default function DashboardOrderDetail() {
                 {references.map((file) => (
                   <article key={file.id} className="project-file-row">
                     <div className="project-file-icon">
-                      <FileText size={18} />
+                      <Icon name="article" size={18} />
                     </div>
                     <div>
                       <strong className="posho-long-value" title={displayFileName(file.original_name)}>
@@ -665,7 +656,7 @@ export default function DashboardOrderDetail() {
                   <span>ADDITIONAL COSTS</span>
                   <h3>Project additions</h3>
                 </div>
-                <ReceiptText size={20} />
+                <Icon name="receipt" size={20} />
               </div>
               <div className="project-cost-list">
                 {activeCosts.map((cost) => (

@@ -3,16 +3,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  KeyRound,
-  LockKeyhole,
-  LogOut,
-  ShieldCheck,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   Navigate,
   useNavigate,
@@ -278,7 +271,7 @@ export default function AdminAccess() {
           </div>
 
           <div className="admin-access-security">
-            <ShieldCheck
+            <Icon name="verified_user" 
               size={20}
             />
 
@@ -299,7 +292,7 @@ export default function AdminAccess() {
         <section className="admin-access-form-side">
           <div className="admin-access-card">
             <div className="admin-access-lock">
-              <LockKeyhole
+              <Icon name="lock" 
                 size={25}
               />
             </div>
@@ -330,7 +323,7 @@ export default function AdminAccess() {
               </label>
 
               <div className="admin-access-input">
-                <KeyRound
+                <Icon name="key" 
                   size={18}
                 />
 
@@ -377,11 +370,11 @@ export default function AdminAccess() {
                   }
                 >
                   {showCode ? (
-                    <EyeOff
+                    <Icon name="visibility_off" 
                       size={17}
                     />
                   ) : (
-                    <Eye
+                    <Icon name="visibility" 
                       size={17}
                     />
                   )}
@@ -424,7 +417,7 @@ export default function AdminAccess() {
                 </span>
 
                 {!submitting && (
-                  <ArrowRight
+                  <Icon name="arrow_forward" 
                     size={18}
                   />
                 )}
@@ -438,7 +431,7 @@ export default function AdminAccess() {
                 handleSignOut
               }
             >
-              <LogOut
+              <Icon name="logout" 
                 size={16}
               />
 

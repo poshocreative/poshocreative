@@ -5,22 +5,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  AlertCircle,
-  ArrowRight,
-  Bell,
-  Check,
-  CheckCheck,
-  CircleDollarSign,
-  Clock3,
-  FileText,
-  FolderKanban,
-  Gauge,
-  PackageCheck,
-  RefreshCw,
-  Search,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   useNavigate,
 } from 'react-router-dom';
@@ -230,7 +217,7 @@ function NotificationIcon({
     'payment'
   ) {
     return (
-      <CircleDollarSign
+      <Icon name="monetization_on" 
         size={19}
       />
     );
@@ -241,7 +228,7 @@ function NotificationIcon({
     'file'
   ) {
     return (
-      <PackageCheck
+      <Icon name="package_2" 
         size={19}
       />
     );
@@ -252,7 +239,7 @@ function NotificationIcon({
     'progress'
   ) {
     return (
-      <Gauge
+      <Icon name="speed"
         size={19}
       />
     );
@@ -263,14 +250,14 @@ function NotificationIcon({
     'project'
   ) {
     return (
-      <FolderKanban
+      <Icon name="folder_special" 
         size={19}
       />
     );
   }
 
   return (
-    <Bell
+    <Icon name="notifications"
       size={19}
     />
   );
@@ -749,8 +736,7 @@ export default function DashboardNotifications() {
       value:
         metrics.total,
 
-      icon:
-        Bell,
+      icon: 'notifications',
 
       type:
         'all',
@@ -762,8 +748,7 @@ export default function DashboardNotifications() {
       value:
         metrics.unread,
 
-      icon:
-        Clock3,
+      icon: 'schedule',
 
       type:
         'unread',
@@ -775,8 +760,7 @@ export default function DashboardNotifications() {
       value:
         metrics.project,
 
-      icon:
-        Gauge,
+      icon: 'speed',
 
       type:
         'project',
@@ -789,8 +773,7 @@ export default function DashboardNotifications() {
         metrics.payments +
         metrics.files,
 
-      icon:
-        FileText,
+      icon: 'article',
 
       type:
         'commerce',
@@ -828,7 +811,7 @@ export default function DashboardNotifications() {
               refreshing
             }
           >
-            <RefreshCw
+            <Icon name="autorenew" 
               size={15}
             />
 
@@ -849,7 +832,7 @@ export default function DashboardNotifications() {
                 markingAll
               }
             >
-              <CheckCheck
+              <Icon name="done_all" 
                 size={16}
               />
 
@@ -866,8 +849,7 @@ export default function DashboardNotifications() {
           (
             metric,
           ) => {
-            const Icon =
-              metric.icon;
+            const iconName = metric.icon;
 
             return (
               <article
@@ -877,8 +859,7 @@ export default function DashboardNotifications() {
                 className={`workspace-update-metric workspace-update-metric-${metric.type}`}
               >
                 <div>
-                  <Icon
-                    size={17}
+                  <Icon name={iconName} size={17}
                   />
                 </div>
 
@@ -899,7 +880,7 @@ export default function DashboardNotifications() {
         0 && (
         <section className="workspace-unread-summary">
           <div>
-            <Bell
+            <Icon name="notifications"
               size={19}
             />
 
@@ -927,7 +908,7 @@ export default function DashboardNotifications() {
           >
             Show unread
 
-            <ArrowRight
+            <Icon name="arrow_forward" 
               size={14}
             />
           </button>
@@ -936,7 +917,7 @@ export default function DashboardNotifications() {
 
       <section className="workspace-update-controls">
         <div className="workspace-update-search">
-          <Search
+          <Icon name="search" 
             size={17}
           />
 
@@ -998,7 +979,7 @@ export default function DashboardNotifications() {
 
       {error && (
         <div className="workspace-alert">
-          <AlertCircle
+          <Icon name="notification_important" 
             size={16}
           />
 
@@ -1008,7 +989,7 @@ export default function DashboardNotifications() {
 
       {message && (
         <div className="workspace-success-message">
-          <Check
+          <Icon name="check" 
             size={16}
           />
 
@@ -1020,7 +1001,7 @@ export default function DashboardNotifications() {
       0 ? (
         <section className="workspace-panel workspace-updates-empty">
           <div>
-            <CheckCheck
+            <Icon name="done_all" 
               size={25}
             />
           </div>
@@ -1166,7 +1147,7 @@ export default function DashboardNotifications() {
 
                             {projectTitle && (
                               <div className="workspace-activity-project">
-                                <FolderKanban
+                                <Icon name="folder_special" 
                                   size={13}
                                 />
 
@@ -1194,7 +1175,7 @@ export default function DashboardNotifications() {
                                   .progress_percent !==
                                   null && (
                                   <span>
-                                    <Gauge
+                                    <Icon name="speed"
                                       size={12}
                                     />
 
@@ -1209,7 +1190,7 @@ export default function DashboardNotifications() {
                                   .amount_kobo !==
                                   null && (
                                   <span>
-                                    <CircleDollarSign
+                                    <Icon name="monetization_on" 
                                       size={12}
                                     />
 
@@ -1230,7 +1211,7 @@ export default function DashboardNotifications() {
 
                             <div className="workspace-activity-footer">
                               <div className="workspace-activity-time">
-                                <Clock3
+                                <Icon name="schedule"
                                   size={12}
                                 />
 
@@ -1262,7 +1243,7 @@ export default function DashboardNotifications() {
                                       notification.id
                                     }
                                   >
-                                    <Check
+                                    <Icon name="check" 
                                       size={14}
                                     />
 
@@ -1288,7 +1269,7 @@ export default function DashboardNotifications() {
                                 >
                                   {destination.label}
 
-                                  <ArrowRight
+                                  <Icon name="arrow_forward" 
                                     size={14}
                                   />
                                 </button>

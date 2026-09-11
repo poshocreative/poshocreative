@@ -3,14 +3,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   Navigate,
   useNavigate,
@@ -397,7 +392,7 @@ export default function Login() {
                 </label>
 
                 <div className="auth-input-wrapper">
-                  <Mail
+                  <Icon name="mail" 
                     size={18}
                   />
 
@@ -435,7 +430,7 @@ export default function Login() {
                 </div>
 
                 <div className="auth-input-wrapper">
-                  <LockKeyhole
+                  <Icon name="lock" 
                     size={18}
                   />
 
@@ -481,11 +476,11 @@ export default function Login() {
                     }
                   >
                     {showPassword ? (
-                      <EyeOff
+                      <Icon name="visibility_off" 
                         size={17}
                       />
                     ) : (
-                      <Eye
+                      <Icon name="visibility" 
                         size={17}
                       />
                     )}
@@ -511,7 +506,7 @@ export default function Login() {
                   : 'Sign in'}
 
                 {!submitting && (
-                  <ArrowRight
+                  <Icon name="arrow_forward" 
                     size={18}
                   />
                 )}

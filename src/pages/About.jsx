@@ -1,37 +1,28 @@
-import {
-  ArrowRight,
-  CheckCircle2,
-  Layers3,
-  Lightbulb,
-  MonitorSmartphone,
-  MoveUpRight,
-  ShieldCheck,
-  Sparkles,
-  Target,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   Link,
 } from 'react-router-dom';
 
 const principles = [
   {
-    icon: Target,
+    icon: 'target',
     title: 'Clarity before complexity',
     text: 'Every project begins with understanding the real objective, audience and outcome before execution starts.',
   },
   {
-    icon: Sparkles,
+    icon: 'auto_awesome',
     title: 'Creativity with purpose',
     text: 'Strong creative work should do more than look impressive. It should communicate, position and perform.',
   },
   {
-    icon: Layers3,
+    icon: 'layers',
     title: 'Connected solutions',
     text: 'Branding, technology, promotion and business support work better when they are treated as one connected system.',
   },
   {
-    icon: ShieldCheck,
+    icon: 'verified_user',
     title: 'Professional accountability',
     text: 'Projects are organised through clear requests, review, quoting, payments, updates and deliverables.',
   },
@@ -79,7 +70,7 @@ export default function About() {
               >
                 Explore our services
 
-                <ArrowRight
+                <Icon name="arrow_forward" 
                   size={17}
                 />
               </Link>
@@ -216,7 +207,7 @@ export default function About() {
         <div className="container company-process-grid">
           <div className="company-process-visual">
             <div>
-              <Lightbulb
+              <Icon name="lightbulb" 
                 size={22}
               />
 
@@ -225,12 +216,12 @@ export default function About() {
               </span>
             </div>
 
-            <MoveUpRight
+            <Icon name="open_in_new" 
               size={22}
             />
 
             <div>
-              <MonitorSmartphone
+              <Icon name="devices" 
                 size={22}
               />
 
@@ -239,12 +230,12 @@ export default function About() {
               </span>
             </div>
 
-            <MoveUpRight
+            <Icon name="open_in_new" 
               size={22}
             />
 
             <div>
-              <CheckCircle2
+              <Icon name="check_circle" 
                 size={22}
               />
 
@@ -334,7 +325,7 @@ export default function About() {
                     capability
                   }
                 >
-                  <CheckCircle2
+                  <Icon name="check_circle" 
                     size={17}
                   />
 
@@ -371,7 +362,7 @@ export default function About() {
             >
               Start a project
 
-              <ArrowRight
+              <Icon name="arrow_forward" 
                 size={17}
               />
             </Link>

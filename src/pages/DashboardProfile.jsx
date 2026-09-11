@@ -3,11 +3,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  CheckCircle2,
-  Save,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import {
   useAuth,
 } from '../context/AuthContext';
@@ -297,7 +295,7 @@ export default function DashboardProfile() {
 
         {message && (
           <div className="workspace-success-message">
-            <CheckCircle2 size={17} />
+            <Icon name="check_circle" size={17} />
             {message}
           </div>
         )}
@@ -308,7 +306,7 @@ export default function DashboardProfile() {
           disabled={saving}
           aria-busy={saving}
         >
-          <Save size={17} />
+          <Icon name="save" size={17} />
 
           {saving
             ? 'Saving…'

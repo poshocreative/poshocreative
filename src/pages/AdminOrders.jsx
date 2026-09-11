@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { ArrowRight, Search } from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
@@ -205,7 +205,7 @@ export default function AdminOrders() {
 
       <div className="posho-search-row">
         <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Search size={17} aria-hidden="true" />
+          <Icon name="search" size={17} aria-hidden="true" />
           <input
             type="search"
             value={search}
@@ -383,7 +383,7 @@ export default function AdminOrders() {
                     : formatOrderStatus(order.review_decision)}
                 </span>
 
-                <ArrowRight size={18} />
+                <Icon name="arrow_forward" size={18} />
               </Link>
             );
           })}

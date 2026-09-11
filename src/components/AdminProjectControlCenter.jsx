@@ -4,20 +4,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  CheckCircle2,
-  Download,
-  Eye,
-  FileText,
-  Gauge,
-  History,
-  Info,
-  LockKeyhole,
-  Maximize2,
-  Paperclip,
-  X,
-} from 'lucide-react';
 
+
+import Icon from './ui/Icon';
 import {
   canPreviewAdminProjectFile,
   getAdminProjectFileUrl,
@@ -439,7 +428,7 @@ export default function AdminProjectControlCenter({
 
         <div className="admin-pcc-context-meta">
           <div>
-            <Paperclip
+            <Icon name="attach_file" 
               size={17}
             />
 
@@ -453,7 +442,7 @@ export default function AdminProjectControlCenter({
           </div>
 
           <div>
-            <Gauge
+            <Icon name="speed" 
               size={17}
             />
 
@@ -471,7 +460,7 @@ export default function AdminProjectControlCenter({
       <section className="admin-control-card admin-pcc-files">
         <div className="admin-pcc-section-heading">
           <div className="admin-pcc-heading-icon">
-            <Paperclip
+            <Icon name="attach_file" 
               size={20}
             />
           </div>
@@ -501,7 +490,7 @@ export default function AdminProjectControlCenter({
         </div>
 
         <div className="admin-pcc-security-note">
-          <LockKeyhole
+          <Icon name="lock" 
             size={15}
           />
 
@@ -513,7 +502,7 @@ export default function AdminProjectControlCenter({
         {uploadedFiles.length ===
         0 ? (
           <div className="admin-pcc-empty">
-            <FileText
+            <Icon name="article" 
               size={27}
             />
 
@@ -545,7 +534,7 @@ export default function AdminProjectControlCenter({
                     className="admin-pcc-file"
                   >
                     <div className="admin-pcc-file-icon">
-                      <FileText
+                      <Icon name="article" 
                         size={21}
                       />
                     </div>
@@ -599,7 +588,7 @@ export default function AdminProjectControlCenter({
                           previewKey
                         }
                       >
-                        <Eye
+                        <Icon name="visibility" 
                           size={15}
                         />
 
@@ -622,7 +611,7 @@ export default function AdminProjectControlCenter({
                           downloadKey
                         }
                       >
-                        <Download
+                        <Icon name="download" 
                           size={15}
                         />
 
@@ -642,7 +631,7 @@ export default function AdminProjectControlCenter({
         {pendingFiles.length >
           0 && (
           <div className="admin-pcc-pending-files">
-            <Info
+            <Icon name="info" 
               size={15}
             />
 
@@ -666,7 +655,7 @@ export default function AdminProjectControlCenter({
         <section className="admin-control-card admin-pcc-progress">
           <div className="admin-pcc-section-heading">
             <div className="admin-pcc-heading-icon">
-              <Gauge
+              <Icon name="speed" 
                 size={20}
               />
             </div>
@@ -966,7 +955,7 @@ export default function AdminProjectControlCenter({
             {draftProgress ===
               100 && (
               <div className="admin-pcc-completion-warning">
-                <CheckCircle2
+                <Icon name="check_circle" 
                   size={17}
                 />
 
@@ -989,7 +978,7 @@ export default function AdminProjectControlCenter({
                 publishing
               }
             >
-              <Gauge
+              <Icon name="speed" 
                 size={17}
               />
 
@@ -1002,7 +991,7 @@ export default function AdminProjectControlCenter({
           <div className="admin-pcc-history">
             <div className="admin-pcc-history-heading">
               <div>
-                <History
+                <Icon name="history" 
                   size={18}
                 />
 
@@ -1118,7 +1107,7 @@ export default function AdminProjectControlCenter({
                 }
                 aria-label="Close file preview"
               >
-                <X
+                <Icon name="close" 
                   size={19}
                 />
               </button>
@@ -1149,7 +1138,7 @@ export default function AdminProjectControlCenter({
                 />
               ) : (
                 <div className="admin-pcc-preview-message">
-                  <FileText
+                  <Icon name="article" 
                     size={35}
                   />
 
@@ -1172,7 +1161,7 @@ export default function AdminProjectControlCenter({
                 target="_blank"
                 rel="noreferrer"
               >
-                <Maximize2
+                <Icon name="aspect_ratio" 
                   size={15}
                 />
 
@@ -1187,7 +1176,7 @@ export default function AdminProjectControlCenter({
                   )
                 }
               >
-                <Download
+                <Icon name="download" 
                   size={15}
                 />
 

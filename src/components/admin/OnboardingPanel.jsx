@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { CheckCircle2, Circle, Loader } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { runAdminOrderAction } from '../../lib/admin';
 
@@ -106,7 +106,7 @@ export default function OnboardingPanel({ order, finance, onChanged }) {
         {steps.map((step) => (
           <div key={step.key} className="posho-timeline-item">
             <span className="posho-timeline-dot" aria-hidden="true">
-              {step.done ? <CheckCircle2 size={14} /> : <Circle size={14} />}
+              {step.done ? <Icon name="check_circle" size={14} /> : <Icon name="radio_button_unchecked" size={14} />}
             </span>
             <div className="posho-timeline-body">
               <strong>{step.label}</strong>
@@ -124,7 +124,7 @@ export default function OnboardingPanel({ order, finance, onChanged }) {
             disabled={busy}
             aria-busy={busy}
           >
-            {busy ? <Loader size={15} className="admin-spin" /> : null}
+            {busy ? <Icon name="hourglass_empty" size={15} className="admin-spin" /> : null}
             {busy ? 'Starting…' : 'Begin project'}
           </button>
         </div>

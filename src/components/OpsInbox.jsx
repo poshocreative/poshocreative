@@ -5,13 +5,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowRight,
-  BellRing,
-  CheckCheck,
-  Clock3,
-} from 'lucide-react';
 
+import Icon from './ui/Icon';
 import Link from './PortalLink';
 
 import {
@@ -825,8 +820,7 @@ export default function OpsInbox({
       {visible.length ===
       0 ? (
         <div className="admin-project-empty-state admin-project-empty-state-small">
-          <BellRing
-            size={22}
+          <Icon name="notifications_active"             size={22}
           />
 
           <span>
@@ -906,8 +900,7 @@ export default function OpsInbox({
                     className="button button-primary"
                   >
                     Open
-                    <ArrowRight
-                      size={15}
+                    <Icon name="arrow_forward"                       size={15}
                     />
                   </Link>
 
@@ -925,8 +918,7 @@ export default function OpsInbox({
                           )
                         }
                       >
-                        <Clock3
-                          size={15}
+                        <Icon name="schedule"                           size={15}
                         />
                         Snooze
                       </button>
@@ -942,8 +934,7 @@ export default function OpsInbox({
                         }
                         aria-label={`Resolve ${item.title}`}
                       >
-                        <CheckCheck
-                          size={15}
+                        <Icon name="done_all"                           size={15}
                         />
                         Resolve
                       </button>

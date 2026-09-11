@@ -1,11 +1,10 @@
+import Icon from './ui/Icon';
+
 import {
   socialPlatformLogoUrl,
   socialPlatforms,
 } from '../data/socialPlatforms';
 
-import {
-  Plus,
-} from 'lucide-react';
 
 export function SocialPlatformLogo({
   platform,
@@ -26,8 +25,7 @@ export function SocialPlatformLogo({
 
   if (platform.id === 'other') {
     return (
-      <Plus
-        size={22}
+      <Icon name="add"         size={22}
         color="#6C2BD9"
         aria-hidden="true"
       />

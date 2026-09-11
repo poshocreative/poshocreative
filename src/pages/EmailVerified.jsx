@@ -3,14 +3,9 @@ import {
   useState,
 } from 'react';
 
-import {
-  ArrowRight,
-  CheckCircle2,
-  CircleAlert,
-  LoaderCircle,
-  ShieldCheck,
-} from 'lucide-react';
 
+
+import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
 
 import {
@@ -207,7 +202,7 @@ export default function EmailVerified() {
                 <div className="verification-orbit verification-orbit-two" />
 
                 <div className="verification-icon">
-                  <LoaderCircle
+                  <Icon name="autorenew" 
                     size={34}
                   />
                 </div>
@@ -244,7 +239,7 @@ export default function EmailVerified() {
                 <div className="verification-success-ring verification-success-ring-two" />
 
                 <div className="verification-icon">
-                  <CheckCircle2
+                  <Icon name="check_circle" 
                     size={36}
                   />
                 </div>
@@ -270,7 +265,7 @@ export default function EmailVerified() {
               </p>
 
               <div className="verification-security-note">
-                <ShieldCheck
+                <Icon name="verified_user" 
                   size={18}
                 />
 
@@ -294,7 +289,7 @@ export default function EmailVerified() {
                 >
                   Open dashboard
 
-                  <ArrowRight
+                  <Icon name="arrow_forward" 
                     size={18}
                   />
                 </Link>
@@ -314,7 +309,7 @@ export default function EmailVerified() {
             <>
               <div className="verification-visual verification-visual-error">
                 <div className="verification-icon">
-                  <CircleAlert
+                  <Icon name="error" 
                     size={35}
                   />
                 </div>
@@ -341,7 +336,7 @@ export default function EmailVerified() {
                 >
                   Try signing in
 
-                  <ArrowRight
+                  <Icon name="arrow_forward" 
                     size={18}
                   />
                 </Link>

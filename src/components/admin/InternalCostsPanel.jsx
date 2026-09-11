@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { PlusCircle, Trash2, X } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { usePermissions } from '../../lib/permissions';
 import { EmptyState, ErrorBlock } from '../ui/StateBlocks';
@@ -111,7 +111,7 @@ export default function InternalCostsPanel({ order, work, finance, onChanged }) 
           </p>
         </div>
         <button type="button" className="button button-secondary" onClick={() => setOpen(true)}>
-          <PlusCircle size={17} /> Record cost
+          <Icon name="add_circle" size={17} /> Record cost
         </button>
       </div>
 
@@ -137,7 +137,7 @@ export default function InternalCostsPanel({ order, work, finance, onChanged }) 
               {cost.note && <p>{cost.note}</p>}
               <div className="finance-review-actions">
                 <button type="button" className="button button-secondary" onClick={() => setRemoving(cost)}>
-                  <Trash2 size={15} /> Remove
+                  <Icon name="delete" size={15} /> Remove
                 </button>
               </div>
             </article>
@@ -150,7 +150,7 @@ export default function InternalCostsPanel({ order, work, finance, onChanged }) 
           <form role="dialog" aria-modal="true" aria-label="Record internal cost" className="posho-modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
             <div className="posho-modal-heading">
               <h3>Record internal cost</h3>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close" disabled={busy}><X size={19} /></button>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Close" disabled={busy}><Icon name="close" size={19} /></button>
             </div>
             <div className="posho-form-grid">
               <label>

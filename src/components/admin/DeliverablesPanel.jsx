@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 
-import { FileUp, PlusCircle, X } from 'lucide-react';
 
+import Icon from '../ui/Icon';
 import { useToast } from '../ui/Toast';
 import { EmptyState, ErrorBlock } from '../ui/StateBlocks';
 import StatusBadge from '../ui/StatusBadge';
@@ -143,7 +143,7 @@ export default function DeliverablesPanel({ order, work, onChanged }) {
           </p>
         </div>
         <button type="button" className="button button-secondary" onClick={openNew}>
-          <PlusCircle size={17} /> Publish deliverable
+          <Icon name="add_circle" size={17} /> Publish deliverable
         </button>
       </div>
 
@@ -189,7 +189,7 @@ export default function DeliverablesPanel({ order, work, onChanged }) {
                 ))}
                 <div className="finance-review-actions" style={{ marginTop: 8 }}>
                   <button type="button" className="button button-secondary" onClick={() => openNewVersion(deliverable)}>
-                    <FileUp size={15} /> Publish V{(versions[0]?.version_number || 0) + 1}
+                    <Icon name="upload_file" size={15} /> Publish V{(versions[0]?.version_number || 0) + 1}
                   </button>
                 </div>
               </article>
@@ -203,7 +203,7 @@ export default function DeliverablesPanel({ order, work, onChanged }) {
           <form role="dialog" aria-modal="true" aria-label="Publish deliverable" className="posho-modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
             <div className="posho-modal-heading">
               <h3>{form.deliverableId ? `Publish new version — ${form.title}` : 'Publish deliverable'}</h3>
-              <button type="button" onClick={() => setPublishOpen(false)} aria-label="Close" disabled={busy}><X size={19} /></button>
+              <button type="button" onClick={() => setPublishOpen(false)} aria-label="Close" disabled={busy}><Icon name="close" size={19} /></button>
             </div>
             <div className="posho-form-grid">
               {!form.deliverableId && (

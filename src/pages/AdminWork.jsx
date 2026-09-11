@@ -5,14 +5,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  Link2,
-  Plus,
-  Search,
-  Timer,
-  X,
-} from 'lucide-react';
 
+import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
 import WorkCalendar from '../components/admin/WorkCalendar';
 import PageHeader from '../components/ui/PageHeader';
@@ -1301,7 +1295,7 @@ export default function AdminWork() {
               })
             }
           >
-            <Plus size={17} />
+            <Icon name="add" size={17} />
             New task
           </button>
         }
@@ -1380,8 +1374,7 @@ export default function AdminWork() {
             gap: 8,
           }}
         >
-          <Search
-            size={17}
+          <Icon name="search"             size={17}
             aria-hidden="true"
           />
 
@@ -2055,8 +2048,7 @@ export default function AdminWork() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -2338,8 +2330,7 @@ export default function AdminWork() {
                     addDependency
                   }
                 >
-                  <Link2
-                    size={15}
+                  <Icon name="link"                     size={15}
                   />
                   Add
                 </button>
@@ -2414,8 +2405,7 @@ export default function AdminWork() {
                   })
                 }
               >
-                <Timer
-                  size={15}
+                <Icon name="timer"                   size={15}
                 />
                 Log time
               </button>
@@ -2479,8 +2469,7 @@ export default function AdminWork() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
@@ -2910,8 +2899,7 @@ export default function AdminWork() {
                   busy
                 }
               >
-                <X
-                  size={19}
+                <Icon name="close"                   size={19}
                 />
               </button>
             </div>
