@@ -458,6 +458,31 @@ export default {
                   `${newlyUploadedIds.length} new project file${newlyUploadedIds.length === 1 ? '' : 's'} uploaded by the customer.`,
               },
             });
+
+          try {
+            const {
+              runAutomations,
+            } = await import(
+              '../_shared/ops.ts'
+            );
+
+            await runAutomations(
+              ctx.supabaseAdmin,
+              'client_file_uploaded',
+              {
+                orderId,
+                origin:
+                  'confirm-order-files',
+              },
+              ownedOrder.customer_id ||
+                'system',
+            );
+          } catch (automationError) {
+            console.error(
+              'Automation after file upload failed:',
+              automationError,
+            );
+          }
         }
 
         return Response.json({

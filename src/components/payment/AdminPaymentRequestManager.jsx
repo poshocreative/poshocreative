@@ -106,12 +106,7 @@ export default function AdminPaymentRequestManager({
       return;
     }
 
-    const requestedAmountKobo = Number(
-      selectedRequest.requested_amount_kobo || 0,
-    );
-    const amountKobo = requestedAmountKobo > 0
-      ? requestedAmountKobo
-      : Math.round(Number(form.amount) * 100);
+    const amountKobo = Math.round(Number(String(form.amount).replaceAll(',', '')) * 100);
 
     if (
       decision === 'approve' &&
@@ -264,30 +259,28 @@ export default function AdminPaymentRequestManager({
                 {formatMoney(selectedRequest.requested_amount_kobo)}
               </strong>
               <small>
-                Approving accepts this exact installment for the project.
+                Management may approve a different installment below.
               </small>
             </div>
           )}
 
           <div className="finance-review-grid">
-            {!selectedRequest.requested_amount_kobo && (
-              <label>
-                <span>Approved installment in Naira</span>
-                <input
-                  type="number"
-                  min="1"
-                  step="0.01"
-                  value={form.amount}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      amount: event.target.value,
-                    }))
-                  }
-                  placeholder="Legacy request amount"
-                />
-              </label>
-            )}
+            <label>
+              <span>Approved installment in Naira</span>
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                value={form.amount}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    amount: event.target.value,
+                  }))
+                }
+                placeholder="Management-chosen amount"
+              />
+            </label>
             <label>
               <span>Installment approval expires</span>
               <input

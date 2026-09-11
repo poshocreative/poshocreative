@@ -1172,6 +1172,32 @@ export default {
             },
           });
 
+        try {
+          const {
+            runAutomations,
+          } = await import(
+            '../_shared/ops.ts'
+          );
+
+          await runAutomations(
+            ctx.supabaseAdmin,
+            'project_submitted',
+            {
+              orderId:
+                order.id,
+              origin:
+                'create-order',
+            },
+            customer.user_id ||
+              'system',
+          );
+        } catch (automationError) {
+          console.error(
+            'Automation after order creation failed:',
+            automationError,
+          );
+        }
+
         return Response.json(
           {
             success: true,

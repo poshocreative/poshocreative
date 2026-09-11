@@ -1,0 +1,673 @@
+/* ==========================================================
+   POSHO OPERATIONS SYSTEM — shared portal primitives
+   Loads LAST. Premium, readable, mobile-first.
+   ========================================================== */
+
+:root {
+  --posho-purple: #6c2bd9;
+  --posho-purple-deep: #4c1d95;
+  --posho-ink: #17122b;
+  --posho-muted: #5f5878;
+  --posho-line: #e9e4f6;
+  --posho-surface: #ffffff;
+  --posho-wash: #f6f3fd;
+  --posho-green: #15803d;
+  --posho-green-wash: #e9f7ee;
+  --posho-amber: #92400e;
+  --posho-amber-wash: #fdf3e3;
+  --posho-red: #b91c1c;
+  --posho-red-wash: #fdecec;
+  --posho-radius: 16px;
+  --posho-shadow: 0 12px 32px rgba(23, 12, 60, 0.1);
+}
+
+/* ---------- readable type floor (no microscopic text) ---------- */
+.posho-finance-grid small,
+.posho-empty-state p,
+.posho-error-block p,
+.posho-modal-description,
+.client-pro-content,
+.admin-pro-content {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.posho-finance-grid span,
+.posho-tabbar button,
+.posho-section-label {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+/* ---------- toast system ---------- */
+.posho-toast-region {
+  position: fixed;
+  z-index: 1200;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(430px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+@media (min-width: 900px) {
+  .posho-toast-region {
+    left: auto;
+    right: 28px;
+    transform: none;
+    bottom: 28px;
+  }
+}
+
+.posho-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #17122b;
+  color: #fff;
+  border-radius: 14px;
+  padding: 13px 14px;
+  box-shadow: var(--posho-shadow);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.posho-toast p {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.posho-toast button {
+  background: transparent;
+  border: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.posho-toast-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  background: #a78bfa;
+  flex: none;
+}
+
+.posho-toast-success .posho-toast-dot { background: #34d399; }
+.posho-toast-error { background: #2a0f16; border: 1px solid #7f1d1d; }
+.posho-toast-error .posho-toast-dot { background: #f87171; }
+.posho-toast-info .posho-toast-dot { background: #60a5fa; }
+
+/* ---------- modal ---------- */
+.posho-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(18, 10, 40, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  border: 0;
+  width: 100%;
+  cursor: default;
+}
+
+@media (min-width: 720px) {
+  .posho-modal-backdrop {
+    align-items: center;
+    padding: 24px;
+  }
+}
+
+.posho-modal {
+  background: #fff;
+  width: min(560px, 100%);
+  max-height: min(88vh, 760px);
+  overflow: auto;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: var(--posho-shadow);
+}
+
+.posho-modal-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.posho-modal-heading h3 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.25;
+  color: var(--posho-ink);
+  overflow-wrap: anywhere;
+}
+
+.posho-modal-heading button {
+  border: 1px solid var(--posho-line);
+  background: #fff;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+
+.posho-modal-description {
+  color: var(--posho-muted);
+  margin: 0 0 16px;
+}
+
+.posho-modal-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (min-width: 560px) {
+  .posho-modal-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+.posho-button-danger {
+  background: var(--posho-red);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 46px;
+}
+
+.posho-button-danger:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ---------- generic modal form ---------- */
+.posho-form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.posho-form-grid label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--posho-ink);
+  min-width: 0;
+}
+
+.posho-form-grid input,
+.posho-form-grid select,
+.posho-form-grid textarea {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--posho-line);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--posho-ink);
+}
+
+.posho-form-grid textarea { min-height: 96px; resize: vertical; }
+.posho-form-grid input:focus,
+.posho-form-grid select:focus,
+.posho-form-grid textarea:focus {
+  outline: 2px solid var(--posho-purple);
+  outline-offset: 1px;
+  border-color: var(--posho-purple);
+}
+
+.posho-preview-box {
+  background: var(--posho-wash);
+  border: 1px dashed #c4b5fd;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--posho-ink);
+}
+
+/* ---------- states ---------- */
+.posho-empty-state {
+  border: 1px dashed #c4b5fd;
+  background: #fbfaff;
+  border-radius: var(--posho-radius);
+  padding: 22px 18px;
+  text-align: center;
+  color: var(--posho-muted);
+}
+
+.posho-empty-state strong {
+  display: block;
+  font-size: 15px;
+  color: var(--posho-ink);
+  margin-bottom: 6px;
+}
+
+.posho-empty-state p { margin: 0 0 10px; }
+
+.posho-error-block {
+  border: 1px solid #fecaca;
+  background: var(--posho-red-wash);
+  border-radius: var(--posho-radius);
+  padding: 16px;
+  color: #7f1d1d;
+}
+
+.posho-error-block strong { display: block; font-size: 14px; margin-bottom: 4px; }
+.posho-error-block p { margin: 0 0 10px; font-size: 13px; overflow-wrap: anywhere; }
+
+.posho-field-error {
+  color: var(--posho-red);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+/* ---------- finance cards ---------- */
+.posho-finance-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .posho-finance-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1180px) {
+  .posho-finance-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.posho-finance-card {
+  background: var(--posho-surface);
+  border: 1px solid var(--posho-line);
+  border-radius: var(--posho-radius);
+  padding: 16px;
+  min-width: 0;
+  box-shadow: 0 2px 10px rgba(23, 12, 60, 0.05);
+}
+
+.posho-finance-card span {
+  display: block;
+  color: var(--posho-muted);
+  margin-bottom: 6px;
+}
+
+.posho-finance-card strong {
+  display: block;
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--posho-ink);
+  overflow-wrap: anywhere;
+}
+
+.posho-finance-card small {
+  display: block;
+  margin-top: 6px;
+  color: var(--posho-muted);
+  overflow-wrap: anywhere;
+}
+
+.posho-finance-paid { border-left: 4px solid #16a34a; background: linear-gradient(180deg, #f2fbf5, #fff 60%); }
+.posho-finance-outstanding { border-left: 4px solid #d97706; }
+.posho-finance-due {
+  border: 1.5px solid var(--posho-purple);
+  background: linear-gradient(180deg, #f4edff, #fff 70%);
+}
+
+.posho-finance-due strong { font-size: 26px; color: var(--posho-purple-deep); }
+.posho-finance-due-action { margin-top: 12px; }
+.posho-finance-due-action .button,
+.posho-finance-due-action a.button,
+.posho-finance-due-action button {
+  width: 100%;
+  min-height: 46px;
+}
+
+/* ---------- tabs ---------- */
+.posho-tabbar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
+  margin: 0 -2px;
+  scrollbar-width: thin;
+}
+
+.posho-tabbar button {
+  flex: none;
+  border: 1px solid var(--posho-line);
+  background: #fff;
+  color: var(--posho-muted);
+  border-radius: 999px;
+  padding: 10px 16px;
+  min-height: 42px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.posho-tabbar button.active {
+  background: var(--posho-ink);
+  border-color: var(--posho-ink);
+  color: #fff;
+}
+
+.posho-tabbar button:focus-visible,
+.posho-modal button:focus-visible,
+.posho-toast button:focus-visible {
+  outline: 2px solid var(--posho-purple);
+  outline-offset: 2px;
+}
+
+/* ---------- project header ---------- */
+.posho-project-head {
+  background: linear-gradient(135deg, #1d1140, #4c1d95 60%, #6c2bd9);
+  color: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+@media (min-width: 760px) {
+  .posho-project-head { padding: 26px; }
+}
+
+.posho-project-head h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(22px, 4.5vw, 34px);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.posho-project-head .ref {
+  font-size: 13px;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}
+
+.posho-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.posho-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.posho-pill.solid-green { background: #16a34a; border-color: #16a34a; }
+.posho-pill.solid-amber { background: #d97706; border-color: #d97706; }
+.posho-pill.solid-red { background: #dc2626; border-color: #dc2626; }
+.posho-pill.solid-purple { background: #fff; color: var(--posho-purple-deep); border-color: #fff; }
+
+.posho-progress-track {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 14px;
+}
+
+.posho-progress-fill {
+  height: 100%;
+  background: #fff;
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.posho-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+/* ---------- action center ---------- */
+.posho-action-center {
+  border: 1.5px solid var(--posho-purple);
+  background: linear-gradient(180deg, #f6f0ff, #fff);
+  border-radius: var(--posho-radius);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.posho-action-center h2 {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--posho-purple-deep);
+}
+
+.posho-action-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid var(--posho-line);
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 0;
+}
+
+.posho-action-item div { min-width: 0; flex: 1; }
+.posho-action-item strong { display: block; font-size: 14px; }
+.posho-action-item p { margin: 4px 0 10px; font-size: 13px; color: var(--posho-muted); overflow-wrap: anywhere; }
+
+/* ---------- ledger ---------- */
+.posho-ledger { display: grid; gap: 10px; }
+
+.posho-ledger-item {
+  border: 1px solid var(--posho-line);
+  border-radius: 14px;
+  padding: 14px;
+  background: #fff;
+  min-width: 0;
+}
+
+.posho-ledger-item header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.posho-ledger-item strong.amount { font-size: 18px; overflow-wrap: anywhere; }
+.posho-ledger-item p { margin: 4px 0; font-size: 13px; color: var(--posho-muted); overflow-wrap: anywhere; }
+
+.posho-source-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+
+.posho-source-provider { background: var(--posho-green-wash); color: var(--posho-green); }
+.posho-source-manual { background: #eef2ff; color: #4338ca; }
+.posho-source-adjustment { background: var(--posho-amber-wash); color: var(--posho-amber); }
+.posho-source-reversal { background: var(--posho-red-wash); color: var(--posho-red); }
+
+/* ---------- danger zone ---------- */
+.posho-danger-zone {
+  border: 1.5px solid #f0a3a3;
+  border-radius: var(--posho-radius);
+  background: #fff7f7;
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.posho-danger-zone h3 { margin: 0; color: #7f1d1d; font-size: 16px; }
+.posho-danger-zone p { margin: 0; font-size: 13px; color: #7c2d12; overflow-wrap: anywhere; }
+
+.posho-danger-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px dashed #f0c9c9;
+  padding-top: 14px;
+}
+
+/* ---------- overflow safety ---------- */
+.posho-project-head *,
+.posho-finance-card *,
+.posho-ledger-item *,
+.posho-action-item *,
+.posho-modal * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.posho-long-value {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ---------- admin ops table -> cards ---------- */
+.posho-ops-filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin: 0 -2px 12px;
+}
+
+.posho-ops-filters button {
+  flex: none;
+  border: 1px solid var(--posho-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.posho-ops-filters button.active {
+  background: var(--posho-ink);
+  color: #fff;
+  border-color: var(--posho-ink);
+}
+
+.posho-search-row {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 760px) {
+  .posho-search-row { grid-template-columns: 1.4fr 1fr; }
+}
+
+.posho-search-row input,
+.posho-search-row select {
+  border: 1px solid var(--posho-line);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 14px;
+  width: 100%;
+  font-family: inherit;
+}
+
+/* ---------- timeline ---------- */
+.posho-timeline { display: grid; gap: 0; position: relative; }
+.posho-timeline-item {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  position: relative;
+  padding-bottom: 18px;
+}
+
+.posho-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 26px;
+  bottom: 0;
+  width: 2px;
+  background: var(--posho-line);
+}
+
+.posho-timeline-item:last-child::before { display: none; }
+
+.posho-timeline-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--posho-wash);
+  border: 1px solid var(--posho-line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--posho-purple-deep);
+  z-index: 1;
+}
+
+.posho-timeline-body {
+  background: #fff;
+  border: 1px solid var(--posho-line);
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 0;
+}
+
+.posho-timeline-body strong { font-size: 14px; display: block; }
+.posho-timeline-body p { margin: 4px 0; font-size: 13px; color: var(--posho-muted); overflow-wrap: anywhere; }
+.posho-timeline-body time { font-size: 12px; color: var(--posho-muted); }

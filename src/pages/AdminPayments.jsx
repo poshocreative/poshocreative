@@ -24,6 +24,8 @@ import {
 } from '../lib/adminPayments';
 
 import AdminPartPaymentInbox from '../components/payment/AdminPartPaymentInbox';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
+import BrandLoader from '../components/BrandLoader';
 
 import {
   formatMoney,
@@ -166,6 +168,12 @@ export default function AdminPayments() {
     setSuccess,
   ] =
     useState('');
+
+  const [
+    pendingMethod,
+    setPendingMethod,
+  ] =
+    useState(null);
 
   const load =
     async () => {
@@ -367,8 +375,8 @@ export default function AdminPayments() {
       }
     };
 
-  const toggleMethod =
-    async (
+  const requestToggleMethod =
+    (
       setting,
     ) => {
       if (
@@ -377,18 +385,22 @@ export default function AdminPayments() {
           'opay' &&
         !setting.enabled
       ) {
-        const confirmed =
-          window.confirm(
-            'Only enable OPay after Flutterwave has enabled OPay collections for this merchant account. Continue?',
-          );
+        setPendingMethod(
+          setting,
+        );
 
-        if (
-          !confirmed
-        ) {
-          return;
-        }
+        return;
       }
 
+      applyToggleMethod(
+        setting,
+      );
+    };
+
+  const applyToggleMethod =
+    async (
+      setting,
+    ) => {
       try {
         setMethodBusy(
           setting
@@ -426,9 +438,7 @@ export default function AdminPayments() {
 
   if (loading) {
     return (
-      <div className="admin-clean-state">
-        Loading payment operations...
-      </div>
+      <BrandLoader label="Loading payment operations…" />
     );
   }
 
@@ -543,7 +553,7 @@ export default function AdminPayments() {
                       .method_key
                   }
                   onClick={() =>
-                    toggleMethod(
+                    requestToggleMethod(
                       setting,
                     )
                   }
@@ -993,6 +1003,21 @@ export default function AdminPayments() {
           )
         )}
       </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingMethod)}
+        title="Enable OPay collections"
+        description="Only enable OPay after Flutterwave has enabled OPay collections for this merchant account. Customers will see OPay at checkout."
+        confirmLabel="Enable OPay"
+        busy={Boolean(methodBusy)}
+        busyLabel="Saving…"
+        onClose={() => setPendingMethod(null)}
+        onConfirm={async () => {
+          const setting = pendingMethod;
+          setPendingMethod(null);
+          await applyToggleMethod(setting);
+        }}
+      />
     </div>
   );
 }

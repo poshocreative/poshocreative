@@ -193,22 +193,20 @@ async function diagnostic(
   }
 }
 
-export async function syncSuccessfulPaymentOrder(
+export async function ledgerConfirmedPaid(
   admin: any,
   orderId: string,
 ) {
   const {
-    data:
-      successfulPayments,
-    error:
-      totalError,
+    data: entries,
+    error: totalError,
   } =
     await admin
       .from(
         'payment_transactions',
       )
       .select(
-        'amount_kobo',
+        'amount_kobo,base_amount_kobo,payment_type,status,is_reversed',
       )
       .eq(
         'order_id',
@@ -223,23 +221,78 @@ export async function syncSuccessfulPaymentOrder(
     throw totalError;
   }
 
-  const totalPaid =
+  return (
+    entries ||
+    []
+  ).reduce(
     (
-      successfulPayments ||
-      []
-    ).reduce(
-      (
-        sum:
-          number,
-        row:
-          any,
-      ) =>
-        sum +
+      sum:
+        number,
+      row:
+        any,
+    ) => {
+      if (
+        row.is_reversed ===
+        true
+      ) {
+        return sum;
+      }
+
+      if (
+        row.payment_type ===
+        'reversal'
+      ) {
+        return sum;
+      }
+
+      if (
+        row.payment_type ===
+        'adjustment'
+      ) {
+        return (
+          sum +
+          Number(
+            row.amount_kobo ||
+              0,
+          )
+        );
+      }
+
+      // Provider + manual entries credit their base project amount.
+      // Processing fees are tracked separately and never credited.
+      const credit =
         Number(
-          row.amount_kobo ||
+          row.base_amount_kobo ??
+            row.amount_kobo ??
             0,
-        ),
-      0,
+        );
+
+      return (
+        sum +
+        (
+          Number.isFinite(
+            credit,
+          ) &&
+          credit > 0
+            ? Math.round(
+                credit,
+              )
+            : 0
+        )
+      );
+    },
+    0,
+  );
+}
+
+export async function syncSuccessfulPaymentOrder(
+  admin: any,
+  orderId: string,
+) {
+  const totalPaid =
+    await ledgerConfirmedPaid(
+      admin,
+      orderId,
     );
 
   const {
@@ -862,6 +915,37 @@ export async function reconcilePayment(
     );
 
   if (!wasAlreadySuccessful) {
+    // Automation runs are best-effort and never block verification.
+    try {
+      const {
+        runAutomations,
+      } = await import(
+        './ops.ts'
+      );
+
+      await runAutomations(
+        admin,
+        projectState
+          .fullyPaid
+          ? 'payment_confirmed'
+          : 'installment_paid',
+        {
+          orderId:
+            payment.order_id,
+          origin:
+            'reconcile-payment',
+        },
+        payment.initiated_by ||
+          payment.recorded_by ||
+          'system',
+      );
+    } catch (automationError) {
+      console.error(
+        'Automation after payment verification failed:',
+        automationError,
+      );
+    }
+
     await admin
       .from(
         'notification_events',

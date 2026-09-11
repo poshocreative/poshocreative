@@ -517,6 +517,40 @@ export default function DashboardPay() {
             </div>
           )}
 
+          {order?.quoted_amount_kobo > 0 && (
+            <div className="posho-finance-grid" style={{ marginBottom: 14 }}>
+              <div className="posho-finance-card">
+                <span>Total project value</span>
+                <strong>{formatMoney(order.quoted_amount_kobo)}</strong>
+              </div>
+              <div className="posho-finance-card posho-finance-paid">
+                <span>Confirmed paid</span>
+                <strong>{formatMoney(order.paid_amount_kobo)}</strong>
+              </div>
+              <div className="posho-finance-card posho-finance-outstanding">
+                <span>Remaining balance</span>
+                <strong>
+                  {formatMoney(
+                    Math.max(
+                      Number(order.quoted_amount_kobo || 0) -
+                        Number(order.paid_amount_kobo || 0),
+                      0,
+                    ),
+                  )}
+                </strong>
+              </div>
+              <div className="posho-finance-card posho-finance-due">
+                <span>Amount due now</span>
+                <strong>{formatMoney(baseAmount)}</strong>
+                <small>
+                  {checkout?.paymentScope === 'approved_installment'
+                    ? 'Approved installment — not the total project value.'
+                    : 'Full outstanding balance.'}
+                </small>
+              </div>
+            </div>
+          )}
+
           <div className="payment-cost-breakdown">
             <div className="payment-cost-heading">
               <div>

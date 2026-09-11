@@ -51,7 +51,9 @@ export async function getProjectDirectory() {
     throw error;
   }
 
-  return data || [];
+  // Archived projects stay out of the client workspace.
+  // Client-side so this works before and after the archive column exists.
+  return (data || []).filter((order) => !order.archived_at);
 }
 
 export function getProjectBalance(

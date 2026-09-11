@@ -1,0 +1,656 @@
+/* Phase 2 shared component styles — append-only layer. */
+
+.posho-page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.posho-page-heading h1 {
+  margin: 4px 0 6px;
+  font-size: clamp(24px, 4.5vw, 36px);
+  line-height: 1.1;
+  color: var(--posho-ink);
+  overflow-wrap: anywhere;
+}
+
+.posho-page-description {
+  margin: 0;
+  font-size: 14px;
+  color: var(--posho-muted);
+  max-width: 62ch;
+}
+
+.posho-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.posho-status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 6px 12px;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.posho-status-green { background: var(--posho-green-wash); color: var(--posho-green); }
+.posho-status-amber { background: var(--posho-amber-wash); color: var(--posho-amber); }
+.posho-status-red { background: var(--posho-red-wash); color: var(--posho-red); }
+.posho-status-purple { background: #f1e8ff; color: var(--posho-purple-deep); }
+.posho-status-gray { background: #eef0f4; color: #4b5563; }
+
+.posho-metric-card {
+  background: var(--posho-surface);
+  border: 1px solid var(--posho-line);
+  border-radius: var(--posho-radius);
+  padding: 16px;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  box-shadow: 0 2px 10px rgba(23, 12, 60, 0.05);
+}
+
+.posho-metric-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--posho-wash);
+  color: var(--posho-purple-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.posho-metric-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--posho-muted);
+}
+
+.posho-metric-card strong {
+  font-size: 24px;
+  line-height: 1.15;
+  color: var(--posho-ink);
+  overflow-wrap: anywhere;
+}
+
+.posho-metric-card small {
+  font-size: 13px;
+  color: var(--posho-muted);
+}
+
+.posho-metric-green { border-left: 4px solid #16a34a; }
+.posho-metric-amber { border-left: 4px solid #d97706; }
+.posho-metric-red { border-left: 4px solid #dc2626; }
+.posho-metric-purple { border-left: 4px solid var(--posho-purple); }
+
+.posho-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.posho-action-buttons .button,
+.posho-action-buttons button {
+  min-height: 44px;
+}
+
+.posho-skeleton {
+  display: grid;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.posho-skeleton-line {
+  display: block;
+  height: 16px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ece7f8 25%, #f7f4ff 50%, #ece7f8 75%);
+  background-size: 200% 100%;
+  animation: posho-shimmer 1.3s infinite;
+}
+
+.posho-skeleton-line:nth-child(2n) { width: 82%; }
+.posho-skeleton-line:nth-child(3n) { width: 64%; }
+
+@keyframes posho-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.posho-progress-track-light { background: #ece7f8; }
+.posho-progress-fill-brand { background: #6c2bd9; }
+
+.posho-progress-meta strong { font-size: 14px; color: var(--posho-ink); }
+
+.posho-result-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid var(--posho-line);
+  border-radius: 14px;
+  padding: 14px;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.posho-result-card > div { min-width: 0; flex: 1; display: grid; gap: 2px; }
+.posho-result-card small { font-size: 12px; color: var(--posho-muted); }
+.posho-result-card strong { font-size: 15px; color: var(--posho-ink); overflow-wrap: anywhere; }
+.posho-result-card span { font-size: 13px; color: var(--posho-muted); overflow-wrap: anywhere; }
+
+.posho-result-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.posho-result-meta {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.posho-result-meta em { font-style: normal; }
+
+.posho-search-results { display: grid; gap: 14px; }
+
+.posho-search-group-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--posho-muted);
+  margin: 0 0 8px;
+}
+
+.posho-search-list { display: grid; gap: 8px; }
+
+.posho-topbar-search { position: relative; min-width: 0; }
+
+.posho-topbar-search input {
+  width: 100%;
+  border: 1px solid var(--posho-line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--posho-ink);
+}
+
+.posho-topbar-search-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(420px, calc(100vw - 32px));
+  max-height: min(70vh, 560px);
+  overflow: auto;
+  background: #fff;
+  border: 1px solid var(--posho-line);
+  border-radius: 16px;
+  box-shadow: var(--posho-shadow);
+  padding: 14px;
+  z-index: 900;
+}
+
+.posho-milestone { border-left: 4px solid var(--posho-line); }
+.posho-milestone-done { border-left-color: #16a34a; }
+.posho-milestone-active { border-left-color: var(--posho-purple); }
+.posho-milestone-blocked { border-left-color: #d97706; }
+
+.posho-version-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--posho-line);
+  border-radius: 12px;
+  padding: 12px;
+  background: #fbfaff;
+}
+
+.posho-text-danger {
+  color: #b91c1c;
+}
+
+.posho-modal-wide {
+  width: min(720px, 100%);
+}
+
+button.admin-data-row,
+.admin-data-row-button {
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+}
+
+button.admin-data-row:hover {
+  border-color: var(--posho-purple);
+}
+
+.admin-pro-navigation-more {
+  gap: 2px;
+}
+
+.admin-pro-navigation-more strong {
+  font-size: 13px;
+}
+
+.posho-report-list {
+  display: grid;
+  gap: 4px;
+}
+
+.posho-kanban {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+@media (min-width: 720px) {
+  .posho-kanban {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .posho-kanban {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.posho-kanban-column {
+  background: #f6f3fd;
+  border: 1px solid var(--posho-line);
+  border-radius: 16px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+}
+
+.posho-kanban-column > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding: 2px 4px;
+}
+
+.posho-kanban-column > header span {
+  background: #fff;
+  border: 1px solid var(--posho-line);
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 12px;
+}
+
+.posho-kanban-card {
+  background: #fff;
+  border: 1px solid var(--posho-line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  text-align: left;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+}
+
+button.posho-kanban-card {
+  cursor: pointer;
+}
+
+button.posho-kanban-card:hover {
+  border-color: var(--posho-purple);
+}
+
+.posho-kanban-card strong,
+.posho-kanban-card span,
+.posho-kanban-card small {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.posho-kanban-card small {
+  font-size: 12px;
+  color: var(--posho-muted);
+}
+
+.posho-kanban-card-wrap {
+  display: grid;
+  gap: 4px;
+}
+
+.posho-kanban-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.posho-kanban-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.posho-kanban-select input {
+  width: 20px;
+  height: 20px;
+}
+
+.posho-kanban-open {
+  background: none;
+  border: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  min-width: 0;
+}
+
+.posho-kanban-move {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.posho-kanban-move button {
+  border: 1px solid var(--posho-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  min-height: 32px;
+}
+
+.posho-kanban-blocked {
+  border-left: 4px solid #b91c1c;
+}
+
+.admin-pro-command-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--posho-line);
+  background: #fff;
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--posho-muted);
+  cursor: pointer;
+  min-width: 0;
+  max-width: 280px;
+}
+
+.admin-pro-command-trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-pro-command-trigger kbd {
+  font-family: inherit;
+  font-size: 11px;
+  border: 1px solid var(--posho-line);
+  border-radius: 6px;
+  padding: 1px 6px;
+  background: #f6f3fd;
+}
+
+@media (max-width: 720px) {
+  .admin-pro-command-trigger span,
+  .admin-pro-command-trigger kbd {
+    display: none;
+  }
+}
+
+.posho-palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(18, 10, 40, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: calc(10vh) 12px 12px;
+  padding-top: calc(10vh + env(safe-area-inset-top, 0px));
+}
+
+.posho-palette {
+  width: min(560px, 100%);
+  max-height: min(70vh, 600px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: var(--posho-shadow);
+  overflow: hidden;
+}
+
+.posho-palette-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--posho-line);
+}
+
+.posho-palette-input-row input {
+  flex: 1;
+  border: 0;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  min-width: 0;
+  color: var(--posho-ink);
+}
+
+.posho-palette-list {
+  overflow: auto;
+  padding: 8px;
+  display: grid;
+  gap: 2px;
+}
+
+.posho-palette-list button {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 4px 10px;
+  align-items: baseline;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  padding: 9px 10px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  min-width: 0;
+}
+
+.posho-palette-list button.active {
+  background: #f1e8ff;
+}
+
+.posho-palette-group {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--posho-muted);
+}
+
+.posho-palette-list button strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  grid-column: 2;
+}
+
+.posho-palette-list button small {
+  grid-column: 2;
+  font-size: 12px;
+  color: var(--posho-muted);
+  overflow-wrap: anywhere;
+}
+
+.posho-palette-hint {
+  font-size: 12px;
+  color: var(--posho-muted);
+  padding: 10px 16px;
+  margin: 0;
+  border-top: 1px solid var(--posho-line);
+}
+
+.posho-proof-frame {
+  position: relative;
+  border: 1px solid var(--posho-line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111;
+  min-height: 220px;
+}
+
+.posho-proof-frame-active {
+  cursor: crosshair;
+}
+
+.posho-proof-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 62vh;
+  object-fit: contain;
+  background: #111;
+}
+
+.posho-proof-pdf {
+  display: block;
+  width: 100%;
+  height: 62vh;
+  border: 0;
+  background: #fff;
+}
+
+.posho-proof-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  background: #d97706;
+  color: #fff;
+  border: 2px solid #fff;
+  pointer-events: none;
+}
+
+.posho-proof-pin-resolved {
+  background: #15803d;
+}
+
+.posho-proof-pin-acknowledged {
+  background: #6c2bd9;
+}
+
+.posho-proof-pin-reopened,
+.posho-proof-pin-open {
+  background: #d97706;
+}
+
+.posho-proof-pin-draft {
+  background: #1d4ed8;
+}
+
+.posho-report-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: #ece7f8;
+  overflow: hidden;
+}
+
+.posho-report-bar > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #4c1d95, #6c2bd9);
+  border-radius: 999px;
+}
+
+.posho-report-row {
+  display: grid;
+  gap: 6px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--posho-line);
+}
+
+.posho-report-row:last-child { border-bottom: 0; }
+
+.posho-report-row header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.posho-kv {
+  display: grid;
+  gap: 8px;
+}
+
+.posho-kv > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  border-bottom: 1px dashed var(--posho-line);
+  padding-bottom: 8px;
+}
+
+.posho-kv span { color: var(--posho-muted); }
+.posho-kv strong { color: var(--posho-ink); text-align: right; overflow-wrap: anywhere; }
+
+@media (max-width: 560px) {
+  .posho-page-actions .button,
+  .posho-page-actions button,
+  .posho-action-buttons .button,
+  .posho-action-buttons button {
+    width: 100%;
+  }
+}

@@ -40,6 +40,7 @@ export async function getAdminAccessState() {
   const [
     account,
     access,
+    team,
   ] =
     await Promise.all([
       supabase.rpc(
@@ -49,6 +50,19 @@ export async function getAdminAccessState() {
       supabase.rpc(
         'has_admin_access',
       ),
+
+      supabase
+        .rpc(
+          'is_team_member',
+        )
+        .then(
+          (
+            result,
+          ) => result,
+          () => ({
+            data: false,
+          }),
+        ),
     ]);
 
   if (account.error) {
@@ -66,6 +80,10 @@ export async function getAdminAccessState() {
 
     hasAccess:
       access.data ===
+      true,
+
+    isTeamMember:
+      team.data ===
       true,
   };
 }
@@ -334,15 +352,37 @@ export async function getAdminOverview() {
 }
 
 export async function getAdminOrders() {
-  const {
-    data,
-    error,
-  } =
-    await supabase
-      .from(
-        'orders',
-      )
-      .select(`
+  const fullSelect = `
+        id,
+        reference,
+        project_title,
+        service_slug,
+        project_type,
+        status,
+        payment_status,
+        review_decision,
+        decline_reason,
+        reviewed_at,
+        requires_quote,
+        quoted_amount_kobo,
+        paid_amount_kobo,
+        base_project_price_kobo,
+        progress_percent,
+        progress_label,
+        deadline,
+        archived_at,
+        customer_action_required,
+        created_at,
+        customers (
+          id,
+          full_name,
+          email,
+          phone,
+          business_name
+        )
+      `;
+
+  const legacySelect = `
         id,
         reference,
         project_title,
@@ -365,20 +405,60 @@ export async function getAdminOrders() {
           phone,
           business_name
         )
-      `)
-      .order(
-        'created_at',
-        {
-          ascending:
-            false,
-        },
-      );
+      `;
 
-  if (error) {
-    throw error;
+  const attempt = await supabase
+    .from('orders')
+    .select(fullSelect)
+    .order('created_at', { ascending: false })
+    .limit(400);
+
+  let resolved = attempt.data || null;
+
+  if (attempt.error) {
+    const message = String(attempt.error.message || '');
+
+    if (attempt.error.code === '42703' || message.includes('column')) {
+      const fallback = await supabase
+        .from('orders')
+        .select(legacySelect)
+        .order('created_at', { ascending: false })
+        .limit(400);
+
+      if (fallback.error) {
+        throw fallback.error;
+      }
+
+      resolved = fallback.data;
+    } else {
+      throw attempt.error;
+    }
   }
 
-  return data || [];
+  const rows = resolved || [];
+
+  // Annotate open part-payment requests (single extra query, capped).
+  const ids = rows.map((order) => order.id);
+
+  let openByOrder = {};
+
+  if (ids.length > 0) {
+    const { data: openRequests } = await supabase
+      .from('part_payment_requests')
+      .select('order_id')
+      .in('order_id', ids)
+      .in('status', ['pending', 'approved']);
+
+    openByOrder = (openRequests || []).reduce((map, row) => {
+      map[row.order_id] = true;
+      return map;
+    }, {});
+  }
+
+  return rows.map((order) => ({
+    ...order,
+    has_open_part_request: Boolean(openByOrder[order.id]),
+  }));
 }
 
 export async function getAdminOrder(
@@ -424,6 +504,11 @@ export async function getAdminOrder(
     payments,
     history,
     costs,
+    progress,
+    partRequests,
+    milestones,
+    activity,
+    notifications,
   ] =
     await Promise.all([
       supabase
@@ -527,34 +612,161 @@ export async function getAdminOrder(
               false,
           },
         ),
+
+      supabase
+        .from(
+          'project_progress_updates',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+
+      supabase
+        .from(
+          'part_payment_requests',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+
+      supabase
+        .from(
+          'project_payment_milestones',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'sequence',
+          {
+            ascending:
+              true,
+          },
+        ),
+
+      supabase
+        .from(
+          'admin_activity_log',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        )
+        .limit(80),
+
+      supabase
+        .from(
+          'notification_events',
+        )
+        .select('id,event_type,status,read_at,payload,created_at')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        )
+        .limit(80),
     ]);
+
+  const pick = (result, label) => {
+    if (result.error) {
+      // Never silently convert a query failure into an empty list.
+       
+      console.error(`Admin project ${label} failed:`, result.error);
+    }
+
+    return {
+      rows: result.data || [],
+      error: result.error ? result.error.message : null,
+    };
+  };
+
+  const quotesResult = pick(quotes, 'quotes');
+  const notesResult = pick(notes, 'notes');
+  const filesResult = pick(files, 'files');
+  const paymentsResult = pick(payments, 'payments');
+  const historyResult = pick(history, 'status history');
+  const costsResult = pick(costs, 'costs');
+  const progressResult = pick(progress, 'progress');
+  const partResult = pick(partRequests, 'part-payment requests');
+  const milestonesResult = pick(milestones, 'milestones');
+  const activityResult = pick(activity, 'activity');
+  const notificationsResult = pick(notifications, 'notifications');
 
   return {
     ...order,
 
-    quotes:
-      quotes.data ||
-      [],
+    quotes: quotesResult.rows,
 
-    notes:
-      notes.data ||
-      [],
+    notes: notesResult.rows,
 
-    files:
-      files.data ||
-      [],
+    files: filesResult.rows,
 
-    payments:
-      payments.data ||
-      [],
+    payments: paymentsResult.rows,
 
-    history:
-      history.data ||
-      [],
+    history: historyResult.rows,
 
-    costs:
-      costs.data ||
-      [],
+    costs: costsResult.rows,
+
+    progressUpdates: progressResult.rows,
+
+    partRequests: partResult.rows,
+
+    milestones:
+      milestonesResult.error && milestonesResult.error.includes('schema')
+        ? []
+        : milestonesResult.rows,
+
+    adminActivity: activityResult.rows,
+
+    notificationTrail: notificationsResult.rows,
+
+    loadErrors: {
+      quotes: quotesResult.error,
+      notes: notesResult.error,
+      files: filesResult.error,
+      payments: paymentsResult.error,
+      history: historyResult.error,
+      costs: costsResult.error,
+      progress: progressResult.error,
+      partRequests: partResult.error,
+      milestones: null,
+      activity: activityResult.error,
+      notifications: notificationsResult.error,
+    },
   };
 }
 

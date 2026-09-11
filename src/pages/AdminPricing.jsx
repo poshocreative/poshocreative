@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 
 import BrandLoader from '../components/BrandLoader';
+import { ErrorBlock } from '../components/ui/StateBlocks';
+import { useToast } from '../components/ui/Toast';
 
 import {
   getAdminCatalog,
@@ -43,18 +45,31 @@ export default function AdminPricing() {
   ] =
     useState('');
 
+  const [
+    error,
+    setError,
+  ] =
+    useState('');
+
+  const toast = useToast();
+
+  const load = async () => {
+    try {
+      setError('');
+      setLoading(true);
+      setCatalog(await getAdminCatalog());
+    } catch {
+      setError('Service pricing could not be loaded.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     document.title =
-      'Pricing | Posho Creative Admin';
+      'Pricing | Posho Creative Management';
 
-    getAdminCatalog()
-      .then(setCatalog)
-      .catch(
-        console.error,
-      )
-      .finally(() =>
-        setLoading(false),
-      );
+    load();
   }, []);
 
   const change =
@@ -94,6 +109,7 @@ export default function AdminPricing() {
         );
 
         setMessage('');
+        setError('');
 
         const updated =
           await updateCatalogItem(
@@ -134,12 +150,15 @@ export default function AdminPricing() {
         setMessage(
           `${item.title} updated.`,
         );
-      } catch (
-        error
-      ) {
-        setMessage(
-          error.message,
+
+        toast.success(`${item.title} price saved.`);
+      } catch (saveError) {
+        setError(
+          saveError.message ||
+            'The price could not be saved.',
         );
+
+        toast.error('The price could not be saved.');
       } finally {
         setBusy('');
       }
@@ -168,6 +187,12 @@ export default function AdminPricing() {
           </p>
         </div>
       </div>
+
+      {error && (
+        <div style={{ marginBottom: 12 }}>
+          <ErrorBlock message={error} onRetry={load} />
+        </div>
+      )}
 
       {message && (
         <div className="workspace-success-message">

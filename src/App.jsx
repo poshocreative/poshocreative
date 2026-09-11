@@ -17,13 +17,23 @@ import SignOutTransition from './components/SignOutTransition';
 
 import About from './pages/About';
 import AdminAccess from './pages/AdminAccess';
+import AdminActivity from './pages/AdminActivity';
+import AdminAutomations from './pages/AdminAutomations';
 import AdminCustomers from './pages/AdminCustomers';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminFinance from './pages/AdminFinance';
 import AdminOrderDetail from './pages/AdminOrderDetail';
 import AdminOrders from './pages/AdminOrders';
 import AdminPayments from './pages/AdminPayments';
 import AdminPricing from './pages/AdminPricing';
 import AdminQuotes from './pages/AdminQuotes';
+import AdminReports from './pages/AdminReports';
+import AdminRequests from './pages/AdminRequests';
+import AdminSales from './pages/AdminSales';
+import AdminServices from './pages/AdminServices';
+import AdminSettings from './pages/AdminSettings';
+import AdminTeam from './pages/AdminTeam';
+import AdminWork from './pages/AdminWork';
 import Contact from './pages/Contact';
 import Dashboard from './pages/Dashboard';
 import DashboardFiles from './pages/DashboardFiles';
@@ -33,6 +43,8 @@ import DashboardOrders from './pages/DashboardOrders';
 import DashboardPay from './pages/DashboardPay';
 import DashboardPayments from './pages/DashboardPayments';
 import DashboardProfile from './pages/DashboardProfile';
+import DashboardProposal from './pages/DashboardProposal';
+import DashboardRequests from './pages/DashboardRequests';
 import EmailVerified from './pages/EmailVerified';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -180,6 +192,16 @@ export default function App() {
           />
 
           <Route
+            path="requests"
+            element={<DashboardRequests />}
+          />
+
+          <Route
+            path="proposals/:id"
+            element={<DashboardProposal />}
+          />
+
+          <Route
             path="profile"
             element={<DashboardProfile />}
           />
@@ -220,6 +242,56 @@ export default function App() {
           <Route
             path="customers"
             element={<AdminCustomers />}
+          />
+
+          <Route
+            path="sales"
+            element={<AdminSales />}
+          />
+
+          <Route
+            path="work"
+            element={<AdminWork />}
+          />
+
+          <Route
+            path="requests"
+            element={<AdminRequests />}
+          />
+
+          <Route
+            path="finance"
+            element={<AdminFinance />}
+          />
+
+          <Route
+            path="reports"
+            element={<AdminReports />}
+          />
+
+          <Route
+            path="services"
+            element={<AdminServices />}
+          />
+
+          <Route
+            path="team"
+            element={<AdminTeam />}
+          />
+
+          <Route
+            path="automations"
+            element={<AdminAutomations />}
+          />
+
+          <Route
+            path="activity"
+            element={<AdminActivity />}
+          />
+
+          <Route
+            path="settings"
+            element={<AdminSettings />}
           />
 
           <Route

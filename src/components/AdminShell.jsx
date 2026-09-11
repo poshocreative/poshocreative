@@ -8,14 +8,19 @@ import {
 import {
   BadgeDollarSign,
   BellRing,
+  Briefcase,
+  CalendarClock,
+  ClipboardList,
   FolderKanban,
   LayoutDashboard,
+  LineChart,
   LogOut,
   MoreHorizontal,
   ReceiptText,
   Settings2,
   ShieldCheck,
   UsersRound,
+  Workflow,
   X,
 } from 'lucide-react';
 
@@ -31,46 +36,156 @@ import {
 } from '../context/AuthContext';
 
 import {
+  usePermissions,
+} from '../lib/permissions';
+
+import {
   getAdminPendingPartPaymentCount,
 } from '../lib/projectFinance';
 
-const navigationItems = [
+import {
+  getKnowledge,
+} from '../lib/operations';
+
+import CommandPalette from './CommandPalette';
+
+const primaryNav = [
   {
     suffix: '',
     end: true,
     label: 'Overview',
     icon:
       LayoutDashboard,
+    capability: null,
   },
   {
     suffix: 'orders',
-    label: 'Orders',
+    label: 'Projects',
     icon:
       FolderKanban,
+    capability: null,
+  },
+  {
+    suffix: 'work',
+    label: 'Work',
+    icon:
+      ClipboardList,
+    capability: null,
   },
   {
     suffix: 'customers',
     label: 'Clients',
     icon:
       UsersRound,
+    capability: null,
+  },
+  {
+    suffix: 'sales',
+    label: 'Sales',
+    icon:
+      Briefcase,
+    capability:
+      'sales.manage',
+  },
+  {
+    suffix: 'finance',
+    label: 'Finance',
+    icon:
+      ReceiptText,
+    capability:
+      'finance.manage',
+  },
+  {
+    suffix: 'reports',
+    label: 'Reports',
+    icon:
+      LineChart,
+    capability:
+      'reports.view',
+  },
+];
+
+const moreNav = [
+  {
+    suffix: 'requests',
+    label: 'Requests',
+    hint: 'Service request queue',
+    icon:
+      CalendarClock,
+    capability:
+      'requests.manage',
+  },
+  {
+    suffix: 'services',
+    label: 'Services',
+    hint: 'Catalog, packages and intake',
+    icon:
+      Settings2,
+    capability:
+      'services.manage',
+  },
+  {
+    suffix: 'team',
+    label: 'Team',
+    hint: 'Members and capacity',
+    icon:
+      UsersRound,
+    capability:
+      'team.manage',
+  },
+  {
+    suffix: 'automations',
+    label: 'Automations',
+    hint: 'Rules and run history',
+    icon:
+      Workflow,
+    capability:
+      'automations.manage',
+  },
+  {
+    suffix: 'activity',
+    label: 'Activity',
+    hint: 'Operational feed and audit',
+    icon:
+      BellRing,
+    capability:
+      'reports.view',
+  },
+  {
+    suffix: 'settings',
+    label: 'Settings',
+    hint: 'Business rules and system',
+    icon:
+      Settings2,
+    capability:
+      'settings.manage',
   },
   {
     suffix: 'quotes',
     label: 'Quotes',
+    hint: 'Manage project quotations',
     icon:
       BadgeDollarSign,
+    capability:
+      'finance.manage',
   },
   {
     suffix: 'payments',
     label: 'Payments',
+    hint: 'Review payment activity',
     icon:
       ReceiptText,
+    capability:
+      'finance.manage',
   },
   {
     suffix: 'pricing',
     label: 'Pricing',
+    hint: 'Manage service pricing',
     icon:
-      Settings2,
+      BadgeDollarSign,
+    capability:
+      'services.manage',
   },
 ];
 
@@ -111,6 +226,11 @@ export default function AdminShell() {
     setPendingPartPaymentCount,
   ] = useState(0);
 
+  const [
+    disabledFlags,
+    setDisabledFlags,
+  ] = useState([]);
+
   const loadPendingPartPayments =
     useCallback(async () => {
       try {
@@ -125,38 +245,175 @@ export default function AdminShell() {
       }
     }, []);
 
+  const {
+    can,
+  } =
+    usePermissions();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getKnowledge()
+      .then(({ flags }) => {
+        if (!cancelled) {
+          setDisabledFlags(
+            (flags || [])
+              .filter((flag) => flag.enabled === false)
+              .map((flag) => flag.key),
+          );
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDisabledFlags([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleByFlag = useCallback(
+    (suffix) => {
+      const flag =
+        suffix === 'sales'
+          ? 'sales_crm'
+          : suffix === 'requests'
+            ? 'requests'
+            : suffix === 'team'
+              ? 'team'
+              : suffix === 'automations'
+                ? 'automations'
+                : null;
+
+      return (
+        !flag || !disabledFlags.includes(flag)
+      );
+    },
+    [disabledFlags],
+  );
+
   const navigation =
     useMemo(
       () =>
-        navigationItems.map(
-          (item) => ({
-            ...item,
-            to:
-              adminPath(
+        primaryNav
+          .filter(
+            (
+              item,
+            ) =>
+              visibleByFlag(
                 item.suffix,
-              ),
-            badge:
-              item.suffix === 'payments'
-                ? pendingPartPaymentCount
-                : 0,
-          }),
-        ),
+              ) &&
+              (!item.capability ||
+                can(
+                  item.capability,
+                )),
+          )
+          .map(
+            (item) => ({
+              ...item,
+              to:
+                adminPath(
+                  item.suffix,
+                ),
+              badge:
+                item.suffix === 'payments'
+                  ? pendingPartPaymentCount
+                  : 0,
+            }),
+          ),
       [
         adminPath,
         pendingPartPaymentCount,
+        can,
+        visibleByFlag,
+      ],
+    );
+
+  const moreNavigation =
+    useMemo(
+      () =>
+        moreNav
+          .filter(
+            (
+              item,
+            ) =>
+              visibleByFlag(
+                item.suffix,
+              ) &&
+              (!item.capability ||
+                can(
+                  item.capability,
+                )),
+          )
+          .map(
+            (item) => ({
+              ...item,
+              to:
+                adminPath(
+                  item.suffix,
+                ),
+              badge:
+                item.suffix === 'payments'
+                  ? pendingPartPaymentCount
+                  : 0,
+            }),
+          ),
+      [
+        adminPath,
+        pendingPartPaymentCount,
+        can,
+        visibleByFlag,
       ],
     );
 
   const mobilePrimary =
-    navigation.slice(0, 3);
+    navigation.filter(
+      (
+        item,
+      ) =>
+        [
+          '',
+          'orders',
+          'customers',
+        ].includes(
+          item.suffix,
+        ),
+    );
 
-  const mobileSecondary =
-    navigation.slice(3);
+  const mobileSecondary = [
+    ...navigation.filter(
+      (
+        item,
+      ) =>
+        ![
+          '',
+          'orders',
+          'customers',
+        ].includes(
+          item.suffix,
+        ),
+    ),
+    ...moreNavigation,
+  ];
+
+  const allNavigation =
+    useMemo(
+      () => [
+        ...navigation,
+        ...moreNavigation,
+      ],
+      [
+        navigation,
+        moreNavigation,
+      ],
+    );
 
   const currentTitle =
     useMemo(() => {
       const match =
-        [...navigation]
+        [...allNavigation]
           .reverse()
           .find(
             (item) =>
@@ -173,7 +430,7 @@ export default function AdminShell() {
       );
     }, [
       location.pathname,
-      navigation,
+      allNavigation,
     ]);
 
   const moreActive =
@@ -360,6 +617,46 @@ export default function AdminShell() {
           )}
         </nav>
 
+        {moreNavigation.length >
+          0 && (
+          <>
+            <div className="admin-pro-nav-label">
+              MORE
+            </div>
+
+            <nav
+              className="admin-pro-navigation admin-pro-navigation-more"
+              aria-label="More management sections"
+            >
+              {moreNavigation.map(
+                ({
+                  to,
+                  label,
+                  icon:
+                    Icon,
+                }) => (
+                  <NavLink
+                    key={
+                      to
+                    }
+                    to={to}
+                  >
+                    <span>
+                      <Icon
+                        size={17}
+                      />
+                    </span>
+
+                    <strong>
+                      {label}
+                    </strong>
+                  </NavLink>
+                ),
+              )}
+            </nav>
+          </>
+        )}
+
         <div className="admin-pro-sidebar-footer">
           <div className="admin-pro-security">
             <ShieldCheck
@@ -419,6 +716,8 @@ export default function AdminShell() {
               {currentTitle}
             </strong>
           </div>
+
+          <CommandPalette />
 
           <div className="admin-pro-session">
             <span />
@@ -555,6 +854,7 @@ export default function AdminShell() {
               to,
               label,
               badge,
+              hint,
               icon:
                 Icon,
             }) => (
@@ -581,15 +881,11 @@ export default function AdminShell() {
                     </span>
                   )}
 
-                  <small>
-                    {label ===
-                    'Quotes'
-                      ? 'Manage project quotations'
-                      : label ===
-                          'Payments'
-                        ? 'Review payment activity'
-                        : 'Manage service pricing'}
-                  </small>
+                  {hint && (
+                    <small>
+                      {hint}
+                    </small>
+                  )}
                 </div>
               </NavLink>
             ),

@@ -11,6 +11,10 @@ import {
   AuthProvider,
 } from "./context/AuthContext";
 
+import {
+  ToastProvider,
+} from "./components/ui/Toast";
+
 
 // ==========================================================
 // GLOBAL STYLES
@@ -78,6 +82,8 @@ import "./styles/service-requests.css";
 
 import "./styles/portal-readable-type.css";
 import "./styles/portal-mobile-safety.css";
+import "./styles/portal-operations.css";
+import "./styles/portal-components.css";
 
 
 
@@ -112,7 +118,11 @@ ReactDOM.createRoot(
 
       <AuthProvider>
 
-        <App />
+        <ToastProvider>
+
+          <App />
+
+        </ToastProvider>
 
       </AuthProvider>
 

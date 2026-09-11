@@ -146,12 +146,18 @@ export async function requestProjectPartPayment({
   requestedAmountKobo,
   reason = '',
 }) {
+  const amount = Number(requestedAmountKobo);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error('Enter the amount you would like Management to approve.');
+  }
+
   const { data, error } = await supabase.rpc(
     'request_project_part_payment',
     {
       p_order_id: orderId,
-      p_requested_amount_kobo: requestedAmountKobo,
-      p_reason: reason.trim(),
+      p_requested_amount_kobo: Math.round(amount),
+      p_reason: String(reason || '').trim(),
     },
   );
 
@@ -178,15 +184,32 @@ export async function reviewProjectPartPayment({
   adminNote = '',
   allowWorkToStart = false,
 }) {
+  if (decision !== 'approve' && decision !== 'decline') {
+    throw new Error('Choose whether to approve or decline the request.');
+  }
+
+  const approvedKobo =
+    decision === 'approve' ? Number(approvedAmountKobo) : null;
+
+  if (
+    decision === 'approve' &&
+    (!Number.isFinite(approvedKobo) || approvedKobo <= 0)
+  ) {
+    throw new Error(
+      'Enter the installment Management is approving. It must be greater than zero.',
+    );
+  }
+
   const { data, error } = await supabase.rpc(
     'admin_review_part_payment',
     {
       p_request_id: requestId,
       p_decision: decision,
-      p_approved_amount_kobo: approvedAmountKobo,
+      p_approved_amount_kobo:
+        decision === 'approve' ? Math.round(approvedKobo) : null,
       p_approval_expires_at: approvalExpiresAt,
       p_balance_due_at: balanceDueAt,
-      p_admin_note: adminNote.trim() || null,
+      p_admin_note: String(adminNote || '').trim() || null,
       p_allow_work_to_start: Boolean(allowWorkToStart),
     },
   );

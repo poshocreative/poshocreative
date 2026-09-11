@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -8,6 +9,7 @@ import {
   ArrowRight,
   Bell,
   CircleDollarSign,
+  ClipboardList,
   Clock3,
   FileText,
   FolderKanban,
@@ -19,12 +21,19 @@ import {
 import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
+import { ErrorBlock } from '../components/ui/StateBlocks';
 
 import {
   formatMoney,
   formatOrderStatus,
   getMyOrders,
 } from '../lib/orders';
+
+import {
+  getMyMeetings,
+  getMyProposals,
+  getMyRequests,
+} from '../lib/clientOps';
 
 const quickLinks = [
   {
@@ -65,6 +74,19 @@ const quickLinks = [
 
     icon:
       FileText,
+  },
+  {
+    to:
+      '/dashboard/requests',
+
+    label:
+      'Requests',
+
+    description:
+      'Small tasks, updates and support requests.',
+
+    icon:
+      ClipboardList,
   },
   {
     to:
@@ -115,23 +137,59 @@ export default function Dashboard() {
   ] =
     useState(true);
 
+  const [
+    loadError,
+    setLoadError,
+  ] =
+    useState('');
+
+  const [
+    nowMs,
+  ] =
+    useState(
+      () =>
+        Date.now(),
+    );
+
+  const [
+    extras,
+    setExtras] =
+    useState({
+      requests: [],
+      proposals: [],
+      meetings: [],
+    });
+
+  const load = useCallback(async () => {
+    try {
+      setLoadError('');
+      setLoading(true);
+      setOrders(await getMyOrders());
+
+      try {
+        const [requests, proposals, meetings] = await Promise.all([
+          getMyRequests().catch(() => []),
+          getMyProposals().catch(() => []),
+          getMyMeetings().catch(() => []),
+        ]);
+
+        setExtras({ requests, proposals, meetings });
+      } catch {
+        setExtras({ requests: [], proposals: [], meetings: [] });
+      }
+    } catch {
+      setLoadError('Your workspace could not be loaded. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     document.title =
       'Client Workspace | Posho Creative';
 
-    getMyOrders()
-      .then(
-        setOrders,
-      )
-      .catch(
-        console.error,
-      )
-      .finally(() =>
-        setLoading(
-          false,
-        ),
-      );
-  }, []);
+    load();
+  }, [load]);
 
   const metrics =
     useMemo(() => {
@@ -207,6 +265,14 @@ export default function Dashboard() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="workspace-view">
+        <ErrorBlock message={loadError} onRetry={load} />
+      </div>
+    );
+  }
+
   const actionOrders =
     orders.filter(
       (
@@ -215,6 +281,62 @@ export default function Dashboard() {
         order
           .customer_action_required,
     );
+
+  const awaitingReview = [
+    ...extras.proposals
+      .filter((proposal) =>
+        ['sent', 'viewed'].includes(proposal.status),
+      )
+      .map((proposal) => ({
+        id: `proposal-${proposal.id}`,
+        to: `/dashboard/proposals/${proposal.id}`,
+        reference: proposal.number,
+        title: proposal.title,
+        label: 'Proposal awaiting decision',
+      })),
+    ...extras.requests
+      .filter(
+        (request) =>
+          request.status === 'waiting_on_client',
+      )
+      .map((request) => ({
+        id: `request-${request.id}`,
+        to: '/dashboard/requests',
+        reference: request.reference,
+        title: request.title,
+        label: 'Request needs your input',
+      })),
+  ];
+
+  const upcomingMeetings = extras.meetings
+    .filter(
+      (meeting) =>
+        meeting.status === 'scheduled' &&
+        new Date(meeting.scheduled_at).getTime() >= nowMs,
+    )
+    .slice(0, 3);
+
+  const nextPayment = orders
+    .map((order) => ({
+      order,
+      outstanding: Math.max(
+        Number(order.quoted_amount_kobo || 0) -
+          Number(order.paid_amount_kobo || 0),
+        0,
+      ),
+    }))
+    .filter(
+      (row) =>
+        row.outstanding > 0 &&
+        row.order.review_decision === 'approved' &&
+        !['completed', 'cancelled'].includes(row.order.status),
+    )
+    .sort((a, b) => {
+      const dateA = a.order.deadline || '9999';
+      const dateB = b.order.deadline || '9999';
+
+      return dateA < dateB ? -1 : 1;
+    })[0];
 
   const metricCards = [
     {
@@ -357,6 +479,116 @@ export default function Dashboard() {
           },
         )}
       </div>
+
+      {awaitingReview.length > 0 && (
+        <section className="workspace-priority-section">
+          <div className="workspace-priority-heading">
+            <div>
+              <span>
+                AWAITING REVIEW
+              </span>
+
+              <h3>
+                Decisions waiting on you.
+              </h3>
+
+              <p>
+                Proposals and requests that need your answer.
+              </p>
+            </div>
+
+            <div className="workspace-priority-count">
+              {awaitingReview.length}
+            </div>
+          </div>
+
+          <div className="workspace-priority-list">
+            {awaitingReview.map((item) => (
+              <Link key={item.id} to={item.to}>
+                <div className="workspace-priority-project">
+                  <small>
+                    {item.reference}
+                  </small>
+
+                  <strong>
+                    {item.title}
+                  </strong>
+
+                  <span>
+                    {item.label}
+                  </span>
+                </div>
+
+                <div className="workspace-priority-arrow">
+                  <ArrowRight size={17} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {(nextPayment || upcomingMeetings.length > 0) && (
+        <section className="workspace-panel">
+          <div className="workspace-panel-heading">
+            <div>
+              <span>UP NEXT</span>
+
+              <h3>What is coming</h3>
+            </div>
+          </div>
+
+          {nextPayment && (
+            <div className="workspace-priority-list">
+              <Link
+                to={`/dashboard/orders/${nextPayment.order.reference}/pay`}
+              >
+                <div className="workspace-priority-project">
+                  <small>
+                    NEXT PAYMENT
+                  </small>
+
+                  <strong>
+                    {formatMoney(nextPayment.outstanding)}
+                  </strong>
+
+                  <span>
+                    {nextPayment.order.project_title}
+                    {nextPayment.order.deadline
+                      ? ` · Due ${nextPayment.order.deadline}`
+                      : ''}
+                  </span>
+                </div>
+
+                <div className="workspace-priority-arrow">
+                  <ArrowRight size={17} />
+                </div>
+              </Link>
+            </div>
+          )}
+
+          {upcomingMeetings.map((meeting) => (
+            <p key={meeting.id} style={{ fontSize: 13 }}>
+              Meeting ({String(meeting.kind || '').replaceAll('_', ' ')}) ·{' '}
+              {new Date(meeting.scheduled_at).toLocaleString('en-NG')}
+            </p>
+          ))}
+        </section>
+      )}
+
+      {actionOrders.length === 0 &&
+        awaitingReview.length === 0 &&
+        !nextPayment && (
+          <section className="workspace-panel">
+            <p>
+              <strong>You are all caught up.</strong>
+            </p>
+
+            <p style={{ fontSize: 13, color: '#5f5878' }}>
+              Nothing needs your attention right now.
+            </p>
+          </section>
+        )}
 
       {actionOrders.length >
         0 && (

@@ -60,6 +60,7 @@ export default function AdminPartPaymentInbox() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [form, setForm] = useState({
+    approvedAmount: '',
     approvalExpiry: dateFromNow(7),
     balanceDue: dateFromNow(37),
     note: '',
@@ -97,6 +98,7 @@ export default function AdminPartPaymentInbox() {
   const openReview = (request) => {
     setReviewing(request);
     setForm({
+      approvedAmount: String(Number(request.requested_amount_kobo || 0) / 100 || ''),
       approvalExpiry: dateFromNow(7),
       balanceDue: dateFromNow(37),
       note: '',
@@ -119,6 +121,28 @@ export default function AdminPartPaymentInbox() {
       return;
     }
 
+    const order = reviewing.orders || {};
+    const outstanding = Math.max(
+      Number(order.quoted_amount_kobo || 0) -
+        Number(order.paid_amount_kobo || 0),
+      0,
+    );
+    const approvedKobo = Math.round(Number(String(form.approvedAmount).replaceAll(',', '')) * 100);
+
+    if (decision === 'approve') {
+      if (!Number.isFinite(approvedKobo) || approvedKobo <= 0) {
+        setError('Enter the installment Management is approving.');
+        return;
+      }
+
+      if (approvedKobo >= outstanding) {
+        setError(
+          `The approved installment must be lower than the outstanding balance of ${formatMoney(outstanding)}. Use full payment instead.`,
+        );
+        return;
+      }
+    }
+
     if (
       decision === 'approve' &&
       new Date(form.balanceDue) < new Date(form.approvalExpiry)
@@ -137,7 +161,7 @@ export default function AdminPartPaymentInbox() {
         decision,
         approvedAmountKobo:
           decision === 'approve'
-            ? Number(reviewing.requested_amount_kobo)
+            ? approvedKobo
             : null,
         approvalExpiresAt:
           decision === 'approve'
@@ -287,8 +311,59 @@ export default function AdminPartPaymentInbox() {
             <div className="finance-review-requested-amount">
               <span>Customer requested</span>
               <strong>{formatMoney(reviewing.requested_amount_kobo)}</strong>
-              <small>Approval enables payment for this exact installment amount.</small>
+              <small>Management may approve a different installment below.</small>
             </div>
+
+            {(() => {
+              const order = reviewing.orders || {};
+              const outstanding = Math.max(
+                Number(order.quoted_amount_kobo || 0) -
+                  Number(order.paid_amount_kobo || 0),
+                0,
+              );
+              const paid = Number(order.paid_amount_kobo || 0);
+              const preview = Math.round(Number(String(form.approvedAmount).replaceAll(',', '')) * 100) || 0;
+
+              return (
+                <>
+                  <div className="finance-review-requested-amount">
+                    <span>Full project value</span>
+                    <strong>{formatMoney(order.quoted_amount_kobo)}</strong>
+                    <small>
+                      Paid {formatMoney(paid)} · Outstanding {formatMoney(outstanding)}
+                    </small>
+                  </div>
+
+                  <div className="finance-review-grid">
+                    <label>
+                      <span>Approved installment (NGN)</span>
+                      <input
+                        type="number"
+                        min="1"
+                        step="0.01"
+                        value={form.approvedAmount}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            approvedAmount: event.target.value,
+                          }))
+                        }
+                        placeholder="Management-chosen amount"
+                      />
+                    </label>
+                    {preview > 0 && preview < outstanding && (
+                      <div className="finance-review-requested-amount" role="status">
+                        <span>Projected outcome</span>
+                        <strong>
+                          Paid {formatMoney(paid + preview)} · Outstanding{' '}
+                          {formatMoney(outstanding - preview)}
+                        </strong>
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
 
             <div className="finance-review-grid">
               <label>

@@ -438,6 +438,10 @@ export async function getMyOrders() {
         requires_quote,
         quoted_amount_kobo,
         paid_amount_kobo,
+        base_project_price_kobo,
+        progress_percent,
+        progress_label,
+        archived_at,
         customer_action_required,
         customer_action_label,
         submitted_at,
@@ -453,25 +457,101 @@ export async function getMyOrders() {
       );
 
   if (error) {
+    // Older environments without the newer finance columns fall back
+    // to the base select instead of failing the whole workspace.
+    if (String(error.code) === '42703' || String(error.message || '').includes('column')) {
+      const fallback = await supabase
+        .from('orders')
+        .select(`
+          id,
+          reference,
+          service_slug,
+          project_type,
+          project_title,
+          project_description,
+          project_goal,
+          service_details,
+          budget,
+          timeline,
+          deadline,
+          status,
+          payment_status,
+          review_decision,
+          reviewed_at,
+          decline_reason,
+          pricing_type,
+          service_price_kobo,
+          requires_quote,
+          quoted_amount_kobo,
+          paid_amount_kobo,
+          customer_action_required,
+          customer_action_label,
+          submitted_at,
+          created_at,
+          updated_at
+        `)
+        .order('created_at', { ascending: false });
+
+      if (fallback.error) {
+        throw fallback.error;
+      }
+
+      return (fallback.data || []).filter((order) => !order.archived_at);
+    }
+
     throw error;
   }
 
-  return data || [];
+  // Archived projects are hidden from the client workspace.
+  // Filtered client-side so this works before and after the
+  // archive columns exist in the database.
+  return (data || []).filter((order) => !order.archived_at);
 }
 
 export async function getOrderByReference(
   reference,
 ) {
-  const {
-    data: order,
-    error:
-      orderError,
-  } =
-    await supabase
-      .from(
-        'orders',
-      )
-      .select(`
+  const fullSelect = `
+        id,
+        reference,
+        service_slug,
+        project_type,
+        project_title,
+        project_description,
+        project_goal,
+        reference_links,
+        service_details,
+        budget,
+        timeline,
+        deadline,
+        status,
+        payment_status,
+        review_decision,
+        reviewed_at,
+        decline_reason,
+        pricing_type,
+        service_price_kobo,
+        requires_quote,
+        quoted_amount_kobo,
+        paid_amount_kobo,
+        base_project_price_kobo,
+        progress_percent,
+        progress_label,
+        progress_message,
+        progress_updated_at,
+        project_phase,
+        delivered_at,
+        completed_at,
+        archived_at,
+        customer_action_required,
+        customer_action_label,
+        current_quote_id,
+        submitted_at,
+        created_at,
+        updated_at
+      `;
+
+  const legacySelect = `
         id,
         reference,
         service_slug,
@@ -500,20 +580,59 @@ export async function getOrderByReference(
         submitted_at,
         created_at,
         updated_at
-      `)
+      `;
+
+  let order;
+
+  const attempt =
+    await supabase
+      .from(
+        'orders',
+      )
+      .select(
+        fullSelect,
+      )
       .eq(
         'reference',
         reference,
       )
       .maybeSingle();
 
-  if (
-    orderError
-  ) {
-    throw orderError;
+  if (attempt.error) {
+    const message = String(attempt.error.message || '');
+
+    if (attempt.error.code === '42703' || message.includes('column')) {
+      const fallback =
+        await supabase
+          .from(
+            'orders',
+          )
+          .select(
+            legacySelect,
+          )
+          .eq(
+            'reference',
+            reference,
+          )
+          .maybeSingle();
+
+      if (fallback.error) {
+        throw fallback.error;
+      }
+
+      order = fallback.data;
+    } else {
+      throw attempt.error;
+    }
+  } else {
+    order = attempt.data;
   }
 
   if (!order) {
+    return null;
+  }
+
+  if (order.archived_at) {
     return null;
   }
 
@@ -524,6 +643,9 @@ export async function getOrderByReference(
     payments,
     quotes,
     costs,
+    progressUpdates,
+    partRequests,
+    notifications,
   ] =
     await Promise.all([
       supabase
@@ -610,10 +732,16 @@ export async function getOrderByReference(
           provider,
           provider_reference,
           amount_kobo,
+          base_amount_kobo,
           currency,
           payment_method,
+          payment_type,
+          payment_scope,
+          manual_method,
+          manual_reference,
           status,
           verified_at,
+          completed_at,
           created_at
         `)
         .eq(
@@ -678,34 +806,137 @@ export async function getOrderByReference(
               false,
           },
         ),
+
+      supabase
+        .from(
+          'project_progress_updates',
+        )
+        .select(`
+          id,
+          progress_percent,
+          label,
+          message,
+          created_at
+        `)
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+
+      supabase
+        .from(
+          'part_payment_requests',
+        )
+        .select(`
+          id,
+          reason,
+          requested_amount_kobo,
+          status,
+          approved_amount_kobo,
+          approval_expires_at,
+          balance_due_at,
+          allow_work_to_start,
+          admin_note,
+          decline_reason,
+          created_at
+        `)
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        ),
+
+      supabase
+        .from(
+          'notification_events',
+        )
+        .select(`
+          id,
+          event_type,
+          payload,
+          created_at
+        `)
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        )
+        .limit(60),
     ]);
+
+  const pick = (result, label) => {
+    if (result.error) {
+       
+      console.error(`Client project ${label} failed:`, result.error);
+    }
+
+    return {
+      rows: result.data || [],
+      error: result.error ? result.error.message : null,
+    };
+  };
+
+  const filesResult = pick(files, 'files');
+  const historyResult = pick(history, 'history');
+  const notesResult = pick(notes, 'notes');
+  const paymentsResult = pick(payments, 'payments');
+  const quotesResult = pick(quotes, 'quotes');
+  const costsResult = pick(costs, 'costs');
+  const progressResult = pick(progressUpdates, 'progress');
+  const partResult = pick(partRequests, 'part-payment requests');
+  const notificationsResult = pick(notifications, 'notifications');
 
   return {
     ...order,
 
-    files:
-      files.data ||
-      [],
+    files: filesResult.rows,
 
-    history:
-      history.data ||
-      [],
+    history: historyResult.rows,
 
-    notes:
-      notes.data ||
-      [],
+    notes: notesResult.rows,
 
-    payments:
-      payments.data ||
-      [],
+    payments: paymentsResult.rows,
 
-    quotes:
-      quotes.data ||
-      [],
+    quotes: quotesResult.rows,
 
-    costs:
-      costs.data ||
-      [],
+    costs: costsResult.rows,
+
+    progressUpdates: progressResult.rows,
+
+    partRequests: partResult.rows,
+
+    notificationTrail: notificationsResult.rows,
+
+    loadErrors: {
+      files: filesResult.error,
+      history: historyResult.error,
+      notes: notesResult.error,
+      payments: paymentsResult.error,
+      quotes: quotesResult.error,
+      costs: costsResult.error,
+      progress: progressResult.error,
+      partRequests: partResult.error,
+      notifications: notificationsResult.error,
+    },
   };
 }
 

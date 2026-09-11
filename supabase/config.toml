@@ -39,3 +39,21 @@ entrypoint = "./functions/payment-fee-quote/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/payment-fee-quote/*.html" ]
+
+[functions.client-project-action]
+enabled = true
+verify_jwt = true
+import_map = "./functions/client-project-action/deno.json"
+entrypoint = "./functions/client-project-action/index.ts"
+
+[functions.sales-action]
+enabled = true
+verify_jwt = true
+import_map = "./functions/sales-action/deno.json"
+entrypoint = "./functions/sales-action/index.ts"
+
+[functions.operations-action]
+enabled = true
+verify_jwt = true
+import_map = "./functions/operations-action/deno.json"
+entrypoint = "./functions/operations-action/index.ts"

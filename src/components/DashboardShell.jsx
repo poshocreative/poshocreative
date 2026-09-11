@@ -7,6 +7,7 @@ import {
 
 import {
   Bell,
+  ClipboardList,
   FileText,
   FolderKanban,
   LayoutDashboard,
@@ -72,6 +73,15 @@ const navigationItems = [
 
     icon:
       FileText,
+  },
+  {
+    suffix: 'requests',
+
+    label:
+      'Requests',
+
+    icon:
+      ClipboardList,
   },
   {
     suffix: 'notifications',
@@ -693,7 +703,10 @@ export default function DashboardShell() {
                       : label ===
                           'Updates'
                         ? 'Project activity and important updates'
-                        : 'Account and contact information'}
+                        : label ===
+                            'Requests'
+                          ? 'Small tasks and support requests'
+                          : 'Account and contact information'}
                   </small>
                 </div>
               </NavLink>

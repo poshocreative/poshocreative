@@ -24,6 +24,10 @@ import {
 } from '../config/app';
 
 import {
+  getMyMembership,
+} from '../lib/permissions';
+
+import {
   useAuth,
 } from '../context/AuthContext';
 
@@ -88,6 +92,55 @@ export default function Login() {
       'Sign In | Posho Creative';
   }, []);
 
+  const [
+    teamTarget,
+    setTeamTarget,
+  ] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function routeTeam() {
+      if (
+        loading ||
+        !isAuthenticated ||
+        isAdminEmail(
+          user?.email,
+        )
+      ) {
+        return;
+      }
+
+      try {
+        const membership =
+          await getMyMembership();
+
+        if (
+          !cancelled &&
+          membership.member
+        ) {
+          setTeamTarget(
+            portalRoutes
+              .adminBase,
+          );
+        }
+      } catch {
+        // fall through to client workspace
+      }
+    }
+
+    routeTeam();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    loading,
+    isAuthenticated,
+    user,
+    portalRoutes,
+  ]);
+
   if (
     !loading &&
     isAuthenticated
@@ -102,6 +155,19 @@ export default function Login() {
           to={
             portalRoutes
               .adminAccess
+          }
+          replace
+        />
+      );
+    }
+
+    if (
+      teamTarget
+    ) {
+      return (
+        <Navigate
+          to={
+            teamTarget
           }
           replace
         />
@@ -227,6 +293,27 @@ export default function Login() {
         );
 
         return;
+      }
+
+      try {
+        const membership =
+          await getMyMembership();
+
+        if (
+          membership.member
+        ) {
+          navigate(
+            nextPortalRoutes
+              .adminBase,
+            {
+              replace: true,
+            },
+          );
+
+          return;
+        }
+      } catch {
+        // fall through to client workspace
       }
 
       navigate(

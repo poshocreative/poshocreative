@@ -4,6 +4,8 @@ import {
 } from 'react';
 
 import BrandLoader from '../components/BrandLoader';
+import Link from '../components/PortalLink';
+import { EmptyState, ErrorBlock } from '../components/ui/StateBlocks';
 
 import {
   getAdminQuotes,
@@ -27,18 +29,30 @@ export default function AdminQuotes() {
   ] =
     useState(true);
 
+  const [
+    error,
+    setError,
+  ] =
+    useState('');
+
+  const load = async () => {
+    try {
+      setError('');
+      setLoading(true);
+      setQuotes(await getAdminQuotes());
+    } catch {
+      setError('Quotes could not be loaded.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     document.title =
-      'Quotes | Posho Creative Admin';
+      'Quotes | Posho Creative Management';
 
-    getAdminQuotes()
-      .then(setQuotes)
-      .catch(
-        console.error,
-      )
-      .finally(() =>
-        setLoading(false),
-      );
+    load();
+     
   }, []);
 
   if (loading) {
@@ -61,6 +75,23 @@ export default function AdminQuotes() {
         </div>
       </div>
 
+      {error && (
+        <div style={{ marginBottom: 12 }}>
+          <ErrorBlock message={error} onRetry={load} />
+        </div>
+      )}
+
+      {quotes.length === 0 ? (
+        <EmptyState
+          title="No quotes issued yet"
+          body="Quotes appear here after Management prices a project. Open a project to send its first quote."
+          action={
+            <Link to="/admin/orders" className="button button-secondary">
+              Open projects
+            </Link>
+          }
+        />
+      ) : (
       <div className="admin-data-card">
         {quotes.map(
           (
@@ -110,6 +141,7 @@ export default function AdminQuotes() {
           ),
         )}
       </div>
+      )}
     </div>
   );
 }

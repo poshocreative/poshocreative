@@ -217,6 +217,52 @@ export function getNotificationCategory(
 
   if (
     event.includes(
+      'request',
+    ) &&
+    !event.includes(
+      'change_request',
+    ) &&
+    !event.includes(
+      'part_payment_requested',
+    )
+  ) {
+    return {
+      key:
+        'request',
+
+      label:
+        'Request',
+    };
+  }
+
+  if (
+    event.includes(
+      'revision',
+    ) ||
+    event.includes(
+      'change_request',
+    ) ||
+    event.includes(
+      'milestone',
+    ) ||
+    event.includes(
+      'feedback',
+    ) ||
+    event.includes(
+      'deliverable_approved',
+    )
+  ) {
+    return {
+      key:
+        'project',
+
+      label:
+        'Project',
+    };
+  }
+
+  if (
+    event.includes(
       'order',
     ) ||
     event.includes(
@@ -296,6 +342,75 @@ export function getNotificationTitle(
 
     deliverable_ready:
       'New deliverable ready',
+
+    project_price_set:
+      'Project price ready',
+
+    project_additional_cost_added:
+      'Additional project cost added',
+
+    project_additional_cost_waived:
+      'Additional project cost waived',
+
+    quote_accepted:
+      'Quote accepted',
+
+    quote_declined:
+      'Quote declined',
+
+    part_payment_received:
+      'Installment payment confirmed',
+
+    manual_payment_recorded:
+      'Payment recorded',
+
+    payment_adjusted:
+      'Payment record adjusted',
+
+    remaining_payment_requested:
+      'Remaining balance requested',
+
+    milestone_completed:
+      'Milestone completed',
+
+    deliverable_approved:
+      'Deliverable approved',
+
+    revision_requested:
+      'Revision requested',
+
+    revision_updated:
+      'Revision update',
+
+    change_request_sent:
+      'Change request needs your review',
+
+    change_request_accepted:
+      'Change request accepted',
+
+    change_request_declined:
+      'Change request declined',
+
+    change_request_questioned:
+      'Question on change request',
+
+    change_request_implemented:
+      'Change request implemented',
+
+    project_delivered:
+      'Project delivered',
+
+    feedback_submitted:
+      'Feedback received',
+
+    agreement_sent:
+      'Agreement ready for acceptance',
+
+    request_updated:
+      'Service request update',
+
+    meeting_scheduled:
+      'Meeting scheduled',
   };
 
   return (
@@ -470,6 +585,58 @@ export function getNotificationMessage(
   if (
     notification
       ?.event_type ===
+    'milestone_completed'
+  ) {
+    return payload.title
+      ? `The “${payload.title}” milestone is complete.`
+      : 'A project milestone is complete.';
+  }
+
+  if (
+    notification
+      ?.event_type ===
+    'change_request_sent'
+  ) {
+    return 'Management sent a change request for your review. Open the project to accept, decline or ask a question.';
+  }
+
+  if (
+    notification
+      ?.event_type ===
+    'revision_updated'
+  ) {
+    return payload.message
+      ? `Update on your revision request: ${payload.message}`
+      : 'There is an update on your revision request.';
+  }
+
+  if (
+    notification
+      ?.event_type ===
+    'project_delivered'
+  ) {
+    return 'Your project has been delivered. Open it to download the final files.';
+  }
+
+  if (
+    notification
+      ?.event_type ===
+    'project_completed'
+  ) {
+    return 'Your project is complete. Thank you for working with Posho Creative.';
+  }
+
+  if (
+    notification
+      ?.event_type ===
+    'project_price_set'
+  ) {
+    return 'Your project price is ready for payment.';
+  }
+
+  if (
+    notification
+      ?.event_type ===
     'file_uploaded'
   ) {
     return 'A new file has been added to your project library.';
@@ -524,6 +691,19 @@ export function getNotificationDestination(
 
       label:
         'View files',
+    };
+  }
+
+  if (
+    category.key ===
+    'request'
+  ) {
+    return {
+      path:
+        '/dashboard/requests',
+
+      label:
+        'View requests',
     };
   }
 

@@ -44,6 +44,8 @@ export default function AdminProtectedRoute({
     isAdminAccount:
       false,
     hasAccess: false,
+    isTeamMember:
+      false,
   });
 
   useEffect(() => {
@@ -90,6 +92,9 @@ export default function AdminProtectedRoute({
               false,
 
             hasAccess:
+              false,
+
+            isTeamMember:
               false,
           });
         }
@@ -149,7 +154,8 @@ export default function AdminProtectedRoute({
   }
 
   if (
-    !state.isAdminAccount
+    !state.isAdminAccount &&
+    !state.isTeamMember
   ) {
     return (
       <Navigate
@@ -162,7 +168,10 @@ export default function AdminProtectedRoute({
     );
   }
 
-  if (!state.hasAccess) {
+  if (
+    !state.hasAccess &&
+    !state.isTeamMember
+  ) {
     return (
       <Navigate
         to={
