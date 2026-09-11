@@ -85,6 +85,7 @@ import "./styles/portal-mobile-safety.css";
 import "./styles/portal-operations.css";
 import "./styles/portal-components.css";
 import "./styles/portal-premium.css";
+import "./styles/portal-hotfix.css";
 
 
 
