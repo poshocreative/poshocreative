@@ -883,6 +883,243 @@ button.posho-kanban-card:hover {
   }
 }
 
+/* ---------- calendar ---------- */
+
+.posho-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.posho-calendar-weekdays span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  text-align: center;
+}
+
+.posho-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.posho-calendar-day {
+  min-height: 92px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: #fff;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.posho-calendar-day:hover {
+  border-color: var(--line-medium);
+  box-shadow: var(--elev-1);
+}
+
+.posho-calendar-day > strong {
+  font-size: 13px;
+  color: var(--ink-700);
+}
+
+.posho-calendar-day small {
+  font-size: 11px;
+  color: var(--ink-500);
+}
+
+.posho-calendar-blank {
+  background: transparent;
+  border-style: dashed;
+  min-height: 92px;
+}
+
+.posho-calendar-today {
+  border: 1.5px solid var(--brand-500);
+  box-shadow: 0 0 0 3px rgba(108, 43, 217, 0.1);
+}
+
+.posho-calendar-today > strong {
+  color: var(--brand-700);
+}
+
+.posho-calendar-chip {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--brand-800);
+  background: var(--brand-100);
+  border: 1px solid var(--brand-200);
+  border-radius: 8px;
+  padding: 4px 6px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  transition: background 160ms ease;
+  min-height: 32px;
+}
+
+.posho-calendar-chip:hover {
+  background: var(--brand-200);
+}
+
+/* Mobile: agenda instead of a crushed grid */
+@media (max-width: 640px) {
+  .posho-calendar-weekdays {
+    display: none;
+  }
+
+  .posho-calendar-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .posho-calendar-blank {
+    display: none;
+  }
+
+  .posho-calendar-day {
+    min-height: 0;
+  }
+
+  .posho-calendar-day:not(:has(.posho-calendar-chip)) {
+    display: none;
+  }
+}
+
+/* ---------- responsive inline-grid utilities ---------- */
+
+.posho-grid-duo,
+.posho-grid-trio,
+.posho-grid-trio-equal,
+.posho-grid-auto {
+  display: grid;
+  gap: 8px;
+  align-items: end;
+  min-width: 0;
+}
+
+.posho-grid-duo > *,
+.posho-grid-trio > *,
+.posho-grid-trio-equal > *,
+.posho-grid-auto > * {
+  min-width: 0;
+}
+
+.posho-grid-duo {
+  grid-template-columns: 1fr;
+}
+
+.posho-grid-trio,
+.posho-grid-trio-equal,
+.posho-grid-auto {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 480px) {
+  .posho-grid-auto {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+@media (min-width: 560px) {
+  .posho-grid-duo {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .posho-grid-trio {
+    grid-template-columns: 1fr 1fr auto;
+  }
+}
+
+@media (min-width: 760px) {
+  .posho-grid-trio-equal {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+/* ---------- touch devices: prevent iOS focus zoom, keep targets ---------- */
+
+@media (pointer: coarse) {
+  .posho-form-grid input,
+  .posho-form-grid select,
+  .posho-form-grid textarea,
+  .posho-search-row input,
+  .posho-search-row select,
+  .admin-search input,
+  .workspace-profile-grid input,
+  .workspace-profile-grid select,
+  .workspace-profile-grid textarea {
+    font-size: 16px;
+  }
+
+  .posho-tabbar button,
+  .posho-ops-filters button,
+  .posho-kanban-move button {
+    min-height: 44px;
+  }
+}
+
+/* ---------- action rows always wrap, never clip ---------- */
+
+.finance-review-actions,
+.posho-modal-actions,
+.posho-action-buttons {
+  flex-wrap: wrap;
+}
+
+.finance-review-actions > *,
+.posho-modal-actions > *,
+.posho-action-buttons > * {
+  min-width: 0;
+}
+
+/* Long headings wrap safely at every width */
+.admin-view-heading h1,
+.posho-page-heading h1,
+.workspace-view-heading h2,
+.posho-modal-heading h3,
+.project-detail-hero h2 {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-wrap: balance;
+}
+
+/* ---------- tiny-screen money safety (320–400px) ---------- */
+
+@media (max-width: 400px) {
+  .admin-dashboard-stat > strong,
+  .posho-metric-card strong,
+  .posho-finance-card strong,
+  .workspace-stat-card-v3 strong,
+  .payment-cost-total strong {
+    font-size: 1.2rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .admin-dashboard-stat,
+  .workspace-stat-card-v3 {
+    min-width: 0;
+  }
+
+  .posho-finance-due strong {
+    font-size: 1.45rem;
+  }
+}
+
 /* ---------- readability floor fixes ---------- */
 
 .client-pro-brand > span,

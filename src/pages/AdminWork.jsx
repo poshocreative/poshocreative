@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import BrandLoader from '../components/BrandLoader';
+import WorkCalendar from '../components/admin/WorkCalendar';
 import PageHeader from '../components/ui/PageHeader';
 import MetricCard from '../components/ui/MetricCard';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -1402,15 +1403,7 @@ export default function AdminWork() {
           />
         </label>
 
-        <div
-          style={{
-            display:
-              'grid',
-            gridTemplateColumns:
-              '1fr 1fr 1fr',
-            gap: 8,
-          }}
-        >
+        <div className="posho-grid-trio-equal">
           <label>
             <span className="posho-section-label">
               Status
@@ -1578,6 +1571,10 @@ export default function AdminWork() {
           {
             key: 'timeline',
             label: 'Timeline',
+          },
+          {
+            key: 'calendar',
+            label: 'Calendar',
           },
         ]}
         active={
@@ -1920,7 +1917,8 @@ export default function AdminWork() {
             ),
           )}
         </div>
-      ) : (
+      ) : view ===
+        'timeline' ? (
         <div className="posho-timeline">
           {[...filtered]
             .filter(
@@ -1996,6 +1994,15 @@ export default function AdminWork() {
               ),
             )}
         </div>
+      ) : (
+        <WorkCalendar
+          tasks={
+            filtered
+          }
+          onOpen={
+            setDetail
+          }
+        />
       )}
 
       {detail && (

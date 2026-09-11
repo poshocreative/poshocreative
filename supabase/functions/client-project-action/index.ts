@@ -4,6 +4,7 @@ import {
 
 import {
   makeReference,
+  publicMessage,
   runAutomations,
 } from '../_shared/ops.ts';
 
@@ -2294,14 +2295,20 @@ export default {
           error,
         );
 
+        console.error(
+          'client-project-action:',
+          error,
+        );
+
         return json(
           {
             success: false,
 
             message:
-              error instanceof Error
-                ? error.message
-                : 'This action could not be completed.',
+              publicMessage(
+                error,
+                'This action could not be completed.',
+              ),
           },
           500,
         );

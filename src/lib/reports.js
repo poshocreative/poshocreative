@@ -219,7 +219,14 @@ export function agingBucket(
     return '31–60 days';
   }
 
-  return '60+ days';
+  if (
+    daysOverdue <=
+    90
+  ) {
+    return '61–90 days';
+  }
+
+  return '90+ days';
 }
 
 export function startOfDay(

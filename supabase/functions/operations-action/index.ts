@@ -8,6 +8,7 @@ import {
   logAdminAction,
   makeReference,
   notifyCustomer,
+  publicMessage,
   requireCapability,
   runAutomations,
 } from '../_shared/ops.ts';
@@ -3494,10 +3495,10 @@ export default {
           {
             success: false,
             message:
-              error instanceof
-              Error
-                ? error.message
-                : 'The operation could not be completed.',
+              publicMessage(
+                error,
+                'The operation could not be completed.',
+              ),
           },
           500,
         );

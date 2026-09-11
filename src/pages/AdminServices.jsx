@@ -1155,15 +1155,7 @@ export default function AdminServices() {
                       marginTop: 12,
                     }}
                   >
-                    <div
-                      style={{
-                        display:
-                          'grid',
-                        gridTemplateColumns:
-                          '1fr 1fr',
-                        gap: 8,
-                      }}
-                    >
+                    <div className="posho-grid-duo">
                       <label>
                         <span>
                           Label

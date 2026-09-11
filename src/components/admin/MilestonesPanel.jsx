@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CheckCircle2, Pencil, PlusCircle, Trash2, X } from 'lucide-react';
 
@@ -7,49 +7,9 @@ import { EmptyState, ErrorBlock } from '../ui/StateBlocks';
 import StatusBadge from '../ui/StatusBadge';
 import { useEscapeClose } from '../ui/useEscapeClose';
 import { deleteMilestone, saveMilestone } from '../../lib/projectWork';
+import { supabase } from '../../lib/supabase';
 
 const MILESTONE_STATUSES = ['pending', 'active', 'blocked', 'done', 'cancelled'];
-
-const MILESTONE_TEMPLATES = {
-  'website-development': [
-    { title: 'Discovery & requirements', description: 'Goals, sitemap and content requirements confirmed.' },
-    { title: 'Design', description: 'Visual design prepared and reviewed.' },
-    { title: 'Development', description: 'Responsive frontend implementation.' },
-    { title: 'Testing & QA', description: 'Devices, browsers and forms verified.' },
-    { title: 'Client review', description: 'Client reviews the staged site.' },
-    { title: 'Launch & handover', description: 'Deployment and handover notes.' },
-  ],
-  'graphic-design': [
-    { title: 'Brief & references', description: 'Direction and references gathered.' },
-    { title: 'Concepts', description: 'Initial concepts prepared.' },
-    { title: 'Refinement', description: 'Chosen concept refined.' },
-    { title: 'Final delivery', description: 'Print and digital files delivered.' },
-  ],
-  'social-media-management': [
-    { title: 'Content planning', description: 'Monthly themes and calendar.' },
-    { title: 'Creative production', description: 'Designs and captions produced.' },
-    { title: 'Review & scheduling', description: 'Client review and scheduling.' },
-    { title: 'Reporting', description: 'Performance summary shared.' },
-  ],
-  advertising: [
-    { title: 'Strategy & targeting', description: 'Audience, budget and goals.' },
-    { title: 'Creative production', description: 'Ad creatives prepared.' },
-    { title: 'Launch', description: 'Campaigns launched.' },
-    { title: 'Optimization & reporting', description: 'Tuning and results shared.' },
-  ],
-  'business-services': [
-    { title: 'Requirements', description: 'Documents and details gathered.' },
-    { title: 'Draft preparation', description: 'First draft prepared.' },
-    { title: 'Review', description: 'Client review round.' },
-    { title: 'Finalization', description: 'Final documents delivered.' },
-  ],
-  'creative-solutions': [
-    { title: 'Discovery', description: 'Goals and scope confirmed.' },
-    { title: 'Production', description: 'Creative work in progress.' },
-    { title: 'Review', description: 'Client review round.' },
-    { title: 'Final delivery', description: 'Finished work delivered.' },
-  ],
-};
 
 const emptyForm = {
   milestoneId: '',
@@ -74,7 +34,46 @@ export default function MilestonesPanel({ order, work, onChanged }) {
 
   const milestones = work?.milestones || [];
   const loadError = work?.loadErrors?.milestones;
-  const template = MILESTONE_TEMPLATES[order?.service_slug] || MILESTONE_TEMPLATES['creative-solutions'];
+  const [template, setTemplate] = useState([]);
+  const [templateMissing, setTemplateMissing] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadTemplate() {
+      if (!order?.service_slug) {
+        setTemplate([]);
+        setTemplateMissing(true);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('service_milestone_templates')
+          .select('title,description,sequence,default_duration_days')
+          .eq('service_slug', order.service_slug)
+          .order('sequence', { ascending: true });
+
+        if (error) throw error;
+
+        if (!cancelled) {
+          setTemplate(data || []);
+          setTemplateMissing((data || []).length === 0);
+        }
+      } catch {
+        if (!cancelled) {
+          setTemplate([]);
+          setTemplateMissing(true);
+        }
+      }
+    }
+
+    loadTemplate();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [order?.service_slug]);
 
   const set = (field, value) => setForm((current) => ({ ...current, [field]: value }));
 
@@ -146,12 +145,21 @@ export default function MilestonesPanel({ order, work, onChanged }) {
   };
 
   const applyTemplate = async () => {
+    if (template.length === 0) return;
+
     try {
       setTemplateBusy(true);
       let sequence = milestones.length;
+      const today = new Date();
 
       for (const item of template) {
         sequence += 1;
+
+        const expected = new Date(today);
+        expected.setDate(
+          expected.getDate() + Number(item.default_duration_days || 0),
+        );
+
         await saveMilestone({
           orderId: order.id,
           milestone: {
@@ -159,7 +167,7 @@ export default function MilestonesPanel({ order, work, onChanged }) {
             description: item.description,
             sequence,
             status: 'pending',
-            expectedDate: null,
+            expectedDate: expected.toISOString().slice(0, 10),
             clientVisible: true,
           },
         });
@@ -210,10 +218,15 @@ export default function MilestonesPanel({ order, work, onChanged }) {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {milestones.length === 0 && (
+          {milestones.length === 0 && template.length > 0 && (
             <button type="button" className="button button-secondary" onClick={applyTemplate} disabled={templateBusy} aria-busy={templateBusy}>
               {templateBusy ? 'Applying…' : 'Apply service template'}
             </button>
+          )}
+          {milestones.length === 0 && templateMissing && (
+            <small className="admin-card-description">
+              No milestone template is configured for this service yet — define one in Services.
+            </small>
           )}
           <button type="button" className="button button-secondary" onClick={openNew}>
             <PlusCircle size={17} /> Add milestone

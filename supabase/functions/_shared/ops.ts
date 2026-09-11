@@ -39,6 +39,43 @@ export function json(
   );
 }
 
+// Never expose raw database/driver errors to clients.
+// Technical detail is logged server-side; callers receive
+// professional, actionable copy instead.
+export function publicMessage(
+  error: unknown,
+  fallback: string,
+): string {
+  if (
+    error instanceof
+    Error
+  ) {
+    const text =
+      error.message ||
+      '';
+
+    if (
+      /postgrest|duplicate key|violates|constraint|relation .* does not exist|column .* does not exist|permission denied|row-level|JWT|token|syntax error|database|supabase/i.test(
+        text,
+      )
+    ) {
+      console.error(
+        'Sanitized technical error:',
+        text,
+      );
+
+      return fallback;
+    }
+
+    return (
+      text ||
+      fallback
+    );
+  }
+
+  return fallback;
+}
+
 export function makeReference(
   prefix: string,
 ) {

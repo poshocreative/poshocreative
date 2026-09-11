@@ -531,15 +531,7 @@ export default function AdminSettings() {
                         : input.value,
                     );
                   }}
-                  style={{
-                    display:
-                      'grid',
-                    gridTemplateColumns:
-                      '1fr auto',
-                    gap: 8,
-                    alignItems:
-                      'end',
-                  }}
+                  className="posho-grid-auto"
                 >
                   <label>
                     <span>

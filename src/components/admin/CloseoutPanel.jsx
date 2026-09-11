@@ -121,6 +121,7 @@ export default function CloseoutPanel({ order, work, finance, onChanged }) {
       {completed && (
         <p className="admin-card-description" style={{ marginTop: 8 }}>
           This project is complete. The client sees a polished completed state and can leave feedback.
+          For ongoing work, propose a retainer from the Clients page instead of reopening this project.
         </p>
       )}
 

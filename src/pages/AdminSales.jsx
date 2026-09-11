@@ -3254,17 +3254,7 @@ export default function AdminSales() {
                     />
                   </label>
 
-                  <div
-                    style={{
-                      display:
-                        'grid',
-                      gridTemplateColumns:
-                        '1fr 1fr auto',
-                      gap: 8,
-                      alignItems:
-                        'end',
-                    }}
-                  >
+                  <div className="posho-grid-trio">
                     <label>
                       <span>
                         Qty

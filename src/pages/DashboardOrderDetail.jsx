@@ -233,6 +233,33 @@ export default function DashboardOrderDetail() {
     });
   }
 
+  const earlyStage = ['new', 'under_review', 'quote_sent', 'awaiting_payment'].includes(order.status)
+    && !['completed', 'cancelled'].includes(order.status);
+
+  const nextSteps = [];
+
+  if (earlyStage) {
+    if (pending) {
+      nextSteps.push('We review your request');
+    }
+
+    if (approved && !finance?.hasPrice) {
+      nextSteps.push('We prepare your quote');
+    }
+
+    if (references.length === 0) {
+      nextSteps.push('You upload reference files');
+    }
+
+    if (approved && finance?.hasPrice && outstanding > 0 && paid === 0) {
+      nextSteps.push('You complete the first payment');
+    }
+
+    if (approved && paid > 0) {
+      nextSteps.push('We begin your project');
+    }
+  }
+
   return (
     <div className="workspace-view page-reveal">
       <Link to="/dashboard/orders" className="workspace-back-link">
@@ -263,6 +290,27 @@ export default function DashboardOrderDetail() {
             <div className="posho-progress-fill" style={{ width: `${progress}%`, background: '#6C2BD9' }} />
           </div>
           {order.progress_message && <p style={{ marginTop: 10 }}>{order.progress_message}</p>}
+        </section>
+      )}
+
+      {earlyStage && nextSteps.length > 0 && (
+        <section className="workspace-panel" aria-label="Getting started">
+          <div className="workspace-panel-heading">
+            <div>
+              <span>GETTING STARTED</span>
+              <h3>What happens next</h3>
+            </div>
+          </div>
+          <ol className="posho-timeline" style={{ listStyle: 'none', padding: 0 }}>
+            {nextSteps.map((step) => (
+              <li key={step} className="posho-timeline-item">
+                <span className="posho-timeline-dot" aria-hidden="true">•</span>
+                <div className="posho-timeline-body">
+                  <strong>{step}</strong>
+                </div>
+              </li>
+            ))}
+          </ol>
         </section>
       )}
 

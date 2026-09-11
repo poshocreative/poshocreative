@@ -7,6 +7,7 @@ import {
   json,
   logAdminAction,
   makeReference,
+  publicMessage,
   requireCapability,
   runAutomations,
 } from '../_shared/ops.ts';
@@ -3308,10 +3309,10 @@ export default {
           {
             success: false,
             message:
-              error instanceof
-              Error
-                ? error.message
-                : 'The sales action could not be completed.',
+              publicMessage(
+                error,
+                'The sales action could not be completed.',
+              ),
           },
           500,
         );

@@ -136,7 +136,7 @@ export default function QuoteItemsEditor({ order, onChanged }) {
                 Description
                 <input value={item.description} maxLength={2000} onChange={(e) => set(index, 'description', e.target.value)} placeholder="5 pages, responsive, contact form" />
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, alignItems: 'end' }}>
+              <div className="posho-grid-trio">
                 <label>
                   Qty
                   <input type="number" min="0.01" step="0.01" value={item.quantity} onChange={(e) => set(index, 'quantity', e.target.value)} />

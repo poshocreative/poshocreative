@@ -19,6 +19,10 @@ import {
 } from '../context/AuthContext';
 
 import {
+  usePermissions,
+} from '../lib/permissions';
+
+import {
   globalSearch,
 } from '../lib/search';
 
@@ -52,66 +56,98 @@ const COMMANDS = [
     label: 'Sales pipeline',
     keywords: 'sales leads pipeline crm',
     suffix: 'sales',
+    capability: 'sales.manage',
   },
   {
     group: 'Go to',
     label: 'Finance',
     keywords: 'finance money revenue cash',
     suffix: 'finance',
+    capability: 'finance.manage',
   },
   {
     group: 'Go to',
     label: 'Reports',
     keywords: 'reports analytics export',
     suffix: 'reports',
+    capability: 'reports.view',
   },
   {
     group: 'Go to',
     label: 'Service requests',
     keywords: 'requests queue support maintenance',
     suffix: 'requests',
+    capability: 'requests.manage',
   },
   {
     group: 'Go to',
     label: 'Services hub',
     keywords: 'services packages pricing catalog',
     suffix: 'services',
+    capability: 'services.manage',
   },
   {
     group: 'Go to',
     label: 'Team',
     keywords: 'team members capacity planner',
     suffix: 'team',
+    capability: 'team.manage',
   },
   {
     group: 'Go to',
     label: 'Automations',
     keywords: 'automations rules workflow',
     suffix: 'automations',
+    capability: 'automations.manage',
   },
   {
     group: 'Go to',
     label: 'Activity',
     keywords: 'activity feed audit log',
     suffix: 'activity',
+    capability: 'reports.view',
   },
   {
     group: 'Go to',
     label: 'Settings',
     keywords: 'settings configuration flags sop',
     suffix: 'settings',
+    capability: 'settings.manage',
   },
   {
     group: 'Go to',
     label: 'Payments',
     keywords: 'payments transactions flutterwave',
     suffix: 'payments',
+    capability: 'finance.manage',
   },
   {
     group: 'Go to',
     label: 'Quotes',
     keywords: 'quotes quotations',
     suffix: 'quotes',
+    capability: 'finance.manage',
+  },
+  {
+    group: 'Create',
+    label: 'New lead',
+    keywords: 'create new lead inquiry',
+    suffix: 'sales',
+    capability: 'sales.manage',
+  },
+  {
+    group: 'Create',
+    label: 'New service request',
+    keywords: 'create new request support maintenance',
+    suffix: 'requests',
+    capability: 'requests.manage',
+  },
+  {
+    group: 'Create',
+    label: 'New proposal',
+    keywords: 'create proposal quote commercial',
+    suffix: 'sales',
+    capability: 'sales.manage',
   },
 ];
 
@@ -123,6 +159,11 @@ export default function CommandPalette() {
     adminPath,
   } =
     useAuth();
+
+  const {
+    can,
+  } =
+    usePermissions();
 
   const [
     open,
@@ -316,12 +357,20 @@ export default function CommandPalette() {
           (
             command,
           ) =>
-            !needle ||
-            `${command.label} ${command.keywords}`
-              .toLowerCase()
-              .includes(
-                needle,
-              ),
+            (
+              !command.capability ||
+              can(
+                command.capability,
+              )
+            ) &&
+            (
+              !needle ||
+              `${command.label} ${command.keywords}`
+                .toLowerCase()
+                .includes(
+                  needle,
+                )
+            ),
         ).map(
         (
           command,
@@ -466,6 +515,7 @@ export default function CommandPalette() {
       query,
       results,
       go,
+      can,
     ]);
 
   useEffect(() => {

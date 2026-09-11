@@ -1534,6 +1534,40 @@ export default {
             );
           }
 
+          if (
+            [
+              'completed',
+              'cancelled',
+            ].includes(
+              order.status,
+            )
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'Closed projects are terminal. Restore or duplicate the record instead of reopening it.',
+              },
+              409,
+            );
+          }
+
+          if (
+            status ===
+            'completed'
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  'Complete projects through the closeout workflow so delivery and finances are verified.',
+              },
+              409,
+            );
+          }
+
           const note =
             clean(
               body?.note,

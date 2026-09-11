@@ -28,6 +28,7 @@ import TasksPanel from '../components/admin/TasksPanel';
 import BudgetPanel from '../components/admin/BudgetPanel';
 import PostmortemPanel from '../components/admin/PostmortemPanel';
 import ProjectHealth from '../components/admin/ProjectHealth';
+import OnboardingPanel from '../components/admin/OnboardingPanel';
 import AnnotationsPanel from '../components/admin/AnnotationsPanel';
 import {
   FilesPanel,
@@ -394,6 +395,8 @@ export default function AdminOrderDetail() {
       {tab === 'overview' && (
         <div style={{ display: 'grid', gap: 14, marginTop: 6 }}>
           <ProjectHealth order={order} work={work} />
+
+          <OnboardingPanel order={order} finance={finance} onChanged={load} />
 
           <section className="admin-control-card">
             <span className="posho-section-label">Client brief</span>

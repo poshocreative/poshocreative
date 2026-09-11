@@ -33,6 +33,10 @@ import {
 } from '../lib/sales';
 
 import {
+  getTeam,
+} from '../lib/operations';
+
+import {
   getAdminOrders,
 } from '../lib/admin';
 
@@ -129,6 +133,7 @@ export default function AdminDashboard() {
             partCount,
             orders,
             meetings,
+            team,
           ] =
             await Promise.all([
               getAdminOverview(),
@@ -138,6 +143,12 @@ export default function AdminDashboard() {
                 upcomingOnly: true,
               }).catch(
                 () => [],
+              ),
+              getTeam().catch(
+                () => ({
+                  members: [],
+                  allocations: [],
+                }),
               ),
             ]);
 
@@ -244,6 +255,54 @@ export default function AdminDashboard() {
             0,
           );
 
+          const nowDate = new Date();
+          const monday = new Date(
+            Date.UTC(
+              nowDate.getUTCFullYear(),
+              nowDate.getUTCMonth(),
+              nowDate.getUTCDate(),
+            ),
+          );
+          monday.setUTCDate(
+            monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7),
+          );
+          const weekStart = monday
+            .toISOString()
+            .slice(0, 10);
+
+          const utilizations = (team?.members || [])
+            .filter((member) => member.status === 'active')
+            .map((member) => {
+              const capacity = Number(
+                member.weekly_capacity_minutes || 0,
+              );
+
+              if (capacity <= 0) return null;
+
+              const allocated = (team?.allocations || [])
+                .filter(
+                  (allocation) =>
+                    allocation.member_id === member.id &&
+                    allocation.week_start === weekStart,
+                )
+                .reduce(
+                  (sum, allocation) =>
+                    sum + Number(allocation.minutes || 0),
+                  0,
+                );
+
+              return Math.round((allocated / capacity) * 100);
+            })
+            .filter((value) => value !== null);
+
+          const avgUtilization =
+            utilizations.length > 0
+              ? Math.round(
+                  utilizations.reduce((a, b) => a + b, 0) /
+                    utilizations.length,
+                )
+              : null;
+
           setBrief(
             buildExecutiveBrief({
               attentionCount:
@@ -279,7 +338,7 @@ export default function AdminDashboard() {
                 deadlineRisk.length,
               pendingApprovals:
                 partCount,
-              avgUtilization: null,
+              avgUtilization,
             }),
           );
 
@@ -660,6 +719,32 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               )}
+
+              {brief.avgUtilization !==
+                null &&
+                brief.avgUtilization !==
+                  undefined && (
+                  <div className="admin-dashboard-list-row">
+                    <div>
+                      <small>
+                        TEAM UTILIZATION
+                        THIS WEEK
+                      </small>
+
+                      <strong>
+                        {
+                          brief.avgUtilization
+                        }
+                        %
+                      </strong>
+
+                      <span>
+                        Average across
+                        active members
+                      </span>
+                    </div>
+                  </div>
+                )}
             </div>
           )}
         </section>
