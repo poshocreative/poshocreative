@@ -656,3 +656,97 @@
   word-break: break-word;
   white-space: normal;
 }
+
+/* ==========================================================
+   ADMIN MOBILE — topbar / page heading / inbox overflow fixes
+   ========================================================== */
+
+@media (max-width: 900px) {
+  /* Topbar: prevent title and actions from clipping */
+  .admin-pro-topbar {
+    overflow: hidden;
+    flex-wrap: nowrap;
+  }
+
+  .admin-pro-topbar-title {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .admin-pro-topbar-title > strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .admin-pro-topbar-title > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Topbar right-side actions: prevent search + project ref from overflowing */
+  .admin-pro-topbar > :last-child,
+  .admin-pro-topbar > a,
+  .admin-pro-topbar > button {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  /* Page heading description: allow full wrapping */
+  .posho-page-description,
+  .admin-view-heading p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  /* OpsInbox heading: stack label + select on narrow screens */
+  .finance-request-heading {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .finance-request-heading > div {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .finance-request-heading select {
+    flex: 0 0 auto;
+    min-width: 120px;
+    max-width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  /* Timeline items: prevent overflow */
+  .posho-timeline-body {
+    min-width: 0;
+  }
+
+  .posho-timeline-body strong {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Ledger items: no horizontal overflow */
+  .posho-ledger-item {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .posho-long-value {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    min-width: 0;
+  }
+}
