@@ -1,0 +1,914 @@
+/* ==========================================================
+   POSHO PREMIUM — visual system upgrade layer
+   Loads LAST. Refines every portal surface while keeping
+   #6C2BD9 as the unmistakable hero color.
+   Principles: depth over decoration, rhythm over density,
+   motion with meaning, readable at every size.
+   ========================================================== */
+
+:root {
+  /* Expanded brand scale (600 is the hero) */
+  --brand-50: #faf7ff;
+  --brand-100: #f1e8ff;
+  --brand-200: #e2d1fd;
+  --brand-300: #c9abfa;
+  --brand-400: #a97ef5;
+  --brand-500: #8b5bea;
+  --brand-600: #6c2bd9;
+  --brand-700: #5c22bd;
+  --brand-800: #48198f;
+  --brand-900: #3a1472;
+
+  /* Refined neutrals */
+  --ink-900: #17122b;
+  --ink-700: #3d3654;
+  --ink-500: #5f5878;
+  --ink-400: #7a7390;
+  --line-soft: #ece7f5;
+  --line-medium: #ddd3ee;
+
+  /* Elevation (soft, purple-tinted) */
+  --elev-1: 0 1px 2px rgba(23, 12, 60, 0.05), 0 4px 14px rgba(23, 12, 60, 0.05);
+  --elev-2: 0 2px 6px rgba(23, 12, 60, 0.06), 0 14px 34px rgba(23, 12, 60, 0.09);
+  --elev-3: 0 4px 12px rgba(23, 12, 60, 0.1), 0 24px 56px rgba(76, 29, 149, 0.16);
+  --elev-brand: 0 8px 22px rgba(108, 43, 217, 0.28), 0 2px 6px rgba(108, 43, 217, 0.2);
+
+  --ring-brand: 0 0 0 4px rgba(108, 43, 217, 0.16);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+/* ---------- base refinements ---------- */
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'cv05', 'ss01';
+}
+
+::selection {
+  background: var(--brand-600);
+}
+
+/* Branded, subtle scrollbars on desktop shells */
+@media (min-width: 900px) {
+  .admin-pro-sidebar::-webkit-scrollbar,
+  .client-pro-sidebar::-webkit-scrollbar,
+  .admin-pro-content::-webkit-scrollbar,
+  .client-pro-content::-webkit-scrollbar,
+  .posho-modal::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .admin-pro-sidebar::-webkit-scrollbar-thumb,
+  .client-pro-sidebar::-webkit-scrollbar-thumb,
+  .admin-pro-content::-webkit-scrollbar-thumb,
+  .client-pro-content::-webkit-scrollbar-thumb,
+  .posho-modal::-webkit-scrollbar-thumb {
+    background: rgba(108, 43, 217, 0.22);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  .admin-pro-sidebar::-webkit-scrollbar-thumb:hover,
+  .client-pro-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(108, 43, 217, 0.4);
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+}
+
+/* Tabular numerals for every money figure */
+.posho-finance-card strong,
+.posho-metric-card strong,
+.payment-cost-row strong,
+.payment-cost-total strong,
+.project-summary-list strong,
+.admin-order-directory-finance strong,
+.finance-balance-strip strong,
+.finance-requested-amount,
+.finance-approved-amount {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- buttons: richer, calmer ---------- */
+
+.button {
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  transition:
+    transform 160ms var(--ease-out),
+    box-shadow 200ms ease,
+    background 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+
+.button:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-primary {
+  background: linear-gradient(180deg, #7a3fe3 0%, var(--brand-600) 55%, #5f24c4 100%);
+  box-shadow: var(--elev-brand), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(58, 20, 114, 0.35);
+}
+
+.button-primary:hover {
+  background: linear-gradient(180deg, #8450e8 0%, #7030dd 55%, #6528cc 100%);
+  box-shadow: 0 12px 30px rgba(108, 43, 217, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.button-primary:disabled {
+  background: var(--brand-300);
+  border-color: transparent;
+  box-shadow: none;
+  color: #fff;
+  opacity: 0.85;
+}
+
+.button-secondary {
+  border: 1px solid var(--line-medium);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 2px rgba(23, 12, 60, 0.05);
+}
+
+.button-secondary:hover {
+  border-color: var(--brand-primary-border);
+  background: var(--brand-50);
+  box-shadow: var(--elev-1);
+}
+
+.posho-button-danger {
+  background: linear-gradient(180deg, #d33 0%, #b91c1c 100%);
+  box-shadow: 0 8px 20px rgba(185, 28, 28, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(127, 29, 29, 0.4);
+}
+
+.posho-button-danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(185, 28, 28, 0.36);
+}
+
+.finance-decline-button {
+  transition: transform 160ms var(--ease-out), box-shadow 200ms ease, background 200ms ease;
+}
+
+.finance-decline-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+/* ---------- cards: unified premium surface ---------- */
+
+.admin-control-card,
+.workspace-panel,
+.posho-ledger-item,
+.posho-finance-card,
+.posho-metric-card,
+.admin-data-card,
+.posho-empty-state,
+.posho-modal,
+.project-detail-hero {
+  box-shadow: var(--elev-1);
+}
+
+.admin-control-card,
+.workspace-panel {
+  border-color: var(--line-soft);
+  transition: box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.admin-control-card:hover,
+.workspace-panel:hover {
+  border-color: var(--line-medium);
+  box-shadow: var(--elev-2);
+}
+
+.admin-control-card h3,
+.workspace-panel h3,
+.posho-modal-heading h3 {
+  letter-spacing: -0.015em;
+}
+
+/* Section kickers: refined, readable */
+.posho-section-label,
+.workspace-panel-heading > div > span,
+.workspace-kicker,
+.admin-control-card > span:first-child {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  color: var(--brand-700);
+}
+
+/* Card descriptions breathe */
+.admin-card-description,
+.posho-modal-description {
+  color: var(--ink-500);
+  line-height: 1.6;
+}
+
+/* ---------- navigation shells ---------- */
+
+.admin-pro-sidebar,
+.client-pro-sidebar {
+  background:
+    radial-gradient(circle at 12% -4%, rgba(139, 91, 234, 0.32), transparent 30%),
+    radial-gradient(circle at 110% 108%, rgba(108, 43, 217, 0.2), transparent 42%),
+    linear-gradient(180deg, #16121f 0%, #100d18 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.admin-pro-navigation a,
+.client-pro-navigation a {
+  border: 1px solid transparent;
+  transition: background 180ms ease, border-color 180ms ease, transform 160ms var(--ease-out), color 180ms ease;
+}
+
+.admin-pro-navigation a:hover,
+.client-pro-navigation a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateX(2px);
+}
+
+.admin-pro-navigation a.active,
+.client-pro-navigation a.active,
+.admin-pro-mobile-tabs a.active,
+.client-pro-mobile-tabs a.active {
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-700));
+  box-shadow: var(--elev-brand), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.admin-pro-navigation a.active strong,
+.client-pro-navigation a.active strong {
+  color: #fff;
+}
+
+/* More-section links stay quiet */
+.admin-pro-navigation-more a {
+  opacity: 0.92;
+}
+
+.admin-pro-navigation-more a.active {
+  background: rgba(108, 43, 217, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(139, 91, 234, 0.4);
+}
+
+/* Topbar: frosted, crisp */
+.admin-pro-topbar,
+.client-pro-topbar {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.admin-pro-topbar-title strong,
+.client-pro-topbar-title strong {
+  letter-spacing: -0.01em;
+}
+
+/* Command trigger in topbar */
+.admin-pro-command-trigger {
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.admin-pro-command-trigger:hover {
+  border-color: var(--brand-primary-border);
+  box-shadow: var(--ring-brand);
+}
+
+/* Mobile tabs polish */
+.admin-pro-mobile-tabs,
+.client-pro-mobile-tabs {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line-soft);
+  box-shadow: 0 -8px 28px rgba(23, 12, 60, 0.08);
+}
+
+.admin-pro-mobile-tabs a,
+.client-pro-mobile-tabs a,
+.admin-pro-mobile-tabs button,
+.client-pro-mobile-tabs button {
+  transition: color 180ms ease, transform 160ms var(--ease-out);
+}
+
+.admin-pro-mobile-tabs a:active,
+.client-pro-mobile-tabs a:active {
+  transform: scale(0.94);
+}
+
+/* Brand + account polish */
+.client-pro-brand > span,
+.admin-pro-brand > span {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.client-pro-avatar {
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 12px rgba(108, 43, 217, 0.35);
+}
+
+.client-pro-account {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.client-pro-security,
+.admin-pro-security {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+}
+
+/* ---------- filter chips + tabs ---------- */
+
+.posho-ops-filters button,
+.posho-tabbar button,
+.admin-filter-tabs button {
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 160ms var(--ease-out);
+}
+
+.posho-ops-filters button:hover,
+.posho-tabbar button:hover {
+  border-color: var(--brand-primary-border);
+  transform: translateY(-1px);
+}
+
+.posho-ops-filters button.active,
+.posho-tabbar button.active,
+.admin-filter-tabs button.active {
+  background: var(--ink-900);
+  box-shadow: var(--elev-1);
+}
+
+/* ---------- status pills: crisp semantic system ---------- */
+
+.posho-status-badge,
+.admin-decision-pill,
+.workspace-status,
+.posho-source-tag,
+.finance-status-pill {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+
+.posho-status-green {
+  background: linear-gradient(180deg, #eef9f1, #e2f4e8);
+  border-color: #bfe6cb;
+}
+
+.posho-status-amber {
+  background: linear-gradient(180deg, #fdf6e7, #fbeed3);
+  border-color: #f0d9a8;
+}
+
+.posho-status-red {
+  background: linear-gradient(180deg, #fdeeee, #fbdcdc);
+  border-color: #f3b8b8;
+}
+
+.posho-status-purple {
+  background: linear-gradient(180deg, var(--brand-100), var(--brand-200));
+  border-color: var(--brand-300);
+}
+
+.posho-status-gray {
+  background: #f1eff4;
+  border-color: #ddd8e6;
+  color: var(--ink-500);
+}
+
+/* ---------- finance hierarchy ---------- */
+
+.posho-finance-card {
+  transition: box-shadow 220ms ease, transform 200ms var(--ease-out), border-color 220ms ease;
+}
+
+.posho-finance-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elev-2);
+}
+
+.posho-finance-card strong {
+  letter-spacing: -0.02em;
+}
+
+.posho-finance-due {
+  background: linear-gradient(180deg, #f7f1ff 0%, #ffffff 78%);
+  border: 1.5px solid var(--brand-400);
+  box-shadow: var(--elev-2), 0 0 0 4px rgba(108, 43, 217, 0.07);
+}
+
+.posho-finance-due strong {
+  background: linear-gradient(120deg, var(--brand-700), var(--brand-500));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.finance-balance-strip {
+  background: linear-gradient(135deg, var(--brand-50), #fff);
+  border: 1px solid var(--brand-200);
+}
+
+.finance-review-requested-amount,
+.finance-approved-amount {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- data rows: calm, scannable, alive ---------- */
+
+.admin-data-row,
+.posho-ledger-item,
+.posho-result-card,
+.project-file-row,
+.admin-order-directory-card,
+.workspace-project-row-v3 {
+  transition: border-color 200ms ease, box-shadow 220ms ease, transform 200ms var(--ease-out), background 200ms ease;
+}
+
+a.admin-data-row:hover,
+button.admin-data-row:hover,
+.admin-order-directory-card:hover,
+.posho-result-card:hover {
+  border-color: var(--brand-300);
+  box-shadow: var(--elev-2);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.admin-order-directory-card {
+  position: relative;
+}
+
+.admin-order-directory-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--brand-400), var(--brand-700));
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.admin-order-directory-card:hover::before {
+  opacity: 1;
+}
+
+/* ---------- forms: premium inputs ---------- */
+
+.posho-form-grid input,
+.posho-form-grid select,
+.posho-form-grid textarea,
+.posho-search-row input,
+.posho-search-row select,
+.admin-search input,
+.posho-topbar-search input,
+.workspace-profile-grid input,
+.workspace-profile-grid select,
+.workspace-profile-grid textarea {
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  background: #fff;
+}
+
+.posho-form-grid input:hover,
+.posho-form-grid select:hover,
+.posho-form-grid textarea:hover,
+.posho-search-row input:hover,
+.posho-search-row select:hover {
+  border-color: var(--line-medium);
+}
+
+.posho-form-grid input:focus,
+.posho-form-grid select:focus,
+.posho-form-grid textarea:focus,
+.posho-search-row input:focus,
+.posho-search-row select:focus,
+.admin-search input:focus,
+.posho-topbar-search input:focus {
+  border-color: var(--brand-500);
+  box-shadow: var(--ring-brand);
+  outline: none;
+}
+
+.posho-form-grid label > span,
+.posho-form-grid label > strong {
+  color: var(--ink-700);
+}
+
+/* Checkboxes + radios: on-brand */
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--brand-600);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Range sliders (progress publisher) */
+input[type='range'] {
+  accent-color: var(--brand-600);
+  cursor: pointer;
+}
+
+/* File inputs */
+input[type='file'] {
+  font-size: 13px;
+}
+
+input[type='file']::file-selector-button {
+  border: 1px solid var(--line-medium);
+  background: var(--brand-50);
+  color: var(--brand-800);
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 10px;
+  padding: 9px 14px;
+  margin-right: 12px;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+input[type='file']::file-selector-button:hover {
+  background: var(--brand-100);
+  border-color: var(--brand-300);
+}
+
+/* ---------- progress bars with life ---------- */
+
+.posho-progress-track,
+.posho-progress-track-light,
+.payment-progress-track {
+  box-shadow: inset 0 1px 3px rgba(23, 12, 60, 0.12);
+}
+
+.posho-progress-fill,
+.posho-progress-fill-brand {
+  background: linear-gradient(90deg, var(--brand-700), var(--brand-500), var(--brand-400));
+  box-shadow: 0 0 12px rgba(108, 43, 217, 0.45);
+  transition: width 600ms var(--ease-out);
+}
+
+/* ---------- timeline polish ---------- */
+
+.posho-timeline-dot {
+  box-shadow: 0 0 0 4px var(--brand-100);
+  background: linear-gradient(180deg, #fff, var(--brand-100));
+  border: 1.5px solid var(--brand-400);
+  color: var(--brand-800);
+  font-weight: 800;
+}
+
+.posho-timeline-body {
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.posho-timeline-body:hover {
+  border-color: var(--line-medium);
+  box-shadow: var(--elev-1);
+}
+
+/* ---------- kanban polish ---------- */
+
+.posho-kanban-column {
+  background: linear-gradient(180deg, #f4f1fa, #faf8fe);
+}
+
+.posho-kanban-column > header strong {
+  letter-spacing: 0.02em;
+}
+
+.posho-kanban-card,
+button.posho-kanban-card {
+  box-shadow: var(--elev-1);
+}
+
+button.posho-kanban-card:hover {
+  box-shadow: var(--elev-2);
+  transform: translateY(-2px);
+}
+
+.posho-kanban-blocked {
+  border-left: 4px solid #dc2626;
+  background: linear-gradient(180deg, #fff7f7, #fff);
+}
+
+/* ---------- modals: softer, sharper ---------- */
+
+.posho-modal-backdrop {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.posho-modal {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  animation: posho-modal-in 260ms var(--ease-out);
+}
+
+@keyframes posho-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.posho-modal-heading button {
+  transition: background 180ms ease, transform 160ms var(--ease-out);
+}
+
+.posho-modal-heading button:hover {
+  background: var(--brand-50);
+  transform: rotate(90deg);
+}
+
+/* Command palette polish */
+.posho-palette {
+  box-shadow: var(--elev-3);
+  border: 1px solid var(--line-medium);
+  animation: posho-modal-in 220ms var(--ease-out);
+}
+
+.posho-palette-list button.active {
+  background: linear-gradient(135deg, var(--brand-50), var(--brand-100));
+  box-shadow: inset 2px 0 0 var(--brand-600);
+}
+
+/* ---------- toasts: premium notification ---------- */
+
+.posho-toast {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: var(--elev-3);
+  animation: posho-toast-in 280ms var(--ease-spring);
+}
+
+@keyframes posho-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- empty + error states ---------- */
+
+.posho-empty-state {
+  background: linear-gradient(180deg, var(--brand-50), #fff 70%);
+}
+
+.posho-empty-state strong {
+  letter-spacing: -0.01em;
+}
+
+.posho-error-block {
+  border-left: 4px solid #dc2626;
+}
+
+/* ---------- action center emphasis ---------- */
+
+.posho-action-center {
+  border: 1.5px solid var(--brand-300);
+  background: linear-gradient(180deg, #f8f4ff, #fff 75%);
+  box-shadow: var(--elev-2);
+}
+
+.posho-action-item {
+  transition: box-shadow 200ms ease, border-color 200ms ease, transform 200ms var(--ease-out);
+}
+
+.posho-action-item:hover {
+  border-color: var(--brand-300);
+  box-shadow: var(--elev-1);
+}
+
+/* ---------- project header hero ---------- */
+
+.posho-project-head {
+  box-shadow: var(--elev-2);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.posho-pill {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ---------- proofing polish ---------- */
+
+.posho-proof-frame {
+  box-shadow: var(--elev-2);
+  border-color: var(--line-medium);
+}
+
+.posho-proof-pin {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(255, 255, 255, 0.35);
+  animation: posho-pin-in 240ms var(--ease-spring);
+}
+
+@keyframes posho-pin-in {
+  from {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ---------- report bars ---------- */
+
+.posho-report-bar > span {
+  transition: width 700ms var(--ease-out);
+}
+
+/* ---------- skeleton shimmer refinement ---------- */
+
+.posho-skeleton-line {
+  background: linear-gradient(90deg, #ece7f5 25%, #f7f3ff 50%, #ece7f5 75%);
+}
+
+/* ---------- dashboard + headings ---------- */
+
+.admin-view-heading h1,
+.posho-page-heading h1,
+.workspace-view-heading h2 {
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.admin-total-count {
+  background: var(--brand-50);
+  border: 1px solid var(--brand-200);
+  color: var(--brand-800);
+}
+
+/* ---------- danger zone: serious but calm ---------- */
+
+.posho-danger-zone {
+  border-color: #f0b4b4;
+  background: linear-gradient(180deg, #fff5f5, #fff 60%);
+}
+
+/* ---------- search inputs with icon feel ---------- */
+
+.posho-search-row input[type='search'],
+.admin-search input[type='search'] {
+  background-image: none;
+}
+
+/* ---------- metric cards: quiet confidence ---------- */
+
+.posho-metric-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.posho-metric-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 84px;
+  height: 84px;
+  background: radial-gradient(circle at top right, rgba(108, 43, 217, 0.09), transparent 70%);
+  pointer-events: none;
+}
+
+.posho-metric-icon {
+  background: linear-gradient(135deg, var(--brand-100), var(--brand-200));
+  color: var(--brand-800);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* ---------- auth pages keep brand glow ---------- */
+
+.auth-page-decoration-one,
+.auth-page-decoration-two {
+  filter: saturate(1.1);
+}
+
+/* ---------- page enter motion ---------- */
+
+@keyframes posho-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.page-reveal {
+  animation: posho-page-in 320ms var(--ease-out);
+}
+
+.page-reveal .admin-control-card,
+.page-reveal .workspace-panel,
+.page-reveal .posho-ledger-item,
+.page-reveal .admin-data-row {
+  animation: posho-page-in 380ms var(--ease-out) backwards;
+}
+
+.page-reveal .admin-control-card:nth-child(2),
+.page-reveal .workspace-panel:nth-child(2),
+.page-reveal .posho-ledger-item:nth-child(2),
+.page-reveal .admin-data-row:nth-child(2) {
+  animation-delay: 45ms;
+}
+
+.page-reveal .admin-control-card:nth-child(3),
+.page-reveal .workspace-panel:nth-child(3),
+.page-reveal .posho-ledger-item:nth-child(3),
+.page-reveal .admin-data-row:nth-child(3) {
+  animation-delay: 90ms;
+}
+
+.page-reveal .admin-control-card:nth-child(n + 4),
+.page-reveal .workspace-panel:nth-child(n + 4),
+.page-reveal .posho-ledger-item:nth-child(n + 4),
+.page-reveal .admin-data-row:nth-child(n + 4) {
+  animation-delay: 130ms;
+}
+
+/* ---------- reduced motion: respect users ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .button:hover,
+  a.admin-data-row:hover,
+  .admin-order-directory-card:hover,
+  .posho-finance-card:hover,
+  button.posho-kanban-card:hover {
+    transform: none;
+  }
+}
+
+/* ---------- readability floor fixes ---------- */
+
+.client-pro-brand > span,
+.admin-pro-brand > span {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.workspace-panel-heading span,
+.admin-brief-block strong,
+.admin-form-stack label span,
+.admin-brief-block p {
+  font-size: 11px;
+}
+
+.admin-brief-block p {
+  line-height: 1.7;
+}
+
+.workspace-panel-heading span {
+  letter-spacing: 0.08em;
+}
+
+/* Long content never breaks layout */
+.posho-modal *,
+.admin-data-row *,
+.posho-ledger-item * {
+  overflow-wrap: anywhere;
+}

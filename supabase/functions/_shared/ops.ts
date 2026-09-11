@@ -1,9 +1,9 @@
--- ============================================================
--- Shared helpers for Phase 3 operations edge functions.
--- Import from '../_shared/ops.ts'.
--- Automation executes in-app actions only. Never email (SMTP
--- unconfigured), never financial/destructive operations.
--- ============================================================
+// ============================================================
+// Shared helpers for Phase 3 operations edge functions.
+// Import from '../_shared/ops.ts'.
+// Automation executes in-app actions only. Never email (SMTP
+// unconfigured), never financial/destructive operations.
+// ============================================================
 
 export function clean(
   value: unknown,
