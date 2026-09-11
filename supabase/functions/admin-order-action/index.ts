@@ -2573,6 +2573,31 @@ export default {
             );
           }
 
+          // payment_transactions.order_id uses ON DELETE RESTRICT, so the
+          // ledger rows must be removed before the order itself can be
+          // cascaded. The tombstone above already preserved the financial
+          // summary for audit.
+          const {
+            error:
+              paymentsDeleteError,
+          } =
+            await ctx
+              .supabaseAdmin
+              .from(
+                'payment_transactions',
+              )
+              .delete()
+              .eq(
+                'order_id',
+                order.id,
+              );
+
+          if (
+            paymentsDeleteError
+          ) {
+            throw paymentsDeleteError;
+          }
+
           const {
             error:
               deleteError,
