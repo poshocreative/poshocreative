@@ -7,6 +7,22 @@
 
 /* ---------- dashboard rhythm: prevent card pile-up ---------- */
 
+.posho-preview-readonly {
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.posho-preview-readonly .workspace-panel {
+  padding: 16px 18px;
+}
+
+.posho-preview-readonly .workspace-panel > span:first-child {
+  display: block;
+  margin-bottom: 6px;
+}
+
 .workspace-dashboard-v3 {
   display: flex;
   flex-direction: column;
