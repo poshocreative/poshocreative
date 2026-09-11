@@ -146,6 +146,79 @@
   }
 }
 
+/* ---------- bottom nav: make inactive icons actually visible ---------- */
+
+.client-pro-mobile-tabs a,
+.client-pro-mobile-tabs button {
+  color: #3d3654 !important;
+  opacity: 1;
+}
+
+.client-pro-mobile-tabs a svg,
+.client-pro-mobile-tabs button svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.1;
+  color: #3d3654 !important;
+  opacity: 1;
+  display: block;
+  flex-shrink: 0;
+}
+
+.client-pro-mobile-tabs a span,
+.client-pro-mobile-tabs button span {
+  font-size: 11px !important;
+  font-weight: 700;
+  color: #3d3654 !important;
+  opacity: 1;
+  letter-spacing: 0.01em;
+}
+
+.client-pro-mobile-tabs a.active,
+.client-pro-mobile-tabs button.active {
+  background: #6c2bd9 !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(108, 43, 217, 0.28);
+}
+
+.client-pro-mobile-tabs a.active svg,
+.client-pro-mobile-tabs button.active svg,
+.client-pro-mobile-tabs a.active span,
+.client-pro-mobile-tabs button.active span {
+  color: #ffffff !important;
+}
+
+/* ensure the bar itself doesn't wash icons out */
+.client-pro-mobile-tabs {
+  background: #ffffff !important;
+  border: 1px solid rgba(23, 12, 60, 0.08);
+}
+
+/* same fix for admin bottom nav */
+.admin-pro-mobile-tabs a,
+.admin-pro-mobile-tabs button {
+  color: #3d3654 !important;
+}
+
+.admin-pro-mobile-tabs a svg,
+.admin-pro-mobile-tabs button svg {
+  color: #3d3654 !important;
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.1;
+}
+
+.admin-pro-mobile-tabs a.active,
+.admin-pro-mobile-tabs button.active {
+  background: #6c2bd9 !important;
+  color: #fff !important;
+}
+
+.admin-pro-mobile-tabs a.active svg,
+.admin-pro-mobile-tabs button.active svg {
+  color: #fff !important;
+}
+
 /* ---------- priority / overview cards: prevent inner collision ---------- */
 
 .workspace-priority-section,
