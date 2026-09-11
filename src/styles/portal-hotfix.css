@@ -219,6 +219,40 @@
   color: #fff !important;
 }
 
+/* ---------- profile security card: breathing room + no bottom-nav clash ---------- */
+
+.workspace-security-card {
+  border: 1px solid #e9e4f6;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(23, 12, 60, 0.06);
+}
+
+.workspace-security-card .workspace-panel-heading {
+  background: linear-gradient(180deg, #faf7ff 0%, #ffffff 100%);
+  border-bottom: 1px solid #ece7f5;
+  min-height: 72px;
+}
+
+/* ensure last card clears the floating bottom nav on iPhone */
+.client-pro-content .workspace-view > *:last-child {
+  margin-bottom: 18px;
+}
+
+@media (max-width: 900px) {
+  .client-pro-content {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .workspace-profile-card {
+    padding: 18px !important;
+  }
+
+  .workspace-profile-grid {
+    gap: 14px !important;
+  }
+}
+
 /* ---------- priority / overview cards: prevent inner collision ---------- */
 
 .workspace-priority-section,

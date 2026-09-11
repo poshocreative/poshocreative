@@ -391,20 +391,63 @@ export default function DashboardProfile() {
         </section>
       )}
 
-      <section className="workspace-panel" style={{ marginTop: 14 }}>
+      <section
+        className="workspace-panel workspace-security-card"
+        style={{ marginTop: 18 }}
+      >
         <div className="workspace-panel-heading">
-          <div>
-            <span>SECURITY</span>
-            <h3>Signed in as</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: '#f1e8ff',
+                color: '#6C2BD9',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+              aria-hidden="true"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                <circle cx="12" cy="16" r="1.2" />
+              </svg>
+            </span>
+            <div>
+              <span>SECURITY</span>
+              <h3 style={{ margin: 0 }}>Signed in as</h3>
+            </div>
           </div>
         </div>
-        <p className="posho-long-value" style={{ fontSize: 14 }}>
-          {user?.email}
-        </p>
-        <p style={{ fontSize: 13, color: '#5f5878' }}>
-          Your workspace session is private to this account. Use Sign out from
-          the navigation when you finish on a shared device.
-        </p>
+        <div style={{ padding: '14px 20px 18px' }}>
+          <p
+            className="posho-long-value"
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: '#17122b',
+              margin: '0 0 8px',
+              wordBreak: 'break-all',
+            }}
+          >
+            {user?.email}
+          </p>
+          <p style={{ fontSize: 13, color: '#5f5878', lineHeight: 1.6, margin: 0 }}>
+            Your workspace session is private to this account. Use Sign out from
+            the navigation when you finish on a shared device.
+          </p>
+        </div>
       </section>
     </div>
   );
