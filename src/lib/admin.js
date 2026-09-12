@@ -509,6 +509,7 @@ export async function getAdminOrder(
     milestones,
     activity,
     notifications,
+    priceAdjustments,
   ] =
     await Promise.all([
       supabase
@@ -699,6 +700,23 @@ export async function getAdminOrder(
           },
         )
         .limit(80),
+
+      supabase
+        .from(
+          'project_price_adjustments',
+        )
+        .select('*')
+        .eq(
+          'order_id',
+          order.id,
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              true,
+          },
+        ),
     ]);
 
   const pick = (result, label) => {
@@ -725,6 +743,7 @@ export async function getAdminOrder(
   const milestonesResult = pick(milestones, 'milestones');
   const activityResult = pick(activity, 'activity');
   const notificationsResult = pick(notifications, 'notifications');
+  const priceAdjustmentsResult = pick(priceAdjustments, 'price adjustments');
 
   return {
     ...order,
@@ -754,6 +773,12 @@ export async function getAdminOrder(
 
     notificationTrail: notificationsResult.rows,
 
+    priceAdjustments:
+      priceAdjustmentsResult.error &&
+      priceAdjustmentsResult.error.includes('schema')
+        ? []
+        : priceAdjustmentsResult.rows,
+
     loadErrors: {
       quotes: quotesResult.error,
       notes: notesResult.error,
@@ -766,6 +791,7 @@ export async function getAdminOrder(
       milestones: null,
       activity: activityResult.error,
       notifications: notificationsResult.error,
+      priceAdjustments: priceAdjustmentsResult.error,
     },
   };
 }

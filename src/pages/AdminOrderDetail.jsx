@@ -17,6 +17,8 @@ import DangerZone from '../components/admin/DangerZone';
 import DeliverablesPanel from '../components/admin/DeliverablesPanel';
 import InternalCostsPanel from '../components/admin/InternalCostsPanel';
 import ManualPaymentPanel from '../components/admin/ManualPaymentPanel';
+
+import ProjectFinanceAdjustments from '../components/admin/ProjectFinanceAdjustments';
 import MilestonesPanel from '../components/admin/MilestonesPanel';
 import PartPaymentReview from '../components/admin/PartPaymentReview';
 import ProjectHeader from '../components/admin/ProjectHeader';
@@ -144,6 +146,7 @@ export default function AdminOrderDetail() {
       costs: order.costs || [],
       partRequests: order.partRequests || [],
       milestones: order.milestones || [],
+      priceAdjustments: order.priceAdjustments || [],
     });
   }, [order]);
 
@@ -502,6 +505,8 @@ export default function AdminOrderDetail() {
           <PartPaymentReview order={order} finance={finance} onChanged={load} />
 
           <ManualPaymentPanel order={order} finance={finance} onChanged={load} />
+
+          <ProjectFinanceAdjustments order={order} finance={finance} onChanged={load} />
 
           <CostManager order={order} finance={finance} onChanged={load} />
 

@@ -536,6 +536,8 @@
 
 .posho-source-provider { background: var(--posho-green-wash); color: var(--posho-green); }
 .posho-source-manual { background: #eef2ff; color: #4338ca; }
+.posho-source-external { background: #e6f7f1; color: #0e7a5f; }
+.posho-source-price { background: #f1eaff; color: #6C2BD9; }
 .posho-source-adjustment { background: var(--posho-amber-wash); color: var(--posho-amber); }
 .posho-source-reversal { background: var(--posho-red-wash); color: var(--posho-red); }
 

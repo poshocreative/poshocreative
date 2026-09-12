@@ -16,6 +16,7 @@ export function buildFinanceSnapshot({
   costs = [],
   partRequests = [],
   milestones = [],
+  priceAdjustments = [],
 } = {}) {
   const base = safeKobo(
     order?.base_project_price_kobo ??
@@ -70,11 +71,24 @@ export function buildFinanceSnapshot({
       .filter((milestone) => ['pending', 'due', 'overdue'].includes(milestone.status))
       .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))[0] || null;
 
+  // Original agreed total = the previous total of the earliest price
+  // adjustment, otherwise the current live total (never adjusted).
+  const sortedAdjustments = [...(priceAdjustments || [])].sort(
+    (a, b) => new Date(a.created_at) - new Date(b.created_at),
+  );
+
+  const originalPrice =
+    sortedAdjustments.length > 0
+      ? safeKobo(sortedAdjustments[0].previous_total_kobo, total)
+      : total;
+
   return {
     base: resolvedBase,
     additional,
     waived,
     total,
+    originalPrice,
+    priceAdjustments: sortedAdjustments,
     paid,
     outstanding,
     dueNow,

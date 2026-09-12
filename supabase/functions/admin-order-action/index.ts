@@ -233,26 +233,28 @@ export default {
         // Team members operate through capabilities; the owner
         // bypasses everything. Financial history rewrites,
         // deletions and archives stay owner-only.
-        const ownerOnlyActions =
-          new Set([
-            'reverse_payment',
-            'adjust_payment',
-            'archive_project',
-            'restore_project',
-            'permanent_delete_project',
-          ]);
+          const ownerOnlyActions =
+            new Set([
+              'reverse_payment',
+              'adjust_payment',
+              'adjust_project_price',
+              'archive_project',
+              'restore_project',
+              'permanent_delete_project',
+            ]);
 
-        const financeActions =
-          new Set([
-            'set_project_price',
-            'send_quote',
-            'save_quote_items',
-            'request_remaining_payment',
-            'record_manual_payment',
-            'review_part_payment',
-            'waive_project_cost',
-            'cancel_payment',
-          ]);
+          const financeActions =
+            new Set([
+              'set_project_price',
+              'send_quote',
+              'save_quote_items',
+              'request_remaining_payment',
+              'record_manual_payment',
+              'record_external_payment',
+              'review_part_payment',
+              'waive_project_cost',
+              'cancel_payment',
+            ]);
 
         if (
           ownerOnlyActions.has(
@@ -2446,6 +2448,155 @@ export default {
                 message:
                   adjustError.message ||
                   'The adjustment could not be recorded.',
+              },
+              400,
+            );
+          }
+
+          return json({
+            success: true,
+            adjustment: result,
+          });
+        }
+
+        /* ====================================================
+           RECORD EXTERNAL PAYMENT (delegates to audited RPC)
+           Off-platform receipts are immutable ledger entries
+           with their own scope — never Flutterwave rows.
+           ==================================================== */
+
+        if (
+          action ===
+          'record_external_payment'
+        ) {
+          const {
+            data: result,
+            error:
+              externalError,
+          } =
+            await ctx
+              .supabase
+              .rpc(
+                'admin_record_external_payment',
+                {
+                  p_order_id:
+                    order.id,
+
+                  p_amount_kobo:
+                    Math.round(
+                      Number(
+                        body?.amountKobo,
+                      ),
+                    ),
+
+                  p_method:
+                    clean(
+                      body?.method,
+                      40,
+                    ) ||
+                    'bank_transfer',
+
+                  p_reference:
+                    clean(
+                      body?.reference,
+                      160,
+                    ) ||
+                    null,
+
+                  p_note:
+                    clean(
+                      body?.note,
+                      3000,
+                    ) ||
+                    null,
+
+                  p_received_at:
+                    body?.receivedAt
+                      ? new Date(
+                          body.receivedAt,
+                        )
+                          .toISOString()
+                      : null,
+
+                  p_notify_customer:
+                    body?.notifyCustomer !==
+                    false,
+                },
+              );
+
+          if (
+            externalError
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  externalError.message ||
+                  'The external payment could not be recorded.',
+              },
+              400,
+            );
+          }
+
+          return json({
+            success: true,
+            payment: result,
+          });
+        }
+
+        /* ====================================================
+           REDUCE PROJECT PRICE (delegates to audited RPC)
+           Owner-only. Lowers the agreed total; every historical
+           price stays preserved in the adjustments ledger.
+           ==================================================== */
+
+        if (
+          action ===
+          'adjust_project_price'
+        ) {
+          const {
+            data: result,
+            error:
+              priceError,
+          } =
+            await ctx
+              .supabase
+              .rpc(
+                'admin_adjust_project_price',
+                {
+                  p_order_id:
+                    order.id,
+
+                  p_new_total_kobo:
+                    Math.round(
+                      Number(
+                        body?.newTotalKobo,
+                      ),
+                    ),
+
+                  p_reason:
+                    clean(
+                      body?.reason,
+                      2000,
+                    ),
+
+                  p_notify_customer:
+                    body?.notifyCustomer !==
+                    false,
+                },
+              );
+
+          if (
+            priceError
+          ) {
+            return json(
+              {
+                success: false,
+
+                message:
+                  priceError.message ||
+                  'The project price could not be adjusted.',
               },
               400,
             );

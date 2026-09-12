@@ -157,6 +157,15 @@ export const MANUAL_PAYMENT_METHODS = [
   { value: 'other', label: 'Other' },
 ];
 
+/** Methods allowed for off-platform receipts (corrections use adjustments). */
+export const EXTERNAL_PAYMENT_METHODS = [
+  { value: 'bank_transfer', label: 'Bank transfer' },
+  { value: 'cash', label: 'Cash' },
+  { value: 'pos', label: 'POS' },
+  { value: 'external_transfer', label: 'External transfer' },
+  { value: 'other', label: 'Other' },
+];
+
 export function manualMethodLabel(value) {
   return (
     MANUAL_PAYMENT_METHODS.find((method) => method.value === value)?.label ||
@@ -167,6 +176,10 @@ export function manualMethodLabel(value) {
 export function paymentSourceLabel(entry) {
   if (!entry) {
     return 'Payment';
+  }
+
+  if (entry.payment_scope === 'external_payment') {
+    return `External Payment · ${manualMethodLabel(entry.manual_method)}`;
   }
 
   if (entry.payment_type === 'manual') {

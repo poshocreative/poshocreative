@@ -146,3 +146,109 @@ export async function adjustLedgerPayment({
 
   return data.adjustment;
 }
+
+const EXTERNAL_METHODS = new Set([
+  'bank_transfer',
+  'cash',
+  'pos',
+  'external_transfer',
+  'other',
+]);
+
+export async function recordExternalPayment({
+  orderId,
+  amountNaira,
+  method,
+  reference = '',
+  note = '',
+  receivedAt = null,
+  notifyCustomer = true,
+}) {
+  const amountKobo = parseNairaInput(amountNaira);
+
+  if (!amountKobo) {
+    throw new Error('Enter a valid payment amount greater than zero.');
+  }
+
+  if (!EXTERNAL_METHODS.has(method)) {
+    throw new Error('Choose a valid external payment method.');
+  }
+
+  const cleanNote = String(note || '').trim();
+
+  if (cleanNote.length < 10) {
+    throw new Error(
+      'Record a clear note (at least 10 characters) describing this external payment.',
+    );
+  }
+
+  const { data, error } = await supabase.functions.invoke(
+    'admin-order-action',
+    {
+      body: {
+        action: 'record_external_payment',
+        orderId,
+        amountKobo,
+        method,
+        reference: String(reference || '').trim() || null,
+        note: cleanNote,
+        receivedAt,
+        notifyCustomer,
+      },
+    },
+  );
+
+  if (error) {
+    throw await toUserError(error, 'The external payment could not be recorded.');
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'The external payment could not be recorded.');
+  }
+
+  return data.payment;
+}
+
+export async function adjustProjectPrice({
+  orderId,
+  newTotalNaira,
+  reason,
+  notifyCustomer = true,
+}) {
+  const newTotalKobo = parseNairaInput(newTotalNaira);
+
+  if (!newTotalKobo) {
+    throw new Error('Enter a valid new project total greater than zero.');
+  }
+
+  const cleanReason = String(reason || '').trim();
+
+  if (cleanReason.length < 10) {
+    throw new Error(
+      'Provide a clear reason (at least 10 characters) for this price change.',
+    );
+  }
+
+  const { data, error } = await supabase.functions.invoke(
+    'admin-order-action',
+    {
+      body: {
+        action: 'adjust_project_price',
+        orderId,
+        newTotalKobo,
+        reason: cleanReason,
+        notifyCustomer,
+      },
+    },
+  );
+
+  if (error) {
+    throw await toUserError(error, 'The project price could not be adjusted.');
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'The project price could not be adjusted.');
+  }
+
+  return data.adjustment;
+}
