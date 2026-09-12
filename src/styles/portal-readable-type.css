@@ -307,7 +307,8 @@
   gap: 9px !important;
 }
 
-.project-directory-meta svg {
+.project-directory-meta svg,
+.project-directory-meta .material-symbols-rounded {
   width: 17px;
   height: 17px;
 }

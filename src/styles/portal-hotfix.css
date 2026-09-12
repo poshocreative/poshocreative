@@ -304,9 +304,12 @@
 }
 
 .client-pro-mobile-tabs a svg,
-.client-pro-mobile-tabs button svg {
+.client-pro-mobile-tabs a .material-symbols-rounded,
+.client-pro-mobile-tabs button svg,
+.client-pro-mobile-tabs button .material-symbols-rounded {
   width: 22px;
   height: 22px;
+  font-size: 22px !important;
   stroke-width: 2.1;
   color: #3d3654 !important;
   opacity: 1;
@@ -331,7 +334,9 @@
 }
 
 .client-pro-mobile-tabs a.active svg,
+.client-pro-mobile-tabs a.active .material-symbols-rounded,
 .client-pro-mobile-tabs button.active svg,
+.client-pro-mobile-tabs button.active .material-symbols-rounded,
 .client-pro-mobile-tabs a.active span,
 .client-pro-mobile-tabs button.active span {
   color: #ffffff !important;
@@ -350,10 +355,13 @@
 }
 
 .admin-pro-mobile-tabs a svg,
-.admin-pro-mobile-tabs button svg {
+.admin-pro-mobile-tabs a .material-symbols-rounded,
+.admin-pro-mobile-tabs button svg,
+.admin-pro-mobile-tabs button .material-symbols-rounded {
   color: #3d3654 !important;
   width: 22px;
   height: 22px;
+  font-size: 22px;
   stroke-width: 2.1;
 }
 
@@ -364,7 +372,9 @@
 }
 
 .admin-pro-mobile-tabs a.active svg,
-.admin-pro-mobile-tabs button.active svg {
+.admin-pro-mobile-tabs a.active .material-symbols-rounded,
+.admin-pro-mobile-tabs button.active svg,
+.admin-pro-mobile-tabs button.active .material-symbols-rounded {
   color: #fff !important;
 }
 

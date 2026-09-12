@@ -490,9 +490,13 @@
    ========================================================== */
 
 .text-link svg,
+.text-link .material-symbols-rounded,
 .service-card a svg,
+.service-card a .material-symbols-rounded,
 .service-directory-item svg,
-.footer-project-link svg {
+.service-directory-item .material-symbols-rounded,
+.footer-project-link svg,
+.footer-project-link .material-symbols-rounded {
   transition:
     transform
     260ms
@@ -500,9 +504,13 @@
 }
 
 .text-link:hover svg,
+.text-link:hover .material-symbols-rounded,
 .service-card a:hover svg,
+.service-card a:hover .material-symbols-rounded,
 .service-directory-item:hover svg,
-.footer-project-link:hover svg {
+.service-directory-item:hover .material-symbols-rounded,
+.footer-project-link:hover svg,
+.footer-project-link:hover .material-symbols-rounded {
   transform:
     translate(
       3px,

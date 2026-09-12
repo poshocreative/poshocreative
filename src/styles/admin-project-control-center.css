@@ -94,7 +94,8 @@
     2px 7px;
 }
 
-.admin-pcc-context-meta svg {
+.admin-pcc-context-meta svg,
+.admin-pcc-context-meta .material-symbols-rounded {
   grid-row:
     1 / 3;
 
@@ -217,7 +218,8 @@
   gap: 7px;
 }
 
-.admin-pcc-security-note svg {
+.admin-pcc-security-note svg,
+.admin-pcc-security-note .material-symbols-rounded {
   flex: 0 0 auto;
 }
 
@@ -413,7 +415,8 @@
   text-align: center;
 }
 
-.admin-pcc-empty svg {
+.admin-pcc-empty svg,
+.admin-pcc-empty .material-symbols-rounded {
   color:
     var(--brand-primary);
 }
@@ -942,7 +945,8 @@
   gap: 8px;
 }
 
-.admin-pcc-history-heading svg {
+.admin-pcc-history-heading svg,
+.admin-pcc-history-heading .material-symbols-rounded {
   color:
     var(--brand-primary);
 }
@@ -1244,7 +1248,8 @@
   text-align: center;
 }
 
-.admin-pcc-preview-message svg {
+.admin-pcc-preview-message svg,
+.admin-pcc-preview-message .material-symbols-rounded {
   color:
     var(--brand-primary);
 }

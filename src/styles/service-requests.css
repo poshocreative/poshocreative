@@ -193,7 +193,7 @@ button.social-platform-option:hover,
 }
 
 .project-service-platform img,
-.project-service-platform .social-platform-logo > svg, .material-symbols-rounded {
+.project-service-platform .social-platform-logo > svg, .project-service-platform .social-platform-logo > .material-symbols-rounded {
   width: 22px;
   height: 22px;
 }
@@ -223,7 +223,8 @@ button.social-platform-option:hover,
   gap: 3px 10px;
 }
 
-.project-service-detail-grid svg {
+.project-service-detail-grid svg,
+.project-service-detail-grid .material-symbols-rounded {
   grid-row: span 2;
   color: var(--brand-primary);
 }
@@ -378,7 +379,8 @@ button.social-platform-option:hover,
   gap: 13px;
 }
 
-.admin-part-payment-empty svg {
+.admin-part-payment-empty svg,
+.admin-part-payment-empty .material-symbols-rounded {
   color: #1e9a65;
 }
 

@@ -1064,7 +1064,7 @@
     nowrap;
 }
 
-.workspace-quick-links > a > svg, .material-symbols-rounded {
+.workspace-quick-links > a > svg, .workspace-quick-links > a > .material-symbols-rounded {
   color:
     rgba(255, 255, 255, 0.4);
 }
@@ -1280,7 +1280,8 @@
     font-size: 7.5px;
   }
 
-  .workspace-navigation-v3 a svg {
+  .workspace-navigation-v3 a svg,
+  .workspace-navigation-v3 a .material-symbols-rounded {
     width: 14px;
     height: 14px;
 
@@ -1589,7 +1590,8 @@
     font-size: 7px;
   }
 
-  .workspace-navigation-v3 a svg {
+  .workspace-navigation-v3 a svg,
+  .workspace-navigation-v3 a .material-symbols-rounded {
     width: 13px;
     height: 13px;
   }

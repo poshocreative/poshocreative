@@ -131,7 +131,7 @@
   gap: 10px;
 }
 
-.admin-project-section-heading > div > svg, .material-symbols-rounded {
+.admin-project-section-heading > div > svg, .admin-project-section-heading > div > .material-symbols-rounded {
   flex: 0 0 auto;
 
   color:
@@ -824,7 +824,8 @@
   gap: 10px;
 }
 
-.customer-progress-heading svg {
+.customer-progress-heading svg,
+.customer-progress-heading .material-symbols-rounded {
   color:
     var(--brand-primary);
 }
@@ -1028,7 +1029,7 @@
   gap: 10px;
 }
 
-.customer-project-file-main > svg, .material-symbols-rounded {
+.customer-project-file-main > svg, .customer-project-file-main > .material-symbols-rounded {
   flex: 0 0 auto;
 
   color:

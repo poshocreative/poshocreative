@@ -342,7 +342,9 @@
 }
 
 .workspace-file-search svg,
-.workspace-file-sort svg {
+.workspace-file-search .material-symbols-rounded,
+.workspace-file-sort svg,
+.workspace-file-sort .material-symbols-rounded {
   flex: 0 0 auto;
 
   color:

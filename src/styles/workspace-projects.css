@@ -157,7 +157,9 @@
 }
 
 .project-directory-search svg,
-.project-directory-sort svg {
+.project-directory-search .material-symbols-rounded,
+.project-directory-sort svg,
+.project-directory-sort .material-symbols-rounded {
   flex: 0 0 auto;
 
   color:
@@ -611,7 +613,8 @@
   gap: 9px;
 }
 
-.project-directory-action svg {
+.project-directory-action svg,
+.project-directory-action .material-symbols-rounded {
   margin-top: 1px;
 
   flex: 0 0 auto;
@@ -754,7 +757,8 @@
   gap: 8px;
 }
 
-.project-directory-meta svg {
+.project-directory-meta svg,
+.project-directory-meta .material-symbols-rounded {
   flex: 0 0 auto;
 
   color:
@@ -883,7 +887,7 @@
   text-align: center;
 }
 
-.project-directory-empty > svg, .material-symbols-rounded {
+.project-directory-empty > svg, .project-directory-empty > .material-symbols-rounded {
   color:
     var(--brand-primary);
 }

@@ -103,7 +103,7 @@
 }
 
 .admin-payment-attempt-method > div:first-child,
-.customer-payment-attempt-heading > div > svg, .material-symbols-rounded {
+.customer-payment-attempt-heading > div > svg, .customer-payment-attempt-heading > div > .material-symbols-rounded {
   flex: 0 0 auto;
 }
 
@@ -428,7 +428,8 @@
   flex-direction: column;
 }
 
-.admin-payment-overview svg {
+.admin-payment-overview svg,
+.admin-payment-overview .material-symbols-rounded {
   color: var(--brand-primary);
 }
 
@@ -563,7 +564,8 @@
   color: var(--text-soft);
 }
 
-.customer-payment-message svg {
+.customer-payment-message svg,
+.customer-payment-message .material-symbols-rounded {
   flex: 0 0 auto;
 
   color: var(--brand-primary);

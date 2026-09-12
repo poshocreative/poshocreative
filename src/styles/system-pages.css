@@ -249,7 +249,10 @@
 
 .verification-visual-loading
 .verification-icon
-svg {
+svg,
+.verification-visual-loading
+.verification-icon
+.material-symbols-rounded {
   animation:
     verificationSpin
     1.15s
@@ -1078,6 +1081,7 @@ span {
     reduce
 ) {
   .verification-icon svg,
+  .verification-icon .material-symbols-rounded,
   .verification-orbit,
   .verification-success-ring,
   .verification-progress span,

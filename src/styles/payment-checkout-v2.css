@@ -41,7 +41,8 @@
   gap: 9px;
 }
 
-.payment-cost-heading svg {
+.payment-cost-heading svg,
+.payment-cost-heading .material-symbols-rounded {
   color:
     var(--brand-primary);
 }
@@ -139,7 +140,8 @@
   line-height: 1.55;
 }
 
-.payment-cost-note svg {
+.payment-cost-note svg,
+.payment-cost-note .material-symbols-rounded {
   flex: 0 0 auto;
 
   margin-top: 1px;
@@ -228,7 +230,8 @@
   gap: 10px;
 }
 
-.admin-payment-method-settings-heading svg {
+.admin-payment-method-settings-heading svg,
+.admin-payment-method-settings-heading .material-symbols-rounded {
   color:
     var(--brand-primary);
 }
@@ -305,7 +308,7 @@
   gap: 10px;
 }
 
-.admin-payment-method-control > div > svg, .material-symbols-rounded {
+.admin-payment-method-control > div > svg, .admin-payment-method-control > div > .material-symbols-rounded {
   color:
     var(--brand-primary);
 }

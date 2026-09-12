@@ -811,7 +811,8 @@
     );
 }
 
-.workspace-search svg {
+.workspace-search svg,
+.workspace-search .material-symbols-rounded {
   position: absolute;
 
   top: 50%;
@@ -1515,7 +1516,7 @@
   color: #ffffff;
 }
 
-.project-payment-card > svg, .material-symbols-rounded {
+.project-payment-card > svg, .project-payment-card > .material-symbols-rounded {
   color:
     var(--brand-primary-light);
 }
@@ -2071,7 +2072,7 @@
     display: none;
   }
 
-  .workspace-order-row > svg, .material-symbols-rounded {
+  .workspace-order-row > svg, .workspace-order-row > .material-symbols-rounded {
     display: none;
   }
 
@@ -2109,7 +2110,9 @@
   }
 
   .workspace-orders-table-row
-  > svg, .material-symbols-rounded {
+  > svg,
+  .workspace-orders-table-row
+  > .material-symbols-rounded {
     display: none;
   }
 

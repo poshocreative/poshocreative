@@ -1071,7 +1071,9 @@
   }
 
   .mobile-sidebar-project-button
-  svg {
+  svg,
+  .mobile-sidebar-project-button
+  .material-symbols-rounded {
     transition:
       transform
       250ms
@@ -1084,7 +1086,9 @@
   }
 
   .mobile-sidebar-project-button:hover
-  svg {
+  svg,
+  .mobile-sidebar-project-button:hover
+  .material-symbols-rounded {
     transform:
       translate(
         2px,

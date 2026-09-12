@@ -179,7 +179,7 @@
   gap: 10px;
 }
 
-.workspace-payment-security-note > svg, .material-symbols-rounded {
+.workspace-payment-security-note > svg, .workspace-payment-security-note > .material-symbols-rounded {
   margin-top: 1px;
 
   flex: 0 0 auto;
@@ -245,7 +245,8 @@
   gap: 9px;
 }
 
-.workspace-payment-search svg {
+.workspace-payment-search svg,
+.workspace-payment-search .material-symbols-rounded {
   flex: 0 0 auto;
 
   color:
@@ -698,7 +699,7 @@
   gap: 8px;
 }
 
-.workspace-payment-status-message > svg, .material-symbols-rounded {
+.workspace-payment-status-message > svg, .workspace-payment-status-message > .material-symbols-rounded {
   margin-top: 1px;
 
   flex: 0 0 auto;
@@ -866,7 +867,8 @@
     180ms ease;
 }
 
-.workspace-payment-receipt[open] summary > svg:last-child {
+.workspace-payment-receipt[open] summary > svg:last-child,
+.workspace-payment-receipt[open] summary > .material-symbols-rounded:last-child {
   transform:
     rotate(90deg);
 }
@@ -924,7 +926,7 @@
   font-size: 1rem;
 }
 
-.workspace-payment-receipt-brand > svg, .material-symbols-rounded {
+.workspace-payment-receipt-brand > svg, .workspace-payment-receipt-brand > .material-symbols-rounded {
   color: #14764b;
 }
 
@@ -1345,7 +1347,8 @@
 ) {
   .workspace-payment-card,
   .workspace-payment-filters button,
-  .workspace-payment-receipt summary > svg:last-child {
+  .workspace-payment-receipt summary > svg:last-child,
+  .workspace-payment-receipt summary > .material-symbols-rounded:last-child {
     transition: none;
   }
 }

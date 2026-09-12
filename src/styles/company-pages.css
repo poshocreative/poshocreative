@@ -324,7 +324,8 @@
   gap: 10px;
 }
 
-.company-process-visual > div svg {
+.company-process-visual > div svg,
+.company-process-visual > div .material-symbols-rounded {
   color: var(--brand-primary-light);
 }
 
@@ -375,7 +376,8 @@
   gap: 12px;
 }
 
-.company-capabilities-list svg {
+.company-capabilities-list svg,
+.company-capabilities-list .material-symbols-rounded {
   color: var(--brand-primary);
 }
 
@@ -436,7 +438,7 @@
     var(--background);
 }
 
-.contact-hero-aside > svg, .material-symbols-rounded {
+.contact-hero-aside > svg, .contact-hero-aside > .material-symbols-rounded {
   color: var(--brand-primary-light);
 }
 
@@ -545,7 +547,7 @@
   gap: 25px;
 }
 
-.contact-assurance-card > svg, .material-symbols-rounded {
+.contact-assurance-card > svg, .contact-assurance-card > .material-symbols-rounded {
   flex: 0 0 auto;
   color: var(--brand-primary);
 }

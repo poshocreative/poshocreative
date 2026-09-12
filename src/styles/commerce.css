@@ -82,7 +82,7 @@
   cursor: pointer;
 }
 
-.payment-method > svg, .material-symbols-rounded {
+.payment-method > svg, .payment-method > .material-symbols-rounded {
   color: var(--brand-primary);
 }
 
@@ -236,7 +236,8 @@
   color: #14744b;
 }
 
-.payment-return-icon.pending svg {
+  .payment-return-icon.pending svg,
+  .payment-return-icon.pending .material-symbols-rounded {
   animation: payment-return-spin 1s linear infinite;
 }
 
@@ -536,7 +537,8 @@
   margin-bottom: 18px;
 }
 
-.admin-search svg {
+.admin-search svg,
+.admin-search .material-symbols-rounded {
   position: absolute;
   left: 15px;
   top: 50%;
@@ -949,7 +951,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .payment-return-icon.pending svg {
+.payment-return-icon.pending svg,
+.payment-return-icon.pending .material-symbols-rounded {
     animation-duration: 2s;
   }
 }
