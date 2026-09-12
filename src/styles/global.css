@@ -496,7 +496,8 @@ a {
   gap: 8px;
 }
 
-.hero-trust svg {
+.hero-trust svg,
+.hero-trust .material-symbols-rounded {
   color: var(--brand-primary);
 }
 
@@ -581,7 +582,8 @@ a {
   letter-spacing: 0.12em;
 }
 
-.hero-card-top svg {
+.hero-card-top svg,
+.hero-card-top .material-symbols-rounded {
   color: var(--brand-primary-light);
 }
 
@@ -1400,7 +1402,8 @@ a {
   font-size: 13px;
 }
 
-.directory-count svg {
+.directory-count svg,
+.directory-count .material-symbols-rounded {
   color: var(--brand-primary);
 }
 
@@ -1839,7 +1842,8 @@ a {
   font-weight: 600;
 }
 
-.service-capability-row svg {
+.service-capability-row svg,
+.service-capability-row .material-symbols-rounded {
   color: var(--brand-primary);
 }
 

@@ -209,7 +209,6 @@ export default function Header() {
 
   return (
     <>
-      <AnniversaryBanner variant="public" />
       <header className="site-header">
         <div className="container header-inner">
           <Link
@@ -384,6 +383,8 @@ export default function Header() {
             )}
           </div>
         </div>
+
+        <AnniversaryBanner variant="public" />
       </header>
 
       <div
