@@ -558,7 +558,7 @@ export default function Dashboard() {
       {actionOrders.length === 0 &&
         awaitingReview.length === 0 &&
         !nextPayment && (
-          <section className="workspace-panel">
+          <section className="workspace-panel workspace-caught-up">
             <p>
               <strong>You are all caught up.</strong>
             </p>

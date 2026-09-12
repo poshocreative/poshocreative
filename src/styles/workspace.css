@@ -405,6 +405,11 @@
   background: #ffffff;
 }
 
+.workspace-caught-up {
+  padding:
+    20px 22px;
+}
+
 .workspace-panel-heading {
   min-height: 92px;
 
