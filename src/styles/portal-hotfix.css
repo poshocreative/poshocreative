@@ -6,6 +6,7 @@
    ========================================================== */
 
 .material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
   font-variation-settings:
     'FILL' 0,
     'wght' 400,
@@ -23,7 +24,94 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- anniversary banner ---------- */
+/* ==========================================================
+   GLOBAL ICON COMPAT — make Material Symbols behave like the
+   old Lucide SVGs across every container in the codebase.
+   ========================================================== */
+
+/* Default sizing inside any flex/grid icon container */
+.workspace-stat-icon .material-symbols-rounded,
+.client-pro-nav-icon .material-symbols-rounded,
+.admin-pro-nav-badge .material-symbols-rounded,
+.hero-trust .material-symbols-rounded,
+.hero-card-top .material-symbols-rounded,
+.auth-input-wrapper .material-symbols-rounded,
+.anniversary-banner-badge .material-symbols-rounded {
+  font-size: inherit;
+}
+
+/* Stat card icons: match the old 19px SVG size */
+.workspace-stat-icon .material-symbols-rounded {
+  font-size: 19px;
+}
+
+/* Nav icons: match old 18px SVG size */
+.client-pro-nav-icon .material-symbols-rounded,
+.admin-pro-navigation .material-symbols-rounded {
+  font-size: 18px;
+}
+
+/* Mobile nav tabs */
+.client-pro-mobile-tabs .material-symbols-rounded,
+.admin-pro-mobile-tabs .material-symbols-rounded {
+  font-size: 20px;
+}
+
+/* More menu / sheet links */
+.admin-pro-sheet-links .material-symbols-rounded,
+.client-pro-sheet-links .material-symbols-rounded {
+  font-size: 19px;
+}
+
+/* Buttons with icons */
+.button .material-symbols-rounded {
+  font-size: 18px;
+}
+
+/* Card headers, section headings with icons */
+.admin-pcc-context-meta .material-symbols-rounded,
+.admin-pcc-security-note .material-symbols-rounded,
+.admin-pcc-empty .material-symbols-rounded,
+.admin-pcc-history-heading .material-symbols-rounded,
+.admin-pcc-preview-message .material-symbols-rounded,
+.admin-clean-state .material-symbols-rounded,
+.payment-return-icon .material-symbols-rounded,
+.customer-payment-message .material-symbols-rounded,
+.customer-progress-heading .material-symbols-rounded,
+.project-service-detail-grid .material-symbols-rounded,
+.order-summary-note .material-symbols-rounded,
+.payment-cost-heading .material-symbols-rounded,
+.payment-cost-note .material-symbols-rounded,
+.admin-search .material-symbols-rounded,
+.workspace-search .material-symbols-rounded,
+.workspace-file-search .material-symbols-rounded,
+.workspace-file-sort .material-symbols-rounded,
+.workspace-payment-search .material-symbols-rounded,
+.project-directory-search .material-symbols-rounded,
+.project-directory-sort .material-symbols-rounded,
+.project-directory-action .material-symbols-rounded,
+.project-directory-meta .material-symbols-rounded,
+.workspace-update-search .material-symbols-rounded,
+.workspace-activity-project .material-symbols-rounded,
+.workspace-navigation-v3 .material-symbols-rounded,
+.company-process-visual .material-symbols-rounded,
+.company-capabilities-list .material-symbols-rounded,
+.mobile-sidebar-project-button .material-symbols-rounded,
+.verification-icon .material-symbols-rounded,
+.service-card .material-symbols-rounded,
+.text-link .material-symbols-rounded,
+.footer-project-link .material-symbols-rounded {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Payment receipt expand/collapse arrow */
+.workspace-payment-receipt summary .material-symbols-rounded {
+  font-size: 18px;
+  transition: transform 180ms ease;
+}
+
+/* Anniversary banner ---------- */
 .anniversary-banner {
   background: linear-gradient(135deg, #6C2BD9 0%, #9333ea 50%, #6C2BD9 100%);
   color: #fff;
