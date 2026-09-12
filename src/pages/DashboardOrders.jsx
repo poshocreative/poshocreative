@@ -419,7 +419,7 @@ export default function DashboardOrders() {
                 }
               >
                 <div>
-                  <Icon name={iconName} size={17}
+                  <Icon name={iconName} size={19}
                   />
                 </div>
 
