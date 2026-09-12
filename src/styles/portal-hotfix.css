@@ -119,10 +119,23 @@
 
 @media (max-width: 640px) {
   .anniversary-banner-inner {
-    flex-wrap: nowrap;
-    gap: 10px;
-    padding: 7px 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 10px;
+    padding: 8px 14px;
     font-size: 12px;
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .anniversary-banner-text {
+    white-space: normal;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .anniversary-banner-text::before {
+    display: none;
   }
 
   .anniversary-banner-motto {
@@ -135,6 +148,7 @@
 
   .anniversary-banner-hero .anniversary-banner-inner {
     padding: 8px 14px;
+    font-size: 12px;
   }
 }
 
