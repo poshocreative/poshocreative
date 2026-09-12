@@ -193,7 +193,7 @@ button.social-platform-option:hover,
 }
 
 .project-service-platform img,
-.project-service-platform .social-platform-logo > svg {
+.project-service-platform .social-platform-logo > svg, .material-symbols-rounded {
   width: 22px;
   height: 22px;
 }

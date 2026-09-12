@@ -883,7 +883,7 @@
   text-align: center;
 }
 
-.project-directory-empty > svg {
+.project-directory-empty > svg, .material-symbols-rounded {
   color:
     var(--brand-primary);
 }

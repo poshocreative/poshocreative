@@ -249,7 +249,7 @@
   gap: 9px;
 }
 
-.workspace-unread-summary > div > svg {
+.workspace-unread-summary > div > svg, .material-symbols-rounded {
   color:
     var(--brand-primary);
 }

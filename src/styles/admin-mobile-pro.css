@@ -1139,7 +1139,7 @@ a.active
   }
 
   .admin-dashboard-list-row
-  > svg {
+  > svg, .material-symbols-rounded {
     display: none;
   }
 
@@ -1328,7 +1328,7 @@ a.active
   }
 
   .admin-order-directory-card
-  > svg {
+  > svg, .material-symbols-rounded {
     display: none;
   }
 

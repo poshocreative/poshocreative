@@ -179,7 +179,7 @@
   gap: 10px;
 }
 
-.workspace-payment-security-note > svg {
+.workspace-payment-security-note > svg, .material-symbols-rounded {
   margin-top: 1px;
 
   flex: 0 0 auto;
@@ -698,7 +698,7 @@
   gap: 8px;
 }
 
-.workspace-payment-status-message > svg {
+.workspace-payment-status-message > svg, .material-symbols-rounded {
   margin-top: 1px;
 
   flex: 0 0 auto;
@@ -924,7 +924,7 @@
   font-size: 1rem;
 }
 
-.workspace-payment-receipt-brand > svg {
+.workspace-payment-receipt-brand > svg, .material-symbols-rounded {
   color: #14764b;
 }
 

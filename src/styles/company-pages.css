@@ -436,7 +436,7 @@
     var(--background);
 }
 
-.contact-hero-aside > svg {
+.contact-hero-aside > svg, .material-symbols-rounded {
   color: var(--brand-primary-light);
 }
 
@@ -545,7 +545,7 @@
   gap: 25px;
 }
 
-.contact-assurance-card > svg {
+.contact-assurance-card > svg, .material-symbols-rounded {
   flex: 0 0 auto;
   color: var(--brand-primary);
 }

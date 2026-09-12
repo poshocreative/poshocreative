@@ -323,7 +323,8 @@
   position: relative;
 }
 
-.auth-input-wrapper > svg {
+.auth-input-wrapper > svg,
+.auth-input-wrapper > .material-symbols-rounded {
   position: absolute;
 
   left: 16px;

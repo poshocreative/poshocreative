@@ -1064,7 +1064,7 @@
     nowrap;
 }
 
-.workspace-quick-links > a > svg {
+.workspace-quick-links > a > svg, .material-symbols-rounded {
   color:
     rgba(255, 255, 255, 0.4);
 }

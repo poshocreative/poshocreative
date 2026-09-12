@@ -1515,7 +1515,7 @@
   color: #ffffff;
 }
 
-.project-payment-card > svg {
+.project-payment-card > svg, .material-symbols-rounded {
   color:
     var(--brand-primary-light);
 }
@@ -2071,7 +2071,7 @@
     display: none;
   }
 
-  .workspace-order-row > svg {
+  .workspace-order-row > svg, .material-symbols-rounded {
     display: none;
   }
 
@@ -2109,7 +2109,7 @@
   }
 
   .workspace-orders-table-row
-  > svg {
+  > svg, .material-symbols-rounded {
     display: none;
   }
 

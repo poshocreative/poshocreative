@@ -82,7 +82,7 @@
   cursor: pointer;
 }
 
-.payment-method > svg {
+.payment-method > svg, .material-symbols-rounded {
   color: var(--brand-primary);
 }
 

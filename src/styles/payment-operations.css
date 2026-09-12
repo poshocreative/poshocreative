@@ -103,7 +103,7 @@
 }
 
 .admin-payment-attempt-method > div:first-child,
-.customer-payment-attempt-heading > div > svg {
+.customer-payment-attempt-heading > div > svg, .material-symbols-rounded {
   flex: 0 0 auto;
 }
 

@@ -537,7 +537,7 @@ font-size:1.1rem;
   gap: 18px;
 }
 
-.finance-request-heading > svg {
+.finance-request-heading > svg, .material-symbols-rounded {
   flex: 0 0 auto;
   color: var(--brand-primary, #6c2bd9);
 }
@@ -597,7 +597,7 @@ font-size:1.1rem;
   gap: 11px;
 }
 
-.finance-capability-notice > svg {
+.finance-capability-notice > svg, .material-symbols-rounded {
   flex: 0 0 auto;
   margin-top: 1px;
 }
@@ -737,7 +737,7 @@ font-size:1.1rem;
   gap: 10px;
 }
 
-.finance-request-state-heading > svg {
+.finance-request-state-heading > svg, .material-symbols-rounded {
   flex: 0 0 auto;
 }
 
@@ -1012,7 +1012,7 @@ font-size:1.1rem;
   color: var(--brand-primary, #6c2bd9);
 }
 
-.finance-collection-panel-heading > svg {
+.finance-collection-panel-heading > svg, .material-symbols-rounded {
   flex: 0 0 auto;
 }
 

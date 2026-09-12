@@ -305,7 +305,7 @@
   gap: 10px;
 }
 
-.admin-payment-method-control > div > svg {
+.admin-payment-method-control > div > svg, .material-symbols-rounded {
   color:
     var(--brand-primary);
 }

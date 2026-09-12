@@ -339,7 +339,7 @@ label {
 }
 
 .admin-access-input
-> svg {
+> svg, .material-symbols-rounded {
   position: absolute;
 
   top: 50%;
