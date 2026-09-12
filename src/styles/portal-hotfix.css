@@ -23,6 +23,120 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* ---------- anniversary banner ---------- */
+.anniversary-banner {
+  background: linear-gradient(135deg, #6C2BD9 0%, #9333ea 50%, #6C2BD9 100%);
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+}
+
+.anniversary-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 40px,
+    rgba(255, 255, 255, 0.03) 40px,
+    rgba(255, 255, 255, 0.03) 80px
+  );
+  pointer-events: none;
+}
+
+.anniversary-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  position: relative;
+  z-index: 1;
+}
+
+.anniversary-banner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.anniversary-banner-text {
+  white-space: nowrap;
+}
+
+.anniversary-banner-motto {
+  opacity: 0.7;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+/* divider dots between items */
+.anniversary-banner-text::before,
+.anniversary-banner-motto::before {
+  content: '·';
+  margin-right: 16px;
+  opacity: 0.5;
+}
+
+/* public (header) variant */
+.anniversary-banner-public {
+  border-bottom: 1px solid rgba(108, 43, 217, 0.15);
+}
+
+/* admin/client shell variant */
+.anniversary-banner-shell {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* homepage hero variant — slightly taller */
+.anniversary-banner-hero {
+  padding: 0;
+}
+
+.anniversary-banner-hero .anniversary-banner-inner {
+  padding: 10px 24px;
+  font-size: 14px;
+}
+
+.anniversary-banner-hero .anniversary-banner-badge {
+  font-size: 11.5px;
+  padding: 4px 12px;
+}
+
+@media (max-width: 640px) {
+  .anniversary-banner-inner {
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+
+  .anniversary-banner-motto {
+    display: none;
+  }
+
+  .anniversary-banner-motto::before {
+    display: none;
+  }
+
+  .anniversary-banner-hero .anniversary-banner-inner {
+    padding: 8px 14px;
+  }
+}
+
 /* ---------- dashboard rhythm: prevent card pile-up ---------- */
 
 .posho-preview-readonly {

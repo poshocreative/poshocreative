@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 
 
 import Icon from '../components/ui/Icon';
+import AnniversaryBanner from '../components/ui/AnniversaryBanner';
 import { services } from '../data/services';
 
 export default function Home() {
   return (
     <main className="home-page">
+      <AnniversaryBanner variant="hero" />
       <section className="hero-section">
         <div className="hero-decoration hero-decoration-one" />
         <div className="hero-decoration hero-decoration-two" />

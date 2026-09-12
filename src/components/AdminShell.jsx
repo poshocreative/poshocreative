@@ -8,6 +8,7 @@ import {
 
 
 import Icon from './ui/Icon';
+import AnniversaryBanner from './ui/AnniversaryBanner';
 import {
   NavLink,
   Outlet,
@@ -695,6 +696,8 @@ export default function AdminShell() {
             Protected
           </div>
         </header>
+
+        <AnniversaryBanner variant="shell" />
 
         <div className="admin-pro-content">
           <Outlet />
