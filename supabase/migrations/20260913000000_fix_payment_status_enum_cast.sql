@@ -1,110 +1,6 @@
--- ============================================================
--- PROJECT FINANCE ADJUSTMENTS
--- Two audited admin capabilities backed by immutable ledgers:
---   1. External payments  (client paid outside the website)
---   2. Project price reductions (contract value lowered by Management)
--- Money rules live in security-definer RPCs only. The frontend
--- never writes financial totals directly.
--- ============================================================
-
--- ------------------------------------------------------------
--- 1. PAYMENT SCOPE: recognise external payments distinctly
--- ------------------------------------------------------------
-
-alter table public.payment_transactions
-  drop constraint if exists payment_transactions_payment_scope_check;
-
-alter table public.payment_transactions
-  add constraint payment_transactions_payment_scope_check
-  check (
-    payment_scope is null or payment_scope in (
-      'full_balance',
-      'approved_installment',
-      'manual_payment',
-      'external_payment',
-      'adjustment',
-      'reversal',
-      'additional_cost'
-    )
-  );
-
-comment on column public.payment_transactions.payment_scope is
-  'What this payment applies to. external_payment = admin-recorded off-platform receipt, kept separate from Flutterwave rows.';
-
--- ------------------------------------------------------------
--- 2. PRICE ADJUSTMENT LEDGER (immutable, append-only)
--- ------------------------------------------------------------
-
-create table if not exists public.project_price_adjustments (
-  id uuid primary key default gen_random_uuid(),
-
-  order_id uuid not null
-    references public.orders(id)
-    on delete cascade,
-
-  previous_total_kobo bigint not null check (previous_total_kobo >= 0),
-  new_total_kobo bigint not null check (new_total_kobo > 0),
-  adjustment_kobo bigint not null,
-
-  previous_base_kobo bigint not null default 0 check (previous_base_kobo >= 0),
-  new_base_kobo bigint not null default 0 check (new_base_kobo >= 0),
-
-  reason text not null,
-
-  recorded_by uuid null
-    references auth.users(id)
-    on delete set null,
-
-  created_at timestamptz not null default now(),
-
-  check (new_total_kobo < previous_total_kobo)
-);
-
-comment on table public.project_price_adjustments is
-  'Immutable ledger of Management-approved project price reductions. Original and intermediate prices are preserved here forever; orders.quoted_amount_kobo only ever holds the current live total.';
-
-create index if not exists project_price_adjustments_order_idx
-  on public.project_price_adjustments (order_id, created_at);
-
-alter table public.project_price_adjustments enable row level security;
-
-drop policy if exists "price_adjustments_admin_all" on public.project_price_adjustments;
-create policy "price_adjustments_admin_all"
-  on public.project_price_adjustments
-  for select
-  to authenticated
-  using (public.has_admin_access());
-
-drop policy if exists "price_adjustments_team_read" on public.project_price_adjustments;
-create policy "price_adjustments_team_read"
-  on public.project_price_adjustments
-  for select
-  to authenticated
-  using (public.has_capability('finance.manage'));
-
-drop policy if exists "price_adjustments_customer_read" on public.project_price_adjustments;
-create policy "price_adjustments_customer_read"
-  on public.project_price_adjustments
-  for select
-  to authenticated
-  using (
-    exists (
-      select 1 from public.orders o
-      where o.id = project_price_adjustments.order_id
-        and o.user_id = auth.uid()
-    )
-  );
-
--- No insert / update / delete policies: rows are written only by the
--- security-definer RPC below, so history can never be edited or removed.
-
--- ------------------------------------------------------------
--- 3. RECORD EXTERNAL PAYMENT (security definer)
--- Off-platform receipts: bank transfer, cash, POS, external transfer.
--- Distinct scope + reference prefix keep them separate from
--- Flutterwave rows while sharing the manual ledger mechanics
--- (recalc, reversal, balance_after) with the existing system.
--- ------------------------------------------------------------
+-- FIX: Cast CASE expression text to payment_status enum type
+-- The previous migration assigned text literals to the enum column
+-- without an explicit cast, causing a type mismatch error.
 
 create or replace function public.admin_record_external_payment(
   p_order_id uuid,
@@ -157,8 +53,6 @@ begin
     raise exception 'The payment reference is too long.';
   end if;
 
-  -- Idempotency across both off-platform scopes so the same bank
-  -- reference cannot be recorded twice through either action.
   if v_ref is not null and exists (
     select 1 from public.payment_transactions
     where order_id = p_order_id
@@ -216,7 +110,7 @@ begin
 
   update public.orders
   set paid_amount_kobo = v_new_paid,
-    payment_status = case when v_new_paid >= v_total then 'successful' else 'processing' end::public.payment_status,
+    payment_status = (case when v_new_paid >= v_total then 'successful' else 'processing' end)::public.payment_status,
     customer_action_required = v_new_paid < v_total,
     customer_action_label = case when v_new_paid >= v_total then null
       else 'Payment received — remaining balance outstanding' end,
@@ -263,20 +157,6 @@ begin
   );
 end;
 $$;
-
-revoke all on function public.admin_record_external_payment(uuid, bigint, text, text, text, timestamptz, boolean) from anon, authenticated;
-grant execute on function public.admin_record_external_payment(uuid, bigint, text, text, text, timestamptz, boolean) to authenticated;
-
-comment on function public.admin_record_external_payment(uuid, bigint, text, text, text, timestamptz, boolean) is
-  'Records an off-platform (bank transfer, cash, POS) receipt as an immutable manual-ledger entry with the external_payment scope. Never touches Flutterwave rows.';
-
--- ------------------------------------------------------------
--- 4. REDUCE PROJECT PRICE (security definer, owner-level)
--- Lowers the agreed project total while preserving every
--- historical price in project_price_adjustments. The new total
--- can never drop below confirmed paid, and additional costs
--- are preserved by shrinking the base price, never the extras.
--- ------------------------------------------------------------
 
 create or replace function public.admin_adjust_project_price(
   p_order_id uuid,
@@ -354,7 +234,6 @@ begin
     raise exception 'Active additional costs already exceed the proposed total. Waive costs before reducing the price this far.';
   end if;
 
-  -- Bypass the quoted-total guard: this RPC is the audited path.
   perform set_config('posho.finance_write', '1', true);
 
   insert into public.project_price_adjustments (
@@ -425,9 +304,3 @@ begin
   );
 end;
 $$;
-
-revoke all on function public.admin_adjust_project_price(uuid, bigint, text, boolean) from anon, authenticated;
-grant execute on function public.admin_adjust_project_price(uuid, bigint, text, boolean) to authenticated;
-
-comment on function public.admin_adjust_project_price(uuid, bigint, text, boolean) is
-  'Owner-level project price reduction. Preserves every historical price in project_price_adjustments; the new total can never fall below confirmed paid.';
