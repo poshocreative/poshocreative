@@ -128,8 +128,7 @@ export default function Contact() {
           <div className="contact-option-grid">
             {contactOptions.map(
               ({
-                icon:
-                  Icon,
+                icon,
                 label,
                 value,
                 description,
@@ -159,6 +158,7 @@ export default function Contact() {
                 >
                   <div className="contact-option-icon">
                     <Icon
+                      name={icon}
                       size={22}
                     />
                   </div>

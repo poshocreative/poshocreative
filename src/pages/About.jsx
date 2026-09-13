@@ -172,8 +172,7 @@ export default function About() {
           <div className="company-principles-grid">
             {principles.map(
               ({
-                icon:
-                  Icon,
+                icon,
                 title,
                 text,
               }) => (
@@ -185,6 +184,7 @@ export default function About() {
                 >
                   <div>
                     <Icon
+                      name={icon}
                       size={21}
                     />
                   </div>
