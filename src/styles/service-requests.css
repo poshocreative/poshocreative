@@ -45,12 +45,12 @@ button.social-platform-option:hover,
   background: #f7f5f9;
 }
 
-.social-platform-logo img {
+.social-platform-logo svg {
   position: relative;
   z-index: 1;
-  width: 21px;
-  height: 21px;
-  object-fit: contain;
+  display: block;
+  width: 22px;
+  height: 22px;
 }
 
 .social-platform-logo-fallback {
@@ -133,7 +133,8 @@ button.social-platform-option:hover,
 
 .social-commerce-showcase .button-secondary {
   border-color: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  color: #000;
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .social-commerce-platforms > span {

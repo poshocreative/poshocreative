@@ -1,382 +1,185 @@
-import { Link } from 'react-router-dom';
-
-
+import { Link, useParams } from 'react-router-dom';
 
 import Icon from '../components/ui/Icon';
-import { services } from '../data/services';
+import { getServiceBySlug, services } from '../data/services';
 
-export default function Home() {
+export default function ServiceDetail() {
+  const { slug } = useParams();
+  const service = getServiceBySlug(slug);
+
+  if (!service) {
+    return (
+      <main className="service-detail-page">
+        <div className="container service-detail-not-found">
+          <Icon name="error" size={40} />
+          <h1>Service not found</h1>
+          <p>The service you are looking for does not exist or has been moved.</p>
+          <Link to="/services" className="button button-primary">
+            <Icon name="arrow_back" size={18} />
+            Back to services
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const otherServices = services.filter((s) => s.slug !== service.slug).slice(0, 3);
+
   return (
-    <main>
-      <section className="hero-section">
-        <div className="hero-decoration hero-decoration-one" />
-        <div className="hero-decoration hero-decoration-two" />
-
-        <div className="container hero-grid">
-          <div className="hero-copy">
-            <div className="eyebrow">
-              <span className="eyebrow-dot" />
-              Creative & Business Solutions
+    <main className="service-detail-page">
+      <section className="service-detail-hero">
+        <div className="container service-detail-hero-grid">
+          <div className="service-detail-hero-copy">
+            <div className="service-detail-breadcrumb">
+              <Link to="/services">Services</Link>
+              <Icon name="arrow_forward" size={14} />
+              <span>{service.shortTitle}</span>
             </div>
 
-            <h1>
-              We see what
-              <span> you imagine.</span>
-            </h1>
+            <div className="service-detail-icon">
+              <Icon name={service.icon} size={32} />
+            </div>
 
-            <p className="hero-description">
-              From websites and branding to social media,
-              advertising and business solutions, Posho Creative
-              helps turn ideas into meaningful results.
-            </p>
+            <span className="section-kicker">{service.number}</span>
 
-            <div className="hero-buttons">
-              <Link
-                to="/order"
-                className="button button-primary"
-              >
+            <h1>{service.title}</h1>
+
+            <p className="service-detail-tagline">{service.tagline}</p>
+
+            <p className="service-detail-hero-description">{service.heroDescription}</p>
+
+            <div className="service-detail-hero-actions">
+              <Link to="/order" className="button button-primary">
                 Start a project
                 <Icon name="arrow_forward" size={18} />
               </Link>
-
-              <Link
-                to="/services"
-                className="button button-secondary"
-              >
-                Explore our services
+              <Link to="/contact" className="button button-secondary">
+                Ask a question
               </Link>
             </div>
-
-            <div className="hero-trust">
-              <div>
-                <Icon name="verified" size={20} />
-                Professional service
-              </div>
-
-              <div>
-                <Icon name="verified" size={20} />
-                Built around your goals
-              </div>
-            </div>
           </div>
 
-          <div className="hero-visual">
-            <div className="hero-visual-card">
-              <div className="hero-card-top">
-                <span>
-                  POSHO CREATIVE
-                </span>
-
-                <Icon name="north_east" size={20} />
+          <div className="service-detail-hero-visual">
+            <div className="service-detail-hero-card">
+              <div className="service-detail-hero-card-icon">
+                <Icon name={service.icon} size={48} />
               </div>
-
-              <div className="hero-card-message">
-                <span>
-                  Imagine it.
-                </span>
-
-                <strong>
-                  Let's create it.
-                </strong>
-              </div>
-
-              <div className="hero-service-tags">
-                <span>Websites</span>
-                <span>Branding</span>
-                <span>Social Media</span>
-                <span>Advertising</span>
-                <span>Business</span>
-              </div>
+              <span>{service.title}</span>
+              <strong>Posho Creative</strong>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="intro-strip">
-        <div className="container intro-strip-inner">
-          <span>STRATEGY</span>
-          <span className="strip-dot" />
-
-          <span>DESIGN</span>
-          <span className="strip-dot" />
-
-          <span>TECHNOLOGY</span>
-          <span className="strip-dot" />
-
-          <span>BUSINESS</span>
-          <span className="strip-dot" />
-
-          <span>GROWTH</span>
-        </div>
-      </section>
-
-      <section className="section services-preview">
+      <section className="service-detail-services">
         <div className="container">
           <div className="section-heading">
             <div>
-              <span className="section-kicker">
-                What we do
-              </span>
-
-              <h2>
-                Everything your idea needs
-                <br />
-                to move forward.
-              </h2>
+              <span className="section-kicker">What we offer</span>
+              <h2>Services included</h2>
             </div>
+          </div>
 
-            <div className="section-heading-side">
-              <p>
-                Posho Creative brings creative, digital and
-                business services together in one place.
-              </p>
+          <div className="service-detail-services-grid">
+            {service.services.map((item) => (
+              <div key={item} className="service-detail-service-item">
+                <Icon name="check_circle" size={20} />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              <Link
-                to="/services"
-                className="text-link"
-              >
+      <section className="service-detail-outcomes">
+        <div className="container">
+          <div className="section-heading">
+            <div>
+              <span className="section-kicker">Expected outcomes</span>
+              <h2>What you get</h2>
+            </div>
+          </div>
+
+          <div className="service-detail-outcomes-grid">
+            {service.outcomes.map((outcome) => (
+              <article key={outcome.title} className="service-detail-outcome-card">
+                <Icon name="verified" size={24} />
+                <h3>{outcome.title}</h3>
+                <p>{outcome.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="service-detail-process">
+        <div className="container">
+          <div className="section-heading">
+            <div>
+              <span className="section-kicker">How it works</span>
+              <h2>Our process</h2>
+            </div>
+          </div>
+
+          <div className="service-detail-process-grid">
+            {service.process.map((step, index) => (
+              <div key={step} className="service-detail-process-step">
+                <strong>{String(index + 1).padStart(2, '0')}</strong>
+                <p>{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="service-detail-cta">
+        <div className="container">
+          <div className="service-detail-cta-card">
+            <div>
+              <span className="section-kicker">Ready to start?</span>
+              <h2>Let&apos;s bring your {service.shortTitle.toLowerCase()} to life.</h2>
+              <p>Tell us what you need and we will put together the right approach for your project.</p>
+            </div>
+            <Link to="/order" className="button button-primary">
+              Start your project
+              <Icon name="arrow_forward" size={18} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {otherServices.length > 0 && (
+        <section className="service-detail-related">
+          <div className="container">
+            <div className="section-heading">
+              <div>
+                <span className="section-kicker">Explore more</span>
+                <h2>Other services</h2>
+              </div>
+              <Link to="/services" className="text-link">
                 View all services
                 <Icon name="north_east" size={18} />
               </Link>
             </div>
-          </div>
 
-          <div className="services-grid">
-            {services.map((service) => {
-              const iconName = service.icon;
-
-              return (
-                <article
-                  className="service-card"
-                  key={service.slug}
-                >
-                  <div className="service-card-top">
-                    <div className="service-icon">
-                      <Icon name={iconName} size={24} />
-                    </div>
-
-                    <span>
-                      {service.number}
-                    </span>
+            <div className="service-detail-related-grid">
+              {otherServices.map((other) => (
+                <Link key={other.slug} to={`/services/${other.slug}`} className="service-detail-related-card">
+                  <div className="service-detail-related-icon">
+                    <Icon name={other.icon} size={24} />
                   </div>
-
-                  <h3>
-                    {service.title}
-                  </h3>
-
-                  <p>
-                    {service.description}
-                  </p>
-
-                  <Link
-                    to={`/services/${service.slug}`}
-                    aria-label={`View ${service.title}`}
-                  >
+                  <h3>{other.title}</h3>
+                  <p>{other.description}</p>
+                  <span>
                     Learn more
-                    <Icon name="north_east" size={17} />
-                  </Link>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="section why-section">
-        <div className="container why-grid">
-          <div className="why-copy">
-            <span className="section-kicker">
-              Why Posho Creative
-            </span>
-
-            <h2>
-              One creative partner.
-              <br />
-              Many possibilities.
-            </h2>
-
-            <p>
-              You should not need several different companies to
-              build a website, design your brand, promote your
-              business and manage your digital presence.
-            </p>
-
-            <p>
-              Posho Creative brings these capabilities together so
-              projects can move from idea to execution with a
-              clearer process.
-            </p>
-
-            <Link
-              to="/about"
-              className="button button-dark"
-            >
-              Discover Posho Creative
-              <Icon name="north_east" size={18} />
-            </Link>
-          </div>
-
-          <div className="why-cards">
-            <div className="why-card why-card-large">
-              <span>
-                01
-              </span>
-
-              <div>
-                <h3>
-                  Idea first.
-                </h3>
-
-                <p>
-                  We begin by understanding what you actually
-                  want to achieve.
-                </p>
-              </div>
-            </div>
-
-            <div className="why-card">
-              <span>
-                02
-              </span>
-
-              <div>
-                <h3>
-                  Built around you.
-                </h3>
-
-                <p>
-                  Your project should reflect your requirements,
-                  identity and objectives.
-                </p>
-              </div>
-            </div>
-
-            <div className="why-card">
-              <span>
-                03
-              </span>
-
-              <div>
-                <h3>
-                  Results matter.
-                </h3>
-
-                <p>
-                  Creative work should look professional while
-                  serving a real purpose.
-                </p>
-              </div>
+                    <Icon name="north_east" size={16} />
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="section process-section">
-        <div className="container">
-          <div className="section-heading">
-            <div>
-              <span className="section-kicker">
-                How it works
-              </span>
-
-              <h2>
-                From idea to execution.
-              </h2>
-            </div>
-          </div>
-
-          <div className="process-grid">
-            <div className="process-item">
-              <strong>
-                01
-              </strong>
-
-              <h3>
-                Choose a service
-              </h3>
-
-              <p>
-                Tell us the type of creative, digital or business
-                service you need.
-              </p>
-            </div>
-
-            <div className="process-item">
-              <strong>
-                02
-              </strong>
-
-              <h3>
-                Tell us your idea
-              </h3>
-
-              <p>
-                Share your goals, requirements, references and
-                important project details.
-              </p>
-            </div>
-
-            <div className="process-item">
-              <strong>
-                03
-              </strong>
-
-              <h3>
-                We get to work
-              </h3>
-
-              <p>
-                Your project moves through the appropriate
-                creative or business workflow.
-              </p>
-            </div>
-
-            <div className="process-item">
-              <strong>
-                04
-              </strong>
-
-              <h3>
-                Receive the result
-              </h3>
-
-              <p>
-                We complete and deliver the agreed service based
-                on your project requirements.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section final-cta-section">
-        <div className="container">
-          <div className="final-cta">
-            <div>
-              <span>
-                HAVE SOMETHING IN MIND?
-              </span>
-
-              <h2>
-                Your next idea deserves
-                <br />
-                more than imagination.
-              </h2>
-            </div>
-
-            <Link
-              to="/order"
-              className="cta-circle"
-            >
-              <span>
-                Start a project
-              </span>
-
-              <Icon name="north_east" size={24} />
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }
