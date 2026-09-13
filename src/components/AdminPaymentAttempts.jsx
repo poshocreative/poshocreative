@@ -13,6 +13,10 @@ import {
   cancelAdminPayment,
 } from '../lib/adminPayments';
 
+import { useToast } from './ui/Toast';
+
+import { useAdminPaymentPoller } from './ui/useAdminPaymentPoller';
+
 import {
   formatMoney,
   formatOrderStatus,
@@ -175,6 +179,55 @@ export default function AdminPaymentAttempts({
     setMessage,
   ] =
     useState('');
+
+  const toast = useToast();
+
+  const hasPending =
+    attempts.some(
+      (
+        a,
+      ) =>
+        [
+          'pending',
+          'processing',
+        ].includes(
+          a.status,
+        ),
+    );
+
+  useAdminPaymentPoller({
+    enabled: !loading && hasPending,
+    onStatusChange:
+      ({
+        confirmed,
+        cancelled,
+      }) => {
+        for (
+          const entry
+          of confirmed
+        ) {
+          if (
+            entry.orderReference
+          ) {
+            toast.success(
+              `Payment confirmed for ${entry.orderReference}.`,
+            );
+          }
+        }
+
+        for (
+          const entry
+          of cancelled
+        ) {
+          toast.info(
+            entry.message ||
+              'A pending payment was automatically cancelled after 5 minutes.',
+          );
+        }
+
+        load();
+      },
+  });
 
   const load =
     useCallback(

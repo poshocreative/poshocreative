@@ -19,6 +19,10 @@ import AdminPartPaymentInbox from '../components/payment/AdminPartPaymentInbox';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import BrandLoader from '../components/BrandLoader';
 
+import { useToast } from '../components/ui/Toast';
+
+import { useAdminPaymentPoller } from '../components/ui/useAdminPaymentPoller';
+
 import {
   formatMoney,
   formatOrderStatus,
@@ -166,6 +170,51 @@ export default function AdminPayments() {
     setPendingMethod,
   ] =
     useState(null);
+
+  const toast = useToast();
+
+  const hasPending =
+    payments.some(
+      (
+        p,
+      ) =>
+        [
+          'pending',
+          'processing',
+        ].includes(
+          p.status,
+        ),
+    );
+
+  useAdminPaymentPoller({
+    enabled: !loading && hasPending,
+    onStatusChange:
+      ({
+        confirmed,
+        cancelled,
+      }) => {
+        for (
+          const entry
+          of confirmed
+        ) {
+          toast.success(
+            `Payment confirmed for ${entry.orderReference || 'project'}.`,
+          );
+        }
+
+        for (
+          const entry
+          of cancelled
+        ) {
+          toast.info(
+            entry.message ||
+              'A pending payment was automatically cancelled after 5 minutes.',
+          );
+        }
+
+        load();
+      },
+  });
 
   const load =
     async () => {

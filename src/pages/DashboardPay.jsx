@@ -19,6 +19,10 @@ import {
 
 import BrandLoader from '../components/BrandLoader';
 
+import { useToast } from '../components/ui/Toast';
+
+import { usePaymentPoller } from '../components/ui/usePaymentPoller';
+
 import {
   formatMoney,
   getOrderByReference,
@@ -128,6 +132,56 @@ export default function DashboardPay() {
     setCheckoutBlocked,
   ] =
     useState(false);
+
+  const toast = useToast();
+
+  const isPending =
+    payment &&
+    [
+      'pending',
+      'processing',
+    ].includes(
+      payment.status,
+    );
+
+  usePaymentPoller({
+    enabled:
+      !loading &&
+      isPending,
+    onStatusChange:
+      ({
+        confirmed,
+        cancelled,
+      }) => {
+        for (
+          const entry
+          of confirmed
+        ) {
+          if (
+            entry.orderReference ===
+            reference
+          ) {
+            window.location.assign(
+              resolvePortalPath(
+                `/dashboard/orders/${reference}`,
+                portalRoutes,
+              ),
+            );
+            return;
+          }
+        }
+
+        for (
+          const entry
+          of cancelled
+        ) {
+          toast.info(
+            entry.message ||
+              'This pending payment was automatically cancelled after 5 minutes.',
+          );
+        }
+      },
+  });
 
   useEffect(() => {
     document.title =

@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useState,
 } from 'react';
@@ -13,6 +14,8 @@ import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
 
+import { usePaymentPoller } from '../components/ui/usePaymentPoller';
+
 import {
   verifyPayment,
 } from '../lib/payments';
@@ -20,9 +23,6 @@ import {
 import {
   formatMoney,
 } from '../lib/orders';
-
-const MAX_VERIFICATION_ATTEMPTS = 10;
-const VERIFICATION_INTERVAL_MS = 3500;
 
 export default function PaymentReturn() {
   const [
@@ -56,12 +56,6 @@ export default function PaymentReturn() {
     useState(null);
 
   const [
-    retryKey,
-    setRetryKey,
-  ] =
-    useState(0);
-
-  const [
     autoChecking,
     setAutoChecking,
   ] =
@@ -70,28 +64,14 @@ export default function PaymentReturn() {
   useEffect(() => {
     document.title =
       'Payment Verification | Posho Creative';
+  }, []);
 
-    let active =
-      true;
-
-    let timer =
-      null;
-
-    const wait =
-      () =>
-        new Promise(
-          (resolve) => {
-            timer =
-              window.setTimeout(
-                resolve,
-                VERIFICATION_INTERVAL_MS,
-              );
-          },
-        );
-
-    const verify =
+  const doCheck =
+    useCallback(
       async () => {
-        if (!paymentId) {
+        if (
+          !paymentId
+        ) {
           setStatus(
             'error',
           );
@@ -103,146 +83,166 @@ export default function PaymentReturn() {
           return;
         }
 
-        setStatus(
-          'checking',
-        );
+        try {
+          setAutoChecking(
+            true,
+          );
 
-        setMessage('');
-        setAutoChecking(true);
+          setStatus(
+            'checking',
+          );
 
-        for (
-          let attempt = 1;
-          attempt <= MAX_VERIFICATION_ATTEMPTS;
-          attempt += 1
-        ) {
-          try {
-            const result =
-              await verifyPayment(
-                paymentId,
-              );
+          setMessage('');
 
-            if (!active) {
-              return;
-            }
+          const result =
+            await verifyPayment(
+              paymentId,
+            );
 
+          if (
+            result?.success &&
+            result?.status ===
+              'successful'
+          ) {
             setPaymentResult(
               result,
             );
 
-            if (
-              result?.success &&
-              result?.status ===
-                'successful'
-            ) {
-              setMessage(
-                result.message ||
-                  'Flutterwave confirmed your payment.',
-              );
-
-              setAutoChecking(false);
-
-              setStatus(
-                'success',
-              );
-
-              return;
-            }
-
-            if (
-              [
-                'failed',
-                'cancelled',
-              ].includes(
-                result?.status,
-              )
-            ) {
-              setMessage(
-                result.message ||
-                  'Flutterwave did not complete this payment.',
-              );
-
-              setAutoChecking(false);
-
-              setStatus(
-                'error',
-              );
-
-              return;
-            }
+            setMessage(
+              result.message ||
+                'Flutterwave confirmed your payment.',
+            );
 
             setStatus(
-              'pending',
+              'success',
             );
 
-            setMessage(
-              result?.message ||
-                'Flutterwave has not confirmed the payment yet.',
-            );
-          } catch (
-            error
-          ) {
-            if (!active) {
-              return;
-            }
-
-            if (
-              attempt ===
-              MAX_VERIFICATION_ATTEMPTS
-            ) {
-              setStatus(
-                'error',
-              );
-
-              setMessage(
-                error.message ||
-                  'Payment verification could not be completed.',
-              );
-
-              setAutoChecking(false);
-
-              return;
-            }
-
-            setStatus(
-              'pending',
-            );
-
-            setMessage(
-              'We are reconnecting to Flutterwave to confirm your payment.',
-            );
+            return;
           }
 
           if (
-            attempt <
-            MAX_VERIFICATION_ATTEMPTS
+            [
+              'failed',
+              'cancelled',
+            ].includes(
+              result?.status,
+            )
           ) {
-            await wait();
+            setPaymentResult(
+              result,
+            );
 
-            if (!active) {
-              return;
-            }
+            setMessage(
+              result.message ||
+                'Flutterwave did not complete this payment.',
+            );
+
+            setStatus(
+              'error',
+            );
+
+            return;
           }
+
+          setStatus(
+            'pending',
+          );
+
+          setMessage(
+            result?.message ||
+              'Flutterwave has not confirmed the payment yet. We are checking automatically every 10 seconds.',
+          );
+        } catch {
+          setStatus(
+            'pending',
+          );
+
+          setMessage(
+            'We are reconnecting to Flutterwave to confirm your payment.',
+          );
+        } finally {
+          setAutoChecking(
+            false,
+          );
+        }
+      },
+      [
+        paymentId,
+      ],
+    );
+
+  useEffect(
+    () => {
+      doCheck();
+    },
+    [
+      doCheck,
+    ],
+  );
+
+  usePaymentPoller({
+    enabled:
+      paymentId &&
+      [
+        'pending',
+        'checking',
+      ].includes(
+        status,
+      ),
+    onStatusChange:
+      ({
+        confirmed,
+        cancelled,
+      }) => {
+        for (
+          const entry
+          of confirmed
+        ) {
+          setPaymentResult(
+            {
+              orderReference:
+                entry.orderReference,
+              fullyPaid:
+                entry.fullyPaid,
+              remainingBalanceKobo:
+                null,
+            },
+          );
+
+          setMessage(
+            entry.message ||
+              'Flutterwave confirmed your payment.',
+          );
+
+          setStatus(
+            'success',
+          );
+
+          return;
         }
 
-        setAutoChecking(false);
-      };
+        for (
+          const entry
+          of cancelled
+        ) {
+          if (
+            entry.id ===
+            paymentId
+          ) {
+            setMessage(
+              entry.message ||
+                'This payment was not confirmed within 5 minutes and has been automatically cancelled. No money was charged.',
+            );
 
-    verify();
+            setStatus(
+              'cancelled',
+            );
 
-    return () => {
-      active =
-        false;
-
-      if (timer) {
-        window.clearTimeout(
-          timer,
-        );
-      }
-    };
-  }, [
-    paymentId,
-    retryKey,
-  ]);
+            return;
+          }
+        }
+      },
+  });
 
   if (
     status ===
@@ -302,6 +302,34 @@ export default function PaymentReturn() {
               View updated project
             </Link>
           </>
+        ) : status ===
+        'cancelled' ? (
+          <>
+            <div className="payment-return-icon">
+              <Icon name="cancel" 
+                size={36}
+              />
+            </div>
+
+            <span className="workspace-kicker">
+              PAYMENT CANCELLED
+            </span>
+
+            <h1>
+              This payment was not confirmed.
+            </h1>
+
+            <p>
+              {message}
+            </p>
+
+            <Link
+              to="/dashboard/payments"
+              className="button button-primary"
+            >
+              View payments
+            </Link>
+          </>
         ) : (
           <>
             <div
@@ -337,13 +365,13 @@ export default function PaymentReturn() {
                 type="button"
                 className="button button-primary"
                 onClick={() =>
-                  setRetryKey((current) => current + 1)
+                  doCheck()
                 }
                 disabled={autoChecking}
               >
                 <Icon name="autorenew" size={16} />
                 {autoChecking
-                  ? 'Checking automatically…'
+                  ? 'Checking…'
                   : 'Check again now'}
               </button>
 

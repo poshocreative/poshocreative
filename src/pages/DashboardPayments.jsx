@@ -11,6 +11,10 @@ import Link from '../components/PortalLink';
 
 import BrandLoader from '../components/BrandLoader';
 
+import { useToast } from '../components/ui/Toast';
+
+import { usePaymentPoller } from '../components/ui/usePaymentPoller';
+
 import {
   formatMoney,
 } from '../lib/orders';
@@ -326,6 +330,51 @@ export default function DashboardPayments() {
     setMessage,
   ] =
     useState('');
+
+  const toast = useToast();
+
+  const hasPending =
+    payments.some(
+      (
+        p,
+      ) =>
+        [
+          'pending',
+          'processing',
+        ].includes(
+          p.status,
+        ),
+    );
+
+  usePaymentPoller({
+    enabled: !loading && hasPending,
+    onStatusChange:
+      ({
+        confirmed,
+        cancelled,
+      }) => {
+        for (
+          const entry
+          of confirmed
+        ) {
+          toast.success(
+            `Payment confirmed for ${entry.orderReference || 'project'}.`,
+          );
+        }
+
+        for (
+          const entry
+          of cancelled
+        ) {
+          toast.info(
+            entry.message ||
+              'A pending payment was automatically cancelled after 5 minutes.',
+          );
+        }
+
+        loadPayments();
+      },
+  });
 
   const loadPayments =
     async () => {
