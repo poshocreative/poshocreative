@@ -2,6 +2,7 @@ import Icon from './ui/Icon';
 import {
   socialPlatforms,
   socialPlatformLogoUrl,
+  LINKEDIN_PATH,
 } from '../data/socialPlatforms';
 
 export function SocialPlatformLogo({ platform }) {
@@ -13,6 +14,14 @@ export function SocialPlatformLogo({ platform }) {
         color="#6C2BD9"
         aria-hidden="true"
       />
+    );
+  }
+
+  if (platform.id === 'linkedin') {
+    return (
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="#0A66C2" aria-hidden="true">
+        <path d={LINKEDIN_PATH} />
+      </svg>
     );
   }
 
