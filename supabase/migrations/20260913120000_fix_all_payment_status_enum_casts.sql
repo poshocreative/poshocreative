@@ -1,9 +1,9 @@
 -- FIX: Cast CASE expression text to payment_status enum type
 -- Multiple RPCs assign text literals to the enum column without an
 -- explicit cast, causing: column "payment_status" is of type
--- payment_status but expression is of type text.
+-- payment_status but expression is of type text
 
--- 7a. admin_record_manual_payment
+-- 7a. admin_record_manual_payment (fix line 356)
 create or replace function public.admin_record_manual_payment(
   p_order_id uuid,
   p_amount_kobo bigint,
@@ -83,7 +83,7 @@ begin
   v_outstanding := greatest(v_total - v_paid, 0);
 
   if p_amount_kobo > v_outstanding then
-    raise exception 'The recorded amount (%) exceeds the outstanding balance (%). Record an adjustment workflow if the total changed.', p_amount_kobo, v_outstanding;
+    raise exception 'The recorded amount (%) exceeds the outstanding balance (%).', p_amount_kobo, v_outstanding;
   end if;
 
   v_new_paid := v_paid + p_amount_kobo;
@@ -163,7 +163,7 @@ begin
 end;
 $$;
 
--- 7b. admin_reverse_payment
+-- 7b. admin_reverse_payment (fix line 493)
 create or replace function public.admin_reverse_payment(
   p_payment_id uuid,
   p_reason text
@@ -196,7 +196,7 @@ begin
   end if;
 
   if v_payment.payment_type = 'provider' then
-    raise exception 'Provider-verified payments cannot be reversed from here. Provider transactions remain provider controlled.';
+    raise exception 'Provider-verified payments cannot be reversed from here.';
   end if;
 
   if v_payment.status is distinct from 'successful' then
@@ -279,7 +279,7 @@ begin
 end;
 $$;
 
--- 7c. admin_adjust_payment
+-- 7c. admin_adjust_payment (fix line 602)
 create or replace function public.admin_adjust_payment(
   p_order_id uuid,
   p_amount_kobo bigint,
@@ -326,7 +326,7 @@ begin
   end if;
 
   if v_new_paid > v_total then
-    raise exception 'This adjustment would take confirmed payments above the project value. Adjust the project value first.';
+    raise exception 'This adjustment would take confirmed payments above the project value.';
   end if;
 
   insert into public.payment_transactions (
@@ -386,10 +386,3 @@ begin
   );
 end;
 $$;
-
--- Also fix the reconcile-payment shared module's syncSuccessfulPaymentOrder
--- (PostgREST handles enum conversion from JSON, but the edge function
--- poll-payment-status and admin-poll-payment-status set text directly)
-
--- No SQL fix needed for edge functions — they use the Supabase JS client
--- which goes through PostgREST and handles enum casting automatically.
