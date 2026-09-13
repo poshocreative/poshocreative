@@ -216,7 +216,7 @@ export const services = [
     number: '05',
     title: 'Business Services',
     shortTitle: 'Business',
-    icon: 'corporate_fare',
+    icon: 'apartment',
 
     tagline: 'Practical support for starting, presenting and growing a business.',
 
