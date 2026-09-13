@@ -19,11 +19,7 @@ export function SocialPlatformLogo({ platform }) {
   return (
     <img
       src={socialPlatformLogoUrl(platform)}
-      alt=""
-      width="20"
-      height="20"
-      loading="lazy"
-      aria-hidden="true"
+      alt={platform.name}
     />
   );
 }
