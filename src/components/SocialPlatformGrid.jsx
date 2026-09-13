@@ -1,24 +1,31 @@
 import Icon from './ui/Icon';
-
-import { LOGO_COMPONENTS } from '../data/socialLogos';
-import { socialPlatforms } from '../data/socialPlatforms';
+import {
+  socialPlatforms,
+  socialPlatformLogoUrl,
+} from '../data/socialPlatforms';
 
 export function SocialPlatformLogo({ platform }) {
   if (platform.id === 'other') {
-    return <Icon name="add" size={22} color="#6C2BD9" aria-hidden="true" />;
-  }
-
-  const LogoComponent = LOGO_COMPONENTS[platform.id];
-
-  if (!LogoComponent) {
     return (
-      <span className="social-platform-logo-fallback" aria-hidden="true">
-        {platform.name.slice(0, 1)}
-      </span>
+      <Icon
+        name="add"
+        size={20}
+        color="#6C2BD9"
+        aria-hidden="true"
+      />
     );
   }
 
-  return <LogoComponent />;
+  return (
+    <img
+      src={socialPlatformLogoUrl(platform)}
+      alt=""
+      width="20"
+      height="20"
+      loading="lazy"
+      aria-hidden="true"
+    />
+  );
 }
 
 export default function SocialPlatformGrid({

@@ -45,12 +45,13 @@ button.social-platform-option:hover,
   background: #f7f5f9;
 }
 
-.social-platform-logo svg {
+.social-platform-logo img {
   position: relative;
   z-index: 1;
   display: block;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .social-platform-logo-fallback {

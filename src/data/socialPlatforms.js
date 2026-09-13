@@ -84,5 +84,5 @@ export function getSocialPlatform(platformId) {
 }
 
 export function socialPlatformLogoUrl(platform) {
-  return `https://cdn.simpleicons.org/${platform.icon}/${platform.color}`;
+  return `https://cdn.simpleicons.org/${platform.icon}`;
 }
