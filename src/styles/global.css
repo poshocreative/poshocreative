@@ -2747,7 +2747,7 @@ a {
   margin-bottom: auto;
 }
 
-.service-detail-hero-card span {
+.service-detail-hero-card > span {
   font-family: 'Manrope', sans-serif;
   font-size: clamp(1.5rem, 3vw, 1.8rem);
   font-weight: 700;
@@ -2906,12 +2906,23 @@ a {
   gap: 40px;
   padding: 56px 60px;
   border-radius: 28px;
-  background: var(--brand-primary);
+  background:
+    radial-gradient(
+      circle at 90% 5%,
+      rgba(139, 91, 234, 0.45),
+      transparent 32%
+    ),
+    linear-gradient(
+      145deg,
+      #17131d,
+      #111015
+    );
   color: #fff;
+  box-shadow: 0 32px 90px rgba(23, 11, 40, 0.17);
 }
 
 .service-detail-cta-card .section-kicker {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--brand-primary-light);
 }
 
 .service-detail-cta-card h2 {

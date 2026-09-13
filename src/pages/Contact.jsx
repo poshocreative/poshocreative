@@ -77,7 +77,7 @@ export default function Contact() {
           </div>
 
           <aside className="contact-hero-aside">
-            <Icon name="auto_awesome" 
+            <Icon name="star" 
               size={24}
             />
 

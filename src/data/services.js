@@ -269,7 +269,7 @@ export const services = [
     number: '06',
     title: 'Custom Creative Solutions',
     shortTitle: 'Creative Solutions',
-    icon: 'auto_awesome',
+    icon: 'star',
 
     tagline: 'Not every great idea fits inside a predefined service.',
 

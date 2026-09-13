@@ -9,7 +9,7 @@ export default function AnniversaryBanner({ variant = 'public' }) {
     <div className={`anniversary-banner anniversary-banner-${variant}`} role="status" aria-label="Posho Creative celebrating one year">
       <div className="anniversary-banner-inner">
         <span className="anniversary-banner-badge">
-          <Icon name="auto_awesome" size={14} />
+          <Icon name="star" size={14} />
           1 YEAR
         </span>
 

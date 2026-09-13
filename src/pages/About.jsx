@@ -12,7 +12,7 @@ const principles = [
     text: 'Every project begins with understanding the real objective, audience and outcome before execution starts.',
   },
   {
-    icon: 'auto_awesome',
+    icon: 'star',
     title: 'Creativity with purpose',
     text: 'Strong creative work should do more than look impressive. It should communicate, position and perform.',
   },
