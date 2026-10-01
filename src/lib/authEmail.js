@@ -1,7 +1,13 @@
 import { supabase } from './supabase';
 
-export const AUTH_SENDER_EMAIL =
-  'workspace-admin@poshocreative.com.ng';
+// Public display sender for all auth mail. The mailbox that *logs in* to
+// Gmail SMTP stays workspace-admin (dashboard > Auth > SMTP > Username),
+// but the address users *see* (dashboard > Auth > SMTP > Sender email)
+// must be this no-reply address, with Sender name "Posho Creative".
+// It must also exist as a verified "Send mail as" alias inside the
+// workspace-admin Gmail settings, otherwise Gmail rewrites the From back.
+export const NO_REPLY_EMAIL =
+  'no-reply@poshocreative.com.ng';
 
 export const AUTH_RESEND_COOLDOWN_SECONDS = 60;
 
@@ -36,6 +42,53 @@ export function normalizeEmail(email) {
 export function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
     normalizeEmail(email),
+  );
+}
+
+export const PASSWORD_STRENGTH_LABELS = [
+  'Too short',
+  'Weak',
+  'Fair',
+  'Good',
+  'Strong',
+];
+
+export function scorePassword(password) {
+  const value = String(
+    password || '',
+  );
+
+  if (!value) {
+    return 0;
+  }
+
+  let score = 0;
+
+  if (value.length >= 8) {
+    score += 1;
+  }
+
+  if (
+    /[a-z]/.test(value) &&
+    /[A-Z]/.test(value)
+  ) {
+    score += 1;
+  }
+
+  if (/\d/.test(value)) {
+    score += 1;
+  }
+
+  if (
+    /[^A-Za-z0-9]/.test(value) ||
+    value.length >= 12
+  ) {
+    score += 1;
+  }
+
+  return Math.min(
+    4,
+    Math.max(1, score),
   );
 }
 

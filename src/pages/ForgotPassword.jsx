@@ -10,7 +10,6 @@ import { useAuth } from '../context/AuthContext';
 
 import {
   AUTH_RESEND_COOLDOWN_SECONDS,
-  AUTH_SENDER_EMAIL,
   isValidEmail,
   mapAuthErrorToMessage,
 } from '../lib/authEmail';
@@ -168,12 +167,10 @@ export default function ForgotPassword() {
 
             <p>
               Request a secure
-              password reset link.
-              It arrives from{' '}
-              {AUTH_SENDER_EMAIL}{' '}
-              within a minute.
-              Check spam if you
-              don't see it.
+              password reset code.
+              It arrives within a
+              minute. Check spam if
+              you don't see it.
             </p>
           </div>
 
@@ -195,8 +192,8 @@ export default function ForgotPassword() {
 
               <p>
                 {sent
-                  ? `We sent a reset link to ${email}. It expires soon, so open it promptly.`
-                  : 'Enter your account email and we will send a secure reset link.'}
+                  ? `We sent a reset code to ${email}. Enter it on the next step — it expires soon.`
+                  : 'Enter your account email and we will send a secure 6-digit reset code.'}
               </p>
             </div>
 
@@ -257,8 +254,8 @@ export default function ForgotPassword() {
                   }
                 >
                   {submitting
-                    ? 'Sending reset link...'
-                    : 'Send reset link'}
+                    ? 'Sending reset code...'
+                    : 'Send reset code'}
 
                   {!submitting && (
                     <Icon
@@ -276,9 +273,20 @@ export default function ForgotPassword() {
                   </div>
                 )}
 
+                <Link
+                  to={`/verify-otp?email=${encodeURIComponent(email)}&type=recovery`}
+                  className="button button-primary auth-submit-button"
+                >
+                  Enter reset code
+                  <Icon
+                    name="arrow_forward"
+                    size={18}
+                  />
+                </Link>
+
                 <button
                   type="button"
-                  className="button button-primary auth-submit-button"
+                  className="button button-secondary auth-secondary-button"
                   disabled={
                     submitting ||
                     cooldown > 0
@@ -291,29 +299,14 @@ export default function ForgotPassword() {
                     ? `Resend available in ${cooldown}s`
                     : submitting
                       ? 'Resending...'
-                      : 'Resend reset email'}
+                      : 'Resend code'}
                 </button>
 
-                <p
-                  className="auth-switch-copy"
-                  style={{
-                    textAlign:
-                      'left',
-                    lineHeight: 1.7,
-                  }}
-                >
+                <p className="auth-hint">
                   Didn't get it? Check
-                  spam for{' '}
-                  {AUTH_SENDER_EMAIL},
+                  your spam folder,
                   wait a minute, then
-                  resend. Prefer a
-                  one-time code?{' '}
-                  <Link
-                    to={`/verify-otp?email=${encodeURIComponent(email)}&type=recovery`}
-                  >
-                    Enter OTP code
-                  </Link>
-                  .
+                  resend.
                 </p>
               </>
             )}

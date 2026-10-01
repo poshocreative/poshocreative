@@ -10,13 +10,13 @@ import {
 } from 'react-router-dom';
 
 import Icon from '../components/ui/Icon';
+import OtpInput from '../components/OtpInput';
 import Link from '../components/PortalLink';
 
 import { useAuth } from '../context/AuthContext';
 
 import {
   AUTH_RESEND_COOLDOWN_SECONDS,
-  AUTH_SENDER_EMAIL,
   emailRedirectTo,
   isValidEmail,
   mapAuthErrorToMessage,
@@ -63,11 +63,11 @@ export default function VerifyOtp() {
         : 'signup',
     );
 
-  const [code, setCode] =
-    useState('');
-
   const [submitting, setSubmitting] =
     useState(false);
+
+  const [otpResetKey, setOtpResetKey] =
+    useState(0);
 
   const [resending, setResending] =
     useState(false);
@@ -116,32 +116,34 @@ export default function VerifyOtp() {
     [type],
   );
 
-  const handleVerify = async (
-    event,
+  const handleOtpCode = async (
+    rawCode,
   ) => {
-    event.preventDefault();
+    if (
+      submitting ||
+      String(rawCode || '').length <
+        6
+    ) {
+      return;
+    }
 
     if (!isValidEmail(email)) {
       setError(
         'Enter the email address that received the code.',
       );
 
-      return;
-    }
-
-    const cleanCode = String(code)
-      .replace(/\s+/g, '')
-      .trim();
-
-    if (
-      cleanCode.length < 6
-    ) {
-      setError(
-        'Enter the 6-digit code from your email.',
+      setOtpResetKey(
+        (current) => current + 1,
       );
 
       return;
     }
+
+    const cleanCode = String(
+      rawCode,
+    )
+      .replace(/\s+/g, '')
+      .trim();
 
     setSubmitting(true);
     setError('');
@@ -166,32 +168,44 @@ export default function VerifyOtp() {
         ),
       );
 
+      setOtpResetKey(
+        (current) => current + 1,
+      );
+
       return;
     }
 
     setInfo(
-      'Code accepted. Opening your workspace...',
+      type === 'recovery'
+        ? 'Code accepted. Taking you to set a new password...'
+        : 'Code accepted. Opening your workspace...',
     );
 
-    const target =
-      nextRoutes?.customerBase ||
-      portalRoutes?.customerBase ||
-      '/login';
-
     window.setTimeout(() => {
-      if (
-        data?.session &&
-        target &&
-        target !== '/login'
-      ) {
-        navigate(target, {
-          replace: true,
-        });
-      } else {
+      if (!data?.session) {
         navigate('/login', {
           replace: true,
         });
+
+        return;
       }
+
+      if (type === 'recovery') {
+        navigate('/reset-password', {
+          replace: true,
+        });
+
+        return;
+      }
+
+      const target =
+        nextRoutes?.customerBase ||
+        portalRoutes?.customerBase ||
+        '/login';
+
+      navigate(target, {
+        replace: true,
+      });
     }, 900);
   };
 
@@ -328,11 +342,10 @@ export default function VerifyOtp() {
 
             <p>
               Enter the 6-digit code
-              sent from{' '}
-              {AUTH_SENDER_EMAIL}.
-              Codes expire quickly.
-              Check spam and
-              promotions if needed.
+              we emailed you. Codes
+              expire quickly. Check
+              spam and promotions if
+              needed.
             </p>
           </div>
 
@@ -362,10 +375,7 @@ export default function VerifyOtp() {
               </p>
             </div>
 
-            <form
-              className="auth-form"
-              onSubmit={handleVerify}
-            >
+            <div className="auth-form">
               <div className="auth-field">
                 <label htmlFor="otpEmail">
                   Email address
@@ -414,17 +424,7 @@ export default function VerifyOtp() {
                         .value,
                     )
                   }
-                  style={{
-                    minHeight: 55,
-                    padding:
-                      '0 16px',
-                    borderRadius: 15,
-                    border:
-                      '1px solid var(--border)',
-                    background:
-                      '#ffffff',
-                    fontSize: 14,
-                  }}
+                  className="auth-select"
                 >
                   {OTP_TYPES.map(
                     (
@@ -447,40 +447,28 @@ export default function VerifyOtp() {
                 </select>
               </div>
 
-              <div className="auth-field">
-                <label htmlFor="otpCode">
-                  6-digit code
-                </label>
+              <OtpInput
+                length={6}
+                resetKey={
+                  otpResetKey
+                }
+                disabled={
+                  submitting
+                }
+                hasError={Boolean(
+                  error,
+                )}
+                onComplete={
+                  handleOtpCode
+                }
+              />
 
-                <input
-                  id="otpCode"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={8}
-                  value={code}
-                  onChange={(
-                    event,
-                  ) => {
-                    setCode(
-                      event.target.value.replace(
-                        /[^\d]/g,
-                        '',
-                      ),
-                    );
-
-                    setError('');
-                  }}
-                  placeholder="123456"
-                  style={{
-                    letterSpacing:
-                      '0.35em',
-                    textAlign:
-                      'center',
-                    fontWeight: 700,
-                    fontSize: 18,
-                  }}
-                />
-              </div>
+              {submitting && (
+                <div className="auth-check-card">
+                  <span className="auth-check-spinner" />
+                  Verifying code...
+                </div>
+              )}
 
               {error && (
                 <div className="auth-error">
@@ -489,42 +477,14 @@ export default function VerifyOtp() {
               )}
 
               {info && !error && (
-                <div
-                  className="auth-error"
-                  style={{
-                    borderColor:
-                      'rgba(32, 135, 72, 0.25)',
-                    background:
-                      'rgba(32, 135, 72, 0.07)',
-                    color: '#207848',
-                  }}
-                >
+                <div className="auth-success">
                   {info}
                 </div>
               )}
 
               <button
-                type="submit"
-                className="button button-primary auth-submit-button"
-                disabled={
-                  submitting
-                }
-              >
-                {submitting
-                  ? 'Verifying...'
-                  : 'Verify code'}
-
-                {!submitting && (
-                  <Icon
-                    name="arrow_forward"
-                    size={18}
-                  />
-                )}
-              </button>
-
-              <button
                 type="button"
-                className="button button-secondary auth-submit-button"
+                className="button button-secondary auth-secondary-button"
                 disabled={
                   resending ||
                   cooldown > 0
@@ -539,10 +499,10 @@ export default function VerifyOtp() {
                     ? 'Sending...'
                     : 'Resend code'}
               </button>
-            </form>
+            </div>
 
             <p className="auth-switch-copy">
-              Prefer links?{' '}
+              Code-only sign-in.{' '}
               <Link to="/login">
                 Sign in with password
               </Link>{' '}

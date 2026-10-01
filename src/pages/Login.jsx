@@ -6,6 +6,7 @@ import {
 
 
 import Icon from '../components/ui/Icon';
+import OtpInput from '../components/OtpInput';
 import {
   Navigate,
   useNavigate,
@@ -19,7 +20,6 @@ import {
 } from '../config/app';
 
 import {
-  AUTH_SENDER_EMAIL,
   isValidEmail,
   mapAuthErrorToMessage,
 } from '../lib/authEmail';
@@ -36,6 +36,7 @@ export default function Login() {
   const {
     signIn,
     sendSignInOtp,
+    verifyEmailOtp,
     resendSignupConfirmation,
     isAuthenticated,
     loading,
@@ -96,11 +97,6 @@ export default function Login() {
   ] = useState('password');
 
   const [
-    otpSent,
-    setOtpSent,
-  ] = useState(false);
-
-  const [
     info,
     setInfo,
   ] = useState('');
@@ -115,10 +111,53 @@ export default function Login() {
     setResending,
   ] = useState(false);
 
+  const [
+    otpStep,
+    setOtpStep,
+  ] = useState('email');
+
+  const [
+    verifyingOtp,
+    setVerifyingOtp,
+  ] = useState(false);
+
+  const [
+    otpCooldown,
+    setOtpCooldown,
+  ] = useState(0);
+
+  const [
+    otpResetKey,
+    setOtpResetKey,
+  ] = useState(0);
+
   useEffect(() => {
     document.title =
       'Sign In | Posho Creative';
   }, []);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) {
+      return;
+    }
+
+    const timer = window.setTimeout(
+      () =>
+        setOtpCooldown(
+          (current) =>
+            Math.max(
+              0,
+              current - 1,
+            ),
+        ),
+      1000,
+    );
+
+    return () =>
+      window.clearTimeout(
+        timer,
+      );
+  }, [otpCooldown]);
 
   const [
     teamTarget,
@@ -239,8 +278,60 @@ export default function Login() {
     setMode(nextMode);
     setError('');
     setInfo('');
-    setOtpSent(false);
     setShowResend(false);
+    setOtpStep('email');
+    setOtpCooldown(0);
+  };
+
+  const routeAfterSignIn = async (
+    signedInEmail,
+    nextPortalRoutes,
+  ) => {
+    if (
+      isAdminEmail(
+        signedInEmail,
+      )
+    ) {
+      navigate(
+        nextPortalRoutes
+          .adminAccess,
+        {
+          replace: true,
+        },
+      );
+
+      return;
+    }
+
+    try {
+      const membership =
+        await getMyMembership();
+
+      if (
+        membership.member
+      ) {
+        navigate(
+          nextPortalRoutes
+            .adminBase,
+          {
+            replace: true,
+          },
+        );
+
+        return;
+      }
+    } catch {
+      // fall through to client workspace
+    }
+
+    navigate(
+      publicProtectedNext ||
+        nextPortalRoutes
+          .customerBase,
+      {
+        replace: true,
+      },
+    );
   };
 
   const handleResendConfirmation =
@@ -275,9 +366,107 @@ export default function Login() {
       }
 
       setInfo(
-        `Verification email resent to ${form.email.trim()}. Check inbox and spam for ${AUTH_SENDER_EMAIL}.`,
+        `Verification email resent to ${form.email.trim()}. Check your inbox and spam folder — it arrives within a minute.`,
       );
     };
+
+  const handleOtpComplete =
+    async (code) => {
+      if (
+        verifyingOtp ||
+        String(code || '').length <
+          6
+      ) {
+        return;
+      }
+
+      setVerifyingOtp(true);
+      setError('');
+
+      const {
+        data,
+        error: verifyError,
+        portalRoutes:
+          nextPortalRoutes,
+      } = await verifyEmailOtp({
+        email: form.email,
+        token: code,
+        type: 'magiclink',
+      });
+
+      setVerifyingOtp(false);
+
+      if (verifyError) {
+        setError(
+          mapAuthErrorToMessage(
+            verifyError,
+          ),
+        );
+
+        setOtpResetKey(
+          (current) =>
+            current + 1,
+        );
+
+        return;
+      }
+
+      await routeAfterSignIn(
+        data?.user?.email ||
+          form.email,
+        nextPortalRoutes
+          ?.customerBase
+          ? nextPortalRoutes
+          : portalRoutes,
+      );
+    };
+
+  const handleOtpResend =
+    async () => {
+      if (
+        otpCooldown > 0 ||
+        submitting
+      ) {
+        return;
+      }
+
+      setSubmitting(true);
+      setError('');
+
+      const {
+        error: otpError,
+      } = await sendSignInOtp(
+        form.email,
+      );
+
+      setSubmitting(false);
+
+      if (otpError) {
+        setError(
+          mapAuthErrorToMessage(
+            otpError,
+          ),
+        );
+
+        return;
+      }
+
+      setOtpResetKey(
+        (current) => current + 1,
+      );
+
+      setOtpCooldown(60);
+
+      setInfo(
+        `A fresh code is on its way to ${form.email.trim()}.`,
+      );
+    };
+
+  const handleOtpBack = () => {
+    setOtpStep('email');
+    setError('');
+    setInfo('');
+  };
 
   const handleSubmit =
     async (
@@ -328,10 +517,16 @@ export default function Login() {
           return;
         }
 
-        setOtpSent(true);
+        setOtpStep('code');
+
+        setOtpResetKey(
+          (current) => current + 1,
+        );
+
+        setOtpCooldown(60);
 
         setInfo(
-          `We sent a 6-digit sign-in code to ${form.email.trim()} from ${AUTH_SENDER_EMAIL}.`,
+          `Enter the 6-digit code we sent to ${form.email.trim()}.`,
         );
 
         return;
@@ -412,50 +607,9 @@ export default function Login() {
         data?.user?.email ||
         form.email;
 
-      if (
-        isAdminEmail(
-          signedInEmail,
-        )
-      ) {
-        navigate(
-          nextPortalRoutes
-            .adminAccess,
-          {
-            replace: true,
-          },
-        );
-
-        return;
-      }
-
-      try {
-        const membership =
-          await getMyMembership();
-
-        if (
-          membership.member
-        ) {
-          navigate(
-            nextPortalRoutes
-              .adminBase,
-            {
-              replace: true,
-            },
-          );
-
-          return;
-        }
-      } catch {
-        // fall through to client workspace
-      }
-
-      navigate(
-        publicProtectedNext ||
-          nextPortalRoutes
-            .customerBase,
-        {
-          replace: true,
-        },
+      await routeAfterSignIn(
+        signedInEmail,
+        nextPortalRoutes,
       );
     };
 
@@ -524,298 +678,296 @@ export default function Login() {
                 handleSubmit
               }
             >
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 8,
-                  padding: 4,
-                  borderRadius: 14,
-                  background:
-                    'var(--brand-primary-faint, #f2eafa)',
-                }}
-              >
+              <div className="auth-mode-tabs">
                 <button
                   type="button"
+                  className={
+                    mode ===
+                    'password'
+                      ? 'auth-mode-tab auth-mode-tab-active'
+                      : 'auth-mode-tab'
+                  }
                   onClick={() =>
                     switchMode(
                       'password',
                     )
                   }
-                  style={{
-                    flex: 1,
-                    minHeight: 42,
-                    borderRadius: 10,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    background:
-                      mode ===
-                      'password'
-                        ? '#ffffff'
-                        : 'transparent',
-                    color:
-                      mode ===
-                      'password'
-                        ? 'var(--text)'
-                        : 'var(--text-soft)',
-                    boxShadow:
-                      mode ===
-                      'password'
-                        ? '0 4px 14px rgba(26,16,41,0.08)'
-                        : 'none',
-                  }}
                 >
                   Password
                 </button>
 
                 <button
                   type="button"
+                  className={
+                    mode === 'otp'
+                      ? 'auth-mode-tab auth-mode-tab-active'
+                      : 'auth-mode-tab'
+                  }
                   onClick={() =>
                     switchMode(
                       'otp',
                     )
                   }
-                  style={{
-                    flex: 1,
-                    minHeight: 42,
-                    borderRadius: 10,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    background:
-                      mode ===
-                      'otp'
-                        ? '#ffffff'
-                        : 'transparent',
-                    color:
-                      mode ===
-                      'otp'
-                        ? 'var(--text)'
-                        : 'var(--text-soft)',
-                    boxShadow:
-                      mode ===
-                      'otp'
-                        ? '0 4px 14px rgba(26,16,41,0.08)'
-                        : 'none',
-                  }}
                 >
                   Email code
                 </button>
               </div>
 
-              <div className="auth-field">
-                <label htmlFor="email">
-                  Email address
-                </label>
+              {mode === 'otp' &&
+              otpStep === 'code' ? (
+                <>
+                  <p className="auth-hint">
+                    Code sent to{' '}
+                    <span className="auth-otp-email-pill">
+                      {form.email.trim()}
+                    </span>{' '}
+                    Enter it below to
+                    sign in.
+                  </p>
 
-                <div className="auth-input-wrapper">
-                  <Icon name="mail"
-                    size={18}
+                  <OtpInput
+                    length={6}
+                    resetKey={
+                      otpResetKey
+                    }
+                    disabled={
+                      verifyingOtp
+                    }
+                    hasError={Boolean(
+                      error,
+                    )}
+                    onComplete={
+                      handleOtpComplete
+                    }
                   />
 
-                  <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    value={
-                      form.email
-                    }
-                    onChange={(
-                      event,
-                    ) =>
-                      updateField(
-                        'email',
-                        event
-                          .target
-                          .value,
-                      )
-                    }
-                    placeholder="you@example.com"
-                  />
-                </div>
-              </div>
+                  {verifyingOtp && (
+                    <div className="auth-check-card">
+                      <span className="auth-check-spinner" />
+                      Verifying code...
+                    </div>
+                  )}
 
-              {mode ===
-                'password' && (
-                <div className="auth-field">
-                  <div className="auth-field-label-row">
-                    <label htmlFor="password">
-                      Password
-                    </label>
+                  {error && (
+                    <div className="auth-error">
+                      {error}
+                    </div>
+                  )}
 
-                    <Link to="/forgot-password">
-                      Forgot password?
-                    </Link>
-                  </div>
+                  {info &&
+                    !error && (
+                      <div className="auth-success">
+                        {info}
+                      </div>
+                    )}
 
-                  <div className="auth-input-wrapper">
-                    <Icon name="lock"
-                      size={18}
-                    />
-
-                    <input
-                      id="password"
-                      type={
-                        showPassword
-                          ? 'text'
-                          : 'password'
+                  <div className="auth-resend-row">
+                    <button
+                      type="button"
+                      className="auth-step-back"
+                      onClick={
+                        handleOtpBack
                       }
-                      autoComplete="current-password"
-                      value={
-                        form.password
-                      }
-                      onChange={(
-                        event,
-                      ) =>
-                        updateField(
-                          'password',
-                          event
-                            .target
-                            .value,
-                        )
-                      }
-                      placeholder="Enter your password"
-                    />
+                    >
+                      ← Use a different
+                      email
+                    </button>
 
                     <button
                       type="button"
-                      className="auth-password-toggle"
-                      onClick={() =>
-                        setShowPassword(
-                          (
-                            current,
-                          ) =>
-                            !current,
-                        )
+                      className="auth-step-back"
+                      disabled={
+                        otpCooldown >
+                          0 ||
+                        submitting
                       }
-                      aria-label={
-                        showPassword
-                          ? 'Hide password'
-                          : 'Show password'
+                      onClick={
+                        handleOtpResend
                       }
                     >
-                      {showPassword ? (
-                        <Icon name="visibility_off"
-                          size={17}
-                        />
-                      ) : (
-                        <Icon name="visibility"
-                          size={17}
-                        />
-                      )}
+                      {otpCooldown >
+                      0
+                        ? `Resend in ${otpCooldown}s`
+                        : submitting
+                          ? 'Sending...'
+                          : 'Resend code'}
                     </button>
                   </div>
-                </div>
-              )}
+                </>
+              ) : (
+                <>
+                  <div className="auth-field">
+                    <label htmlFor="email">
+                      Email address
+                    </label>
 
-              {mode === 'otp' && (
-                <p
-                  className="auth-switch-copy"
-                  style={{
-                    margin: 0,
-                    textAlign:
-                      'left',
-                    lineHeight: 1.7,
-                  }}
-                >
-                  We will email a
-                  6-digit sign-in code
-                  from{' '}
-                  {AUTH_SENDER_EMAIL}.
-                  No password needed.
-                </p>
-              )}
+                    <div className="auth-input-wrapper">
+                      <Icon name="mail"
+                        size={18}
+                      />
 
-              {error && (
-                <div className="auth-error">
-                  {error}
-
-                  {showResend && (
-                    <div
-                      style={{
-                        marginTop: 10,
-                      }}
-                    >
-                      <button
-                        type="button"
-                        disabled={
-                          resending
+                      <input
+                        id="email"
+                        type="email"
+                        autoComplete="email"
+                        value={
+                          form.email
                         }
-                        onClick={
-                          handleResendConfirmation
+                        onChange={(
+                          event,
+                        ) =>
+                          updateField(
+                            'email',
+                            event
+                              .target
+                              .value,
+                          )
                         }
-                        style={{
-                          fontWeight: 700,
-                          color:
-                            'var(--brand-primary)',
-                          textDecoration:
-                            'underline',
-                        }}
-                      >
-                        {resending
-                          ? 'Resending...'
-                          : 'Resend verification email'}
-                      </button>
+                        placeholder="you@example.com"
+                      />
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
 
-              {info &&
-                !error && (
-                  <div
-                    className="auth-error"
-                    style={{
-                      borderColor:
-                        'rgba(32, 135, 72, 0.25)',
-                      background:
-                        'rgba(32, 135, 72, 0.07)',
-                      color:
-                        '#207848',
-                    }}
-                  >
-                    {info}
+                  {mode ===
+                    'password' && (
+                    <div className="auth-field">
+                      <div className="auth-field-label-row">
+                        <label htmlFor="password">
+                          Password
+                        </label>
 
-                    {otpSent && (
-                      <div
-                        style={{
-                          marginTop: 10,
-                        }}
-                      >
-                        <Link
-                          to={`/verify-otp?email=${encodeURIComponent(form.email.trim())}&type=magiclink`}
-                          style={{
-                            fontWeight: 700,
-                          }}
-                        >
-                          Enter code now
+                        <Link to="/forgot-password">
+                          Forgot password?
                         </Link>
                       </div>
+
+                      <div className="auth-input-wrapper">
+                        <Icon name="lock"
+                          size={18}
+                        />
+
+                        <input
+                          id="password"
+                          type={
+                            showPassword
+                              ? 'text'
+                              : 'password'
+                          }
+                          autoComplete="current-password"
+                          value={
+                            form.password
+                          }
+                          onChange={(
+                            event,
+                          ) =>
+                            updateField(
+                              'password',
+                              event
+                                .target
+                                .value,
+                            )
+                          }
+                          placeholder="Enter your password"
+                        />
+
+                        <button
+                          type="button"
+                          className="auth-password-toggle"
+                          onClick={() =>
+                            setShowPassword(
+                              (
+                                current,
+                              ) =>
+                                !current,
+                            )
+                          }
+                          aria-label={
+                            showPassword
+                              ? 'Hide password'
+                              : 'Show password'
+                          }
+                        >
+                          {showPassword ? (
+                            <Icon name="visibility_off"
+                              size={17}
+                            />
+                          ) : (
+                            <Icon name="visibility"
+                              size={17}
+                            />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {mode ===
+                    'otp' && (
+                    <p className="auth-hint">
+                      We will email you
+                      a 6-digit code.
+                      Enter it here —
+                      no password
+                      needed.
+                    </p>
+                  )}
+
+                  {error && (
+                    <div className="auth-error">
+                      {error}
+
+                      {showResend && (
+                        <div className="auth-inline-action">
+                          <button
+                            type="button"
+                            disabled={
+                              resending
+                            }
+                            onClick={
+                              handleResendConfirmation
+                            }
+                          >
+                            {resending
+                              ? 'Resending...'
+                              : 'Resend verification email'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {info &&
+                    !error && (
+                      <div className="auth-success">
+                        {info}
+                      </div>
                     )}
-                  </div>
-                )}
 
-              <button
-                type="submit"
-                className="button button-primary auth-submit-button"
-                disabled={
-                  submitting
-                }
-              >
-                {submitting
-                  ? mode ===
-                    'otp'
-                    ? 'Sending code...'
-                    : 'Signing in...'
-                  : mode ===
-                      'otp'
-                    ? 'Send sign-in code'
-                    : 'Sign in'}
+                  <button
+                    type="submit"
+                    className="button button-primary auth-submit-button"
+                    disabled={
+                      submitting
+                    }
+                  >
+                    {submitting
+                      ? mode ===
+                        'otp'
+                        ? 'Sending code...'
+                        : 'Signing in...'
+                      : mode ===
+                          'otp'
+                        ? 'Send sign-in code'
+                        : 'Sign in'}
 
-                {!submitting && (
-                  <Icon name="arrow_forward"
-                    size={18}
-                  />
-                )}
-              </button>
+                    {!submitting && (
+                      <Icon name="arrow_forward"
+                        size={18}
+                      />
+                    )}
+                  </button>
+                </>
+              )}
             </form>
 
             <p className="auth-switch-copy">

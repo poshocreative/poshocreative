@@ -16,7 +16,6 @@ import {
 
 import {
   AUTH_RESEND_COOLDOWN_SECONDS,
-  AUTH_SENDER_EMAIL,
   isValidEmail,
   mapAuthErrorToMessage,
 } from '../lib/authEmail';
@@ -303,7 +302,7 @@ export default function EmailVerified() {
     }
 
     setResendInfo(
-      `Fresh verification email sent to ${target.trim()} from ${AUTH_SENDER_EMAIL}.`,
+      `Fresh verification email sent to ${target.trim()}. Check your inbox and spam folder.`,
     );
 
     setCooldown(
@@ -468,8 +467,6 @@ export default function EmailVerified() {
               >
                 Links expire quickly.
                 Request a fresh email
-                from{' '}
-                {AUTH_SENDER_EMAIL}{' '}
                 or use your 6-digit
                 code instead.
               </p>

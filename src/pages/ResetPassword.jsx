@@ -9,6 +9,7 @@ import {
 
 import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
+import PasswordStrength from '../components/PasswordStrength';
 
 import { useAuth } from '../context/AuthContext';
 
@@ -400,6 +401,12 @@ export default function ResetPassword() {
                     placeholder="Repeat new password"
                   />
                 </div>
+
+                <PasswordStrength
+                  password={
+                    password
+                  }
+                />
 
                 {error && (
                   <div className="auth-error">

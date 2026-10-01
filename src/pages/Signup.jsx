@@ -6,6 +6,8 @@ import {
 
 
 import Icon from '../components/ui/Icon';
+import OtpInput from '../components/OtpInput';
+import PasswordStrength from '../components/PasswordStrength';
 import {
   Navigate,
   useSearchParams,
@@ -17,13 +19,13 @@ import { useAuth } from '../context/AuthContext';
 
 import {
   AUTH_RESEND_COOLDOWN_SECONDS,
-  AUTH_SENDER_EMAIL,
   mapAuthErrorToMessage,
 } from '../lib/authEmail';
 
 export default function Signup() {
   const {
     signUp,
+    verifyEmailOtp,
     resendSignupConfirmation,
     isAuthenticated,
     loading,
@@ -68,6 +70,12 @@ export default function Signup() {
     useState('');
 
   const [cooldown, setCooldown] =
+    useState(0);
+
+  const [verifyingOtp, setVerifyingOtp] =
+    useState(false);
+
+  const [otpResetKey, setOtpResetKey] =
     useState(0);
 
   useEffect(() => {
@@ -239,12 +247,58 @@ export default function Signup() {
       }
 
       setResendInfo(
-        `Confirmation email resent to ${form.email}. Check spam for ${AUTH_SENDER_EMAIL}.`,
+        `Confirmation code resent to ${form.email}. Check your inbox and spam folder.`,
       );
 
       setCooldown(
         AUTH_RESEND_COOLDOWN_SECONDS,
       );
+    };
+
+  const handleOtpComplete =
+    async (code) => {
+      if (
+        verifyingOtp ||
+        String(code || '').length <
+          6
+      ) {
+        return;
+      }
+
+      setVerifyingOtp(true);
+      setError('');
+
+      const {
+        data,
+        error: verifyError,
+      } = await verifyEmailOtp({
+        email: form.email,
+        token: code,
+        type: 'signup',
+      });
+
+      setVerifyingOtp(false);
+
+      if (verifyError) {
+        setError(
+          mapAuthErrorToMessage(
+            verifyError,
+          ),
+        );
+
+        setOtpResetKey(
+          (current) =>
+            current + 1,
+        );
+
+        return;
+      }
+
+      if (data?.session) {
+        window.location.assign(
+          next,
+        );
+      }
     };
 
   if (confirmationSent) {
@@ -267,26 +321,73 @@ export default function Signup() {
             </h1>
 
             <p>
-              We sent a confirmation
-              link and a 6-digit code
-              to{' '}
+              We sent a 6-digit
+              confirmation code to{' '}
               <strong>
                 {form.email}
-              </strong>{' '}
-              from{' '}
-              <strong>
-                {AUTH_SENDER_EMAIL}
               </strong>
-              . Open the email to
-              confirm, or enter the
-              code. Check spam if you
+              . Enter it below to
+              activate your account.
+              Check spam if you
               don't see it within a
               minute.
             </p>
 
-            {resendInfo && (
-              <p
+            <div
+              style={{
+                maxWidth: 380,
+                margin:
+                  '0 auto 22px',
+              }}
+            >
+              <OtpInput
+                length={6}
+                resetKey={
+                  otpResetKey
+                }
+                disabled={
+                  verifyingOtp
+                }
+                hasError={Boolean(
+                  error,
+                )}
+                label="Confirmation code"
+                onComplete={
+                  handleOtpComplete
+                }
+              />
+            </div>
+
+            {verifyingOtp && (
+              <div
+                className="auth-check-card"
                 style={{
+                  justifyContent:
+                    'center',
+                  marginBottom: 16,
+                }}
+              >
+                <span className="auth-check-spinner" />
+                Verifying code...
+              </div>
+            )}
+
+            {error && (
+              <div
+                className="auth-error"
+                style={{
+                  textAlign: 'left',
+                  marginBottom: 16,
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {resendInfo && (
+              <p className="auth-hint"
+                style={{
+                  textAlign: 'center',
                   color: '#207848',
                   fontWeight: 600,
                 }}
@@ -320,16 +421,8 @@ export default function Signup() {
                   ? `Resend in ${cooldown}s`
                   : resending
                     ? 'Resending...'
-                    : 'Resend email'}
+                    : 'Resend code'}
               </button>
-
-              <Link
-                to={`/verify-otp?email=${encodeURIComponent(form.email)}&type=signup`}
-                className="button button-primary"
-              >
-                Enter code
-                <Icon name="arrow_forward" size={18} />
-              </Link>
             </div>
 
             <Link
@@ -577,6 +670,12 @@ export default function Signup() {
                   />
                 </div>
               </div>
+
+              <PasswordStrength
+                password={
+                  form.password
+                }
+              />
 
               {error && (
                 <div className="auth-error">
