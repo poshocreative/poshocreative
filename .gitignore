@@ -15,6 +15,9 @@ dist-ssr/
 .env.*.local
 *.local
 
+# Vercel local linkage
+.vercel
+
 # Logs
 logs/
 *.log
@@ -66,3 +69,5 @@ Desktop.ini
 .env.development.local
 .env.test.local
 .env.production.local
+.vercel
+.env*
