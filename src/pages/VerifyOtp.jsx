@@ -17,6 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   AUTH_RESEND_COOLDOWN_SECONDS,
   AUTH_SENDER_EMAIL,
+  emailRedirectTo,
   isValidEmail,
   mapAuthErrorToMessage,
 } from '../lib/authEmail';
@@ -223,6 +224,12 @@ export default function VerifyOtp() {
             email
               .trim()
               .toLowerCase(),
+            {
+              redirectTo:
+                emailRedirectTo(
+                  '/reset-password',
+                ),
+            },
           );
       } else if (
         type === 'magiclink'
@@ -233,6 +240,13 @@ export default function VerifyOtp() {
               email: email
                 .trim()
                 .toLowerCase(),
+
+              options: {
+                emailRedirectTo:
+                  emailRedirectTo(
+                    '/email-verified',
+                  ),
+              },
             },
           );
       } else {
@@ -246,6 +260,13 @@ export default function VerifyOtp() {
               email: email
                 .trim()
                 .toLowerCase(),
+
+              options: {
+                emailRedirectTo:
+                  emailRedirectTo(
+                    '/email-verified',
+                  ),
+              },
             },
           );
       }
