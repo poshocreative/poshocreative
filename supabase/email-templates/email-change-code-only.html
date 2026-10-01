@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reset your Posho Creative password</title>
+    <title>Confirm your new email address</title>
   </head>
-  <!-- SUPABASE: Auth > Email Templates > Reset password. Subject: {{ .Token }} is your Posho Creative password reset code -->
+  <!-- SUPABASE: Auth > Email Templates > Change email address. Subject: {{ .Token }} is your Posho Creative verification code -->
   <body style="margin:0;padding:0;background-color:#f4f1fa;font-family:Arial,Helvetica,sans-serif;">
-    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Your Posho Creative password reset code is {{ .Token }}. It expires in 10 minutes.</div>
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Your Posho Creative verification code is {{ .Token }}. It expires in 10 minutes.</div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f1fa;padding:32px 16px;">
       <tr>
         <td align="center">
@@ -23,10 +23,10 @@
             </tr>
             <tr>
               <td align="center" style="padding:36px 32px;">
-                <h1 style="margin:0 0 12px;font-size:22px;color:#1a1029;">Reset your password</h1>
-                <p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:#5b5470;">Hi {{ .Email }}, enter this 6-digit code in the app, then choose a new password.</p>
+                <h1 style="margin:0 0 12px;font-size:22px;color:#1a1029;">Confirm your new email</h1>
+                <p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:#5b5470;">You asked to change your Posho Creative email to {{ .Email }}. Enter this 6-digit code in the app to confirm it.</p>
                 <div style="display:inline-block;background-color:#f2eafa;border:1px dashed #6c2bd9;border-radius:12px;padding:16px 32px;font-size:32px;font-weight:bold;letter-spacing:10px;color:#35116f;">{{ .Token }}</div>
-                <p style="margin:24px 0 0;font-size:12px;line-height:1.7;color:#8a8496;">This code expires in 10 minutes and can only be used once. If you did not request a reset, ignore this email.</p>
+                <p style="margin:24px 0 0;font-size:12px;line-height:1.7;color:#8a8496;">This code expires in 10 minutes and can only be used once. If you did not request this change, ignore this email and review your account security.</p>
               </td>
             </tr>
             <tr>
