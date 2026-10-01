@@ -3,8 +3,6 @@ import {
   useState,
 } from 'react';
 
-
-
 import Icon from '../components/ui/Icon';
 import Link from '../components/PortalLink';
 
@@ -16,7 +14,14 @@ import {
   supabase,
 } from '../lib/supabase';
 
-function getRedirectError() {
+import {
+  AUTH_RESEND_COOLDOWN_SECONDS,
+  AUTH_SENDER_EMAIL,
+  isValidEmail,
+  mapAuthErrorToMessage,
+} from '../lib/authEmail';
+
+function getUrlState() {
   const searchParams =
     new URLSearchParams(
       window.location.search,
@@ -24,36 +29,34 @@ function getRedirectError() {
 
   const hashParams =
     new URLSearchParams(
-      window.location.hash
-        .replace(/^#/, ''),
+      window.location.hash.replace(
+        /^#/,
+        '',
+      ),
     );
-
-  const errorDescription =
-    searchParams.get(
-      'error_description',
-    ) ||
-    hashParams.get(
-      'error_description',
-    );
-
-  const errorCode =
-    searchParams.get(
-      'error_code',
-    ) ||
-    hashParams.get(
-      'error_code',
-    );
-
-  if (!errorDescription) {
-    return null;
-  }
 
   return {
-    code: errorCode,
-    message:
-      decodeURIComponent(
-        errorDescription,
-      ),
+    code:
+      searchParams.get('code') ||
+      '',
+
+    errorDescription:
+      searchParams.get(
+        'error_description',
+      ) ||
+      hashParams.get(
+        'error_description',
+      ) ||
+      '',
+
+    errorCode:
+      searchParams.get(
+        'error_code',
+      ) ||
+      hashParams.get(
+        'error_code',
+      ) ||
+      '',
   };
 }
 
@@ -61,6 +64,7 @@ export default function EmailVerified() {
   const {
     user,
     loading,
+    resendSignupConfirmation,
   } = useAuth();
 
   const [status, setStatus] =
@@ -69,20 +73,55 @@ export default function EmailVerified() {
   const [message, setMessage] =
     useState('');
 
+  const [resendEmail, setResendEmail] =
+    useState('');
+
+  const [resending, setResending] =
+    useState(false);
+
+  const [resendInfo, setResendInfo] =
+    useState('');
+
+  const [cooldown, setCooldown] =
+    useState(0);
+
   useEffect(() => {
     document.title =
       'Email Verified | Posho Creative';
   }, []);
 
   useEffect(() => {
+    if (cooldown <= 0) {
+      return;
+    }
+
+    const timer = window.setTimeout(
+      () =>
+        setCooldown(
+          (current) =>
+            Math.max(
+              0,
+              current - 1,
+            ),
+        ),
+      1000,
+    );
+
+    return () =>
+      window.clearTimeout(timer);
+  }, [cooldown]);
+
+  useEffect(() => {
     let active = true;
 
     const checkVerification =
       async () => {
-        const redirectError =
-          getRedirectError();
+        const {
+          code,
+          errorDescription,
+        } = getUrlState();
 
-        if (redirectError) {
+        if (errorDescription) {
           if (!active) {
             return;
           }
@@ -90,7 +129,9 @@ export default function EmailVerified() {
           setStatus('error');
 
           setMessage(
-            redirectError.message ||
+            decodeURIComponent(
+              errorDescription,
+            ) ||
               'We could not verify this email address.',
           );
 
@@ -114,12 +155,46 @@ export default function EmailVerified() {
         }
 
         try {
+          if (code) {
+            const {
+              error: exchangeError,
+            } =
+              await supabase.auth.exchangeCodeForSession(
+                code,
+              );
+
+            if (!active) {
+              return;
+            }
+
+            if (exchangeError) {
+              setStatus('error');
+
+              setMessage(
+                mapAuthErrorToMessage(
+                  exchangeError,
+                ),
+              );
+
+              return;
+            }
+
+            setStatus('success');
+
+            window.history.replaceState(
+              {},
+              '',
+              '/email-verified',
+            );
+
+            return;
+          }
+
           const {
             data,
             error,
           } =
-            await supabase.auth
-              .getSession();
+            await supabase.auth.getSession();
 
           if (!active) {
             return;
@@ -136,11 +211,11 @@ export default function EmailVerified() {
           }
 
           const confirmedUser =
-            data?.session?.user;
+            data?.session?.user ||
+            user;
 
           if (
-            confirmedUser
-              ?.email_confirmed_at
+            confirmedUser?.email_confirmed_at
           ) {
             setStatus('success');
 
@@ -150,7 +225,7 @@ export default function EmailVerified() {
           setStatus('error');
 
           setMessage(
-            'This verification link could not be confirmed. It may have expired or already been used.',
+            'This verification link could not be confirmed. It may have expired or already been used. Request a fresh email below.',
           );
         } catch (error) {
           console.error(
@@ -180,6 +255,62 @@ export default function EmailVerified() {
     loading,
   ]);
 
+  const handleResend = async (
+    event,
+  ) => {
+    event?.preventDefault?.();
+
+    if (
+      cooldown > 0 ||
+      resending
+    ) {
+      return;
+    }
+
+    const target =
+      resendEmail ||
+      user?.email ||
+      '';
+
+    if (
+      !isValidEmail(target)
+    ) {
+      setMessage(
+        'Enter the email address you signed up with, then resend.',
+      );
+
+      return;
+    }
+
+    setResending(true);
+    setResendInfo('');
+
+    const { error } =
+      await resendSignupConfirmation(
+        target,
+      );
+
+    setResending(false);
+
+    if (error) {
+      setMessage(
+        mapAuthErrorToMessage(
+          error,
+        ),
+      );
+
+      return;
+    }
+
+    setResendInfo(
+      `Fresh verification email sent to ${target.trim()} from ${AUTH_SENDER_EMAIL}.`,
+    );
+
+    setCooldown(
+      AUTH_RESEND_COOLDOWN_SECONDS,
+    );
+  };
+
   return (
     <main className="system-page verification-page">
       <div className="system-page-orb system-page-orb-one" />
@@ -202,7 +333,7 @@ export default function EmailVerified() {
                 <div className="verification-orbit verification-orbit-two" />
 
                 <div className="verification-icon">
-                  <Icon name="autorenew" 
+                  <Icon name="autorenew"
                     size={34}
                   />
                 </div>
@@ -239,7 +370,7 @@ export default function EmailVerified() {
                 <div className="verification-success-ring verification-success-ring-two" />
 
                 <div className="verification-icon">
-                  <Icon name="check_circle" 
+                  <Icon name="check_circle"
                     size={36}
                   />
                 </div>
@@ -265,7 +396,7 @@ export default function EmailVerified() {
               </p>
 
               <div className="verification-security-note">
-                <Icon name="verified_user" 
+                <Icon name="verified_user"
                   size={18}
                 />
 
@@ -289,7 +420,7 @@ export default function EmailVerified() {
                 >
                   Open dashboard
 
-                  <Icon name="arrow_forward" 
+                  <Icon name="arrow_forward"
                     size={18}
                   />
                 </Link>
@@ -309,7 +440,7 @@ export default function EmailVerified() {
             <>
               <div className="verification-visual verification-visual-error">
                 <div className="verification-icon">
-                  <Icon name="error" 
+                  <Icon name="error"
                     size={35}
                   />
                 </div>
@@ -329,6 +460,85 @@ export default function EmailVerified() {
                 {message}
               </p>
 
+              <p
+                style={{
+                  fontSize: 12,
+                  lineHeight: 1.7,
+                }}
+              >
+                Links expire quickly.
+                Request a fresh email
+                from{' '}
+                {AUTH_SENDER_EMAIL}{' '}
+                or use your 6-digit
+                code instead.
+              </p>
+
+              {resendInfo && (
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: '#207848',
+                    fontWeight: 600,
+                  }}
+                >
+                  {resendInfo}
+                </p>
+              )}
+
+              <form
+                onSubmit={
+                  handleResend
+                }
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  marginTop: 8,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <input
+                  type="email"
+                  value={
+                    resendEmail ||
+                    user?.email ||
+                    ''
+                  }
+                  onChange={(
+                    event,
+                  ) =>
+                    setResendEmail(
+                      event.target
+                        .value,
+                    )
+                  }
+                  placeholder="you@example.com"
+                  style={{
+                    flex: '1 1 200px',
+                    minHeight: 48,
+                    padding: '0 14px',
+                    borderRadius: 12,
+                    border:
+                      '1px solid var(--border)',
+                  }}
+                />
+
+                <button
+                  type="submit"
+                  className="button button-secondary"
+                  disabled={
+                    resending ||
+                    cooldown > 0
+                  }
+                >
+                  {cooldown > 0
+                    ? `Resend in ${cooldown}s`
+                    : resending
+                      ? 'Sending...'
+                      : 'Resend email'}
+                </button>
+              </form>
+
               <div className="verification-actions">
                 <Link
                   to="/login"
@@ -336,16 +546,16 @@ export default function EmailVerified() {
                 >
                   Try signing in
 
-                  <Icon name="arrow_forward" 
+                  <Icon name="arrow_forward"
                     size={18}
                   />
                 </Link>
 
                 <Link
-                  to="/signup"
+                  to="/verify-otp"
                   className="button button-secondary"
                 >
-                  Create account
+                  Use OTP code
                 </Link>
               </div>
             </>

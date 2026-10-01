@@ -15,9 +15,16 @@ import Link from '../components/PortalLink';
 
 import { useAuth } from '../context/AuthContext';
 
+import {
+  AUTH_RESEND_COOLDOWN_SECONDS,
+  AUTH_SENDER_EMAIL,
+  mapAuthErrorToMessage,
+} from '../lib/authEmail';
+
 export default function Signup() {
   const {
     signUp,
+    resendSignupConfirmation,
     isAuthenticated,
     loading,
     portalRoutes,
@@ -54,10 +61,42 @@ export default function Signup() {
   const [confirmationSent, setConfirmationSent] =
     useState(false);
 
+  const [resending, setResending] =
+    useState(false);
+
+  const [resendInfo, setResendInfo] =
+    useState('');
+
+  const [cooldown, setCooldown] =
+    useState(0);
+
   useEffect(() => {
     document.title =
       'Create Account | Posho Creative';
   }, []);
+
+  useEffect(() => {
+    if (cooldown <= 0) {
+      return;
+    }
+
+    const timer = window.setTimeout(
+      () =>
+        setCooldown(
+          (current) =>
+            Math.max(
+              0,
+              current - 1,
+            ),
+        ),
+      1000,
+    );
+
+    return () =>
+      window.clearTimeout(
+        timer,
+      );
+  }, [cooldown]);
 
   if (
     !loading &&
@@ -146,8 +185,9 @@ export default function Signup() {
 
     if (signUpError) {
       setError(
-        signUpError.message ||
-          'We could not create your account.',
+        mapAuthErrorToMessage(
+          signUpError,
+        ),
       );
 
       return;
@@ -159,7 +199,53 @@ export default function Signup() {
     }
 
     setConfirmationSent(true);
+
+    setCooldown(
+      AUTH_RESEND_COOLDOWN_SECONDS,
+    );
   };
+
+  const handleResendConfirmation =
+    async () => {
+      if (
+        resending ||
+        cooldown > 0
+      ) {
+        return;
+      }
+
+      setResending(true);
+      setResendInfo('');
+
+      const {
+        error: resendError,
+      } =
+        await resendSignupConfirmation(
+          form.email,
+        );
+
+      setResending(false);
+
+      if (resendError) {
+        setResendInfo('');
+
+        setError(
+          mapAuthErrorToMessage(
+            resendError,
+          ),
+        );
+
+        return;
+      }
+
+      setResendInfo(
+        `Confirmation email resent to ${form.email}. Check spam for ${AUTH_SENDER_EMAIL}.`,
+      );
+
+      setCooldown(
+        AUTH_RESEND_COOLDOWN_SECONDS,
+      );
+    };
 
   if (confirmationSent) {
     return (
@@ -182,14 +268,69 @@ export default function Signup() {
 
             <p>
               We sent a confirmation
-              link to{' '}
+              link and a 6-digit code
+              to{' '}
               <strong>
                 {form.email}
+              </strong>{' '}
+              from{' '}
+              <strong>
+                {AUTH_SENDER_EMAIL}
               </strong>
-              . Open the email and
-              confirm your account before
-              signing in.
+              . Open the email to
+              confirm, or enter the
+              code. Check spam if you
+              don't see it within a
+              minute.
             </p>
+
+            {resendInfo && (
+              <p
+                style={{
+                  color: '#207848',
+                  fontWeight: 600,
+                }}
+              >
+                {resendInfo}
+              </p>
+            )}
+
+            <div
+              style={{
+                display: 'flex',
+                gap: 10,
+                justifyContent:
+                  'center',
+                flexWrap: 'wrap',
+                marginBottom: 18,
+              }}
+            >
+              <button
+                type="button"
+                className="button button-secondary"
+                disabled={
+                  resending ||
+                  cooldown > 0
+                }
+                onClick={
+                  handleResendConfirmation
+                }
+              >
+                {cooldown > 0
+                  ? `Resend in ${cooldown}s`
+                  : resending
+                    ? 'Resending...'
+                    : 'Resend email'}
+              </button>
+
+              <Link
+                to={`/verify-otp?email=${encodeURIComponent(form.email)}&type=signup`}
+                className="button button-primary"
+              >
+                Enter code
+                <Icon name="arrow_forward" size={18} />
+              </Link>
+            </div>
 
             <Link
               to={`/login?next=${encodeURIComponent(next)}`}

@@ -101,6 +101,9 @@ const privatePrefixes = [
   '/login',
   '/signup',
   '/email-verified',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-otp',
   '/order',
   '/404',
 ];

@@ -19,6 +19,12 @@ import {
 } from '../config/app';
 
 import {
+  AUTH_SENDER_EMAIL,
+  isValidEmail,
+  mapAuthErrorToMessage,
+} from '../lib/authEmail';
+
+import {
   getMyMembership,
 } from '../lib/permissions';
 
@@ -29,6 +35,8 @@ import {
 export default function Login() {
   const {
     signIn,
+    sendSignInOtp,
+    resendSignupConfirmation,
     isAuthenticated,
     loading,
     user,
@@ -81,6 +89,31 @@ export default function Login() {
     error,
     setError,
   ] = useState('');
+
+  const [
+    mode,
+    setMode,
+  ] = useState('password');
+
+  const [
+    otpSent,
+    setOtpSent,
+  ] = useState(false);
+
+  const [
+    info,
+    setInfo,
+  ] = useState('');
+
+  const [
+    showResend,
+    setShowResend,
+  ] = useState(false);
+
+  const [
+    resending,
+    setResending,
+  ] = useState(false);
 
   useEffect(() => {
     document.title =
@@ -196,13 +229,113 @@ export default function Login() {
     );
 
     setError('');
+    setInfo('');
+    setShowResend(false);
   };
+
+  const switchMode = (
+    nextMode,
+  ) => {
+    setMode(nextMode);
+    setError('');
+    setInfo('');
+    setOtpSent(false);
+    setShowResend(false);
+  };
+
+  const handleResendConfirmation =
+    async () => {
+      if (
+        !isValidEmail(
+          form.email,
+        )
+      ) {
+        return;
+      }
+
+      setResending(true);
+
+      const {
+        error: resendError,
+      } =
+        await resendSignupConfirmation(
+          form.email,
+        );
+
+      setResending(false);
+
+      if (resendError) {
+        setError(
+          mapAuthErrorToMessage(
+            resendError,
+          ),
+        );
+
+        return;
+      }
+
+      setInfo(
+        `Verification email resent to ${form.email.trim()}. Check inbox and spam for ${AUTH_SENDER_EMAIL}.`,
+      );
+    };
 
   const handleSubmit =
     async (
       event,
     ) => {
       event.preventDefault();
+
+      if (
+        mode === 'otp'
+      ) {
+        if (
+          !isValidEmail(
+            form.email,
+          )
+        ) {
+          setError(
+            'Enter your account email to receive a code.',
+          );
+
+          return;
+        }
+
+        setSubmitting(
+          true,
+        );
+
+        setError('');
+        setInfo('');
+
+        const {
+          error: otpError,
+        } =
+          await sendSignInOtp(
+            form.email,
+          );
+
+        setSubmitting(
+          false,
+        );
+
+        if (otpError) {
+          setError(
+            mapAuthErrorToMessage(
+              otpError,
+            ),
+          );
+
+          return;
+        }
+
+        setOtpSent(true);
+
+        setInfo(
+          `We sent a 6-digit sign-in code to ${form.email.trim()} from ${AUTH_SENDER_EMAIL}.`,
+        );
+
+        return;
+      }
 
       if (
         !form.email.trim() ||
@@ -220,6 +353,8 @@ export default function Login() {
       );
 
       setError('');
+      setInfo('');
+      setShowResend(false);
 
       const {
         data,
@@ -258,12 +393,15 @@ export default function Login() {
           )
         ) {
           setError(
-            'Confirm your email address before signing in.',
+            'Confirm your email address before signing in. Check your inbox for the verification email.',
           );
+
+          setShowResend(true);
         } else {
           setError(
-            signInError.message ||
-              'We could not sign you in.',
+            mapAuthErrorToMessage(
+              signInError,
+            ),
           );
         }
 
@@ -386,13 +524,90 @@ export default function Login() {
                 handleSubmit
               }
             >
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  padding: 4,
+                  borderRadius: 14,
+                  background:
+                    'var(--brand-primary-faint, #f2eafa)',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    switchMode(
+                      'password',
+                    )
+                  }
+                  style={{
+                    flex: 1,
+                    minHeight: 42,
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    background:
+                      mode ===
+                      'password'
+                        ? '#ffffff'
+                        : 'transparent',
+                    color:
+                      mode ===
+                      'password'
+                        ? 'var(--text)'
+                        : 'var(--text-soft)',
+                    boxShadow:
+                      mode ===
+                      'password'
+                        ? '0 4px 14px rgba(26,16,41,0.08)'
+                        : 'none',
+                  }}
+                >
+                  Password
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    switchMode(
+                      'otp',
+                    )
+                  }
+                  style={{
+                    flex: 1,
+                    minHeight: 42,
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    background:
+                      mode ===
+                      'otp'
+                        ? '#ffffff'
+                        : 'transparent',
+                    color:
+                      mode ===
+                      'otp'
+                        ? 'var(--text)'
+                        : 'var(--text-soft)',
+                    boxShadow:
+                      mode ===
+                      'otp'
+                        ? '0 4px 14px rgba(26,16,41,0.08)'
+                        : 'none',
+                  }}
+                >
+                  Email code
+                </button>
+              </div>
+
               <div className="auth-field">
                 <label htmlFor="email">
                   Email address
                 </label>
 
                 <div className="auth-input-wrapper">
-                  <Icon name="mail" 
+                  <Icon name="mail"
                     size={18}
                   />
 
@@ -418,81 +633,165 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="auth-field">
-                <div className="auth-field-label-row">
-                  <label htmlFor="password">
-                    Password
-                  </label>
+              {mode ===
+                'password' && (
+                <div className="auth-field">
+                  <div className="auth-field-label-row">
+                    <label htmlFor="password">
+                      Password
+                    </label>
 
-                  <Link to="/forgot-password">
-                    Forgot password?
-                  </Link>
+                    <Link to="/forgot-password">
+                      Forgot password?
+                    </Link>
+                  </div>
+
+                  <div className="auth-input-wrapper">
+                    <Icon name="lock"
+                      size={18}
+                    />
+
+                    <input
+                      id="password"
+                      type={
+                        showPassword
+                          ? 'text'
+                          : 'password'
+                      }
+                      autoComplete="current-password"
+                      value={
+                        form.password
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        updateField(
+                          'password',
+                          event
+                            .target
+                            .value,
+                        )
+                      }
+                      placeholder="Enter your password"
+                    />
+
+                    <button
+                      type="button"
+                      className="auth-password-toggle"
+                      onClick={() =>
+                        setShowPassword(
+                          (
+                            current,
+                          ) =>
+                            !current,
+                        )
+                      }
+                      aria-label={
+                        showPassword
+                          ? 'Hide password'
+                          : 'Show password'
+                      }
+                    >
+                      {showPassword ? (
+                        <Icon name="visibility_off"
+                          size={17}
+                        />
+                      ) : (
+                        <Icon name="visibility"
+                          size={17}
+                        />
+                      )}
+                    </button>
+                  </div>
                 </div>
+              )}
 
-                <div className="auth-input-wrapper">
-                  <Icon name="lock" 
-                    size={18}
-                  />
-
-                  <input
-                    id="password"
-                    type={
-                      showPassword
-                        ? 'text'
-                        : 'password'
-                    }
-                    autoComplete="current-password"
-                    value={
-                      form.password
-                    }
-                    onChange={(
-                      event,
-                    ) =>
-                      updateField(
-                        'password',
-                        event
-                          .target
-                          .value,
-                      )
-                    }
-                    placeholder="Enter your password"
-                  />
-
-                  <button
-                    type="button"
-                    className="auth-password-toggle"
-                    onClick={() =>
-                      setShowPassword(
-                        (
-                          current,
-                        ) =>
-                          !current,
-                      )
-                    }
-                    aria-label={
-                      showPassword
-                        ? 'Hide password'
-                        : 'Show password'
-                    }
-                  >
-                    {showPassword ? (
-                      <Icon name="visibility_off" 
-                        size={17}
-                      />
-                    ) : (
-                      <Icon name="visibility" 
-                        size={17}
-                      />
-                    )}
-                  </button>
-                </div>
-              </div>
+              {mode === 'otp' && (
+                <p
+                  className="auth-switch-copy"
+                  style={{
+                    margin: 0,
+                    textAlign:
+                      'left',
+                    lineHeight: 1.7,
+                  }}
+                >
+                  We will email a
+                  6-digit sign-in code
+                  from{' '}
+                  {AUTH_SENDER_EMAIL}.
+                  No password needed.
+                </p>
+              )}
 
               {error && (
                 <div className="auth-error">
                   {error}
+
+                  {showResend && (
+                    <div
+                      style={{
+                        marginTop: 10,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        disabled={
+                          resending
+                        }
+                        onClick={
+                          handleResendConfirmation
+                        }
+                        style={{
+                          fontWeight: 700,
+                          color:
+                            'var(--brand-primary)',
+                          textDecoration:
+                            'underline',
+                        }}
+                      >
+                        {resending
+                          ? 'Resending...'
+                          : 'Resend verification email'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
+
+              {info &&
+                !error && (
+                  <div
+                    className="auth-error"
+                    style={{
+                      borderColor:
+                        'rgba(32, 135, 72, 0.25)',
+                      background:
+                        'rgba(32, 135, 72, 0.07)',
+                      color:
+                        '#207848',
+                    }}
+                  >
+                    {info}
+
+                    {otpSent && (
+                      <div
+                        style={{
+                          marginTop: 10,
+                        }}
+                      >
+                        <Link
+                          to={`/verify-otp?email=${encodeURIComponent(form.email.trim())}&type=magiclink`}
+                          style={{
+                            fontWeight: 700,
+                          }}
+                        >
+                          Enter code now
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
 
               <button
                 type="submit"
@@ -502,11 +801,17 @@ export default function Login() {
                 }
               >
                 {submitting
-                  ? 'Signing in...'
-                  : 'Sign in'}
+                  ? mode ===
+                    'otp'
+                    ? 'Sending code...'
+                    : 'Signing in...'
+                  : mode ===
+                      'otp'
+                    ? 'Send sign-in code'
+                    : 'Sign in'}
 
                 {!submitting && (
-                  <Icon name="arrow_forward" 
+                  <Icon name="arrow_forward"
                     size={18}
                   />
                 )}
@@ -523,6 +828,17 @@ export default function Login() {
                 }
               >
                 Create an account
+              </Link>
+            </p>
+
+            <p className="auth-switch-copy">
+              Trouble signing in?{' '}
+              <Link to="/forgot-password">
+                Reset password
+              </Link>{' '}
+              ·{' '}
+              <Link to="/verify-otp">
+                Use OTP code
               </Link>
             </p>
           </div>

@@ -8,6 +8,11 @@ import {
 } from 'react';
 
 import {
+  emailRedirectTo,
+  normalizeEmail,
+} from '../lib/authEmail';
+
+import {
   supabase,
 } from '../lib/supabase';
 
@@ -288,8 +293,10 @@ export function AuthProvider({
       password,
     }) => {
       try {
-        const emailRedirectTo =
-          `${window.location.origin}/email-verified`;
+        const redirectTo =
+          emailRedirectTo(
+            '/email-verified',
+          );
 
         const {
           data,
@@ -305,7 +312,8 @@ export function AuthProvider({
               password,
 
               options: {
-                emailRedirectTo,
+                emailRedirectTo:
+                  redirectTo,
 
                 data: {
                   full_name:
@@ -379,6 +387,199 @@ export function AuthProvider({
             getPortalRoutes(
               nextPortalSession,
             ),
+        };
+      } catch (error) {
+        return {
+          data: null,
+          error,
+        };
+      }
+    };
+
+  const sendPasswordReset =
+    async (email) => {
+      try {
+        const {
+          data,
+          error,
+        } =
+          await supabase.auth
+            .resetPasswordForEmail(
+              normalizeEmail(
+                email,
+              ),
+              {
+                redirectTo:
+                  emailRedirectTo(
+                    '/reset-password',
+                  ),
+              },
+            );
+
+        return {
+          data,
+          error,
+        };
+      } catch (error) {
+        return {
+          data: null,
+          error,
+        };
+      }
+    };
+
+  const updateAccountPassword =
+    async (
+      newPassword,
+    ) => {
+      try {
+        const {
+          data,
+          error,
+        } =
+          await supabase.auth
+            .updateUser({
+              password:
+                newPassword,
+            });
+
+        return {
+          data,
+          error,
+        };
+      } catch (error) {
+        return {
+          data: null,
+          error,
+        };
+      }
+    };
+
+  const sendSignInOtp =
+    async (email) => {
+      try {
+        const {
+          data,
+          error,
+        } =
+          await supabase.auth
+            .signInWithOtp({
+              email:
+                normalizeEmail(
+                  email,
+                ),
+
+              options: {
+                shouldCreateUser: false,
+
+                emailRedirectTo:
+                  emailRedirectTo(
+                    '/email-verified',
+                  ),
+              },
+            });
+
+        return {
+          data,
+          error,
+        };
+      } catch (error) {
+        return {
+          data: null,
+          error,
+        };
+      }
+    };
+
+  const verifyEmailOtp =
+    async ({
+      email,
+      token,
+      type,
+    }) => {
+      try {
+        const {
+          data,
+          error,
+        } =
+          await supabase.auth
+            .verifyOtp({
+              email:
+                normalizeEmail(
+                  email,
+                ),
+
+              token: String(
+                token || '',
+              )
+                .trim()
+                .replace(
+                  /\s+/g,
+                  '',
+                ),
+
+              type,
+            });
+
+        const nextPortalSession =
+          !error &&
+          data?.user?.id
+            ? createPortalSession(
+                data.user.id,
+              )
+            : null;
+
+        if (
+          nextPortalSession
+        ) {
+          setPortalSession(
+            nextPortalSession,
+          );
+        }
+
+        return {
+          data,
+          error,
+          portalRoutes:
+            getPortalRoutes(
+              nextPortalSession,
+            ),
+        };
+      } catch (error) {
+        return {
+          data: null,
+          error,
+        };
+      }
+    };
+
+  const resendSignupConfirmation =
+    async (email) => {
+      try {
+        const {
+          data,
+          error,
+        } =
+          await supabase.auth
+            .resend({
+              type: 'signup',
+
+              email:
+                normalizeEmail(
+                  email,
+                ),
+
+              options: {
+                emailRedirectTo:
+                  emailRedirectTo(
+                    '/email-verified',
+                  ),
+              },
+            });
+
+        return {
+          data,
+          error,
         };
       } catch (error) {
         return {
@@ -485,6 +686,11 @@ export function AuthProvider({
         signUp,
         signIn,
         signOut,
+        sendPasswordReset,
+        updateAccountPassword,
+        sendSignInOtp,
+        verifyEmailOtp,
+        resendSignupConfirmation,
         refreshProfile,
         customerPath:
           (suffix = '') =>

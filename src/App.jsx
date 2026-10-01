@@ -46,14 +46,17 @@ import DashboardProfile from './pages/DashboardProfile';
 import DashboardProposal from './pages/DashboardProposal';
 import DashboardRequests from './pages/DashboardRequests';
 import EmailVerified from './pages/EmailVerified';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Order from './pages/Order';
 import PaymentReturn from './pages/PaymentReturn';
+import ResetPassword from './pages/ResetPassword';
 import ServiceDetail from './pages/ServiceDetail';
 import Services from './pages/Services';
 import Signup from './pages/Signup';
+import VerifyOtp from './pages/VerifyOtp';
 
 export default function App() {
   const location =
@@ -128,6 +131,21 @@ export default function App() {
         <Route
           path="/email-verified"
           element={<EmailVerified />}
+        />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/reset-password"
+          element={<ResetPassword />}
+        />
+
+        <Route
+          path="/verify-otp"
+          element={<VerifyOtp />}
         />
 
         <Route
