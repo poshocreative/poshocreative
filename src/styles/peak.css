@@ -1,0 +1,702 @@
+/* ==========================================================
+   POSHO CREATIVE — PEAK FINISH LAYER
+   The single authoritative design-system override.
+   Loads LAST (see src/main.jsx) so it wins every cascade:
+   unifies buttons, type, cards, forms, header, heroes,
+   footer, tables, motion, focus and responsive guards.
+   Rules: additive polish only — never restructure layout.
+   ========================================================== */
+
+:root {
+  /* Brand scale (portal-premium + animations reference these;
+     they had no in-repo definition, so they resolve HERE) */
+  --brand-400: #a97ff2;
+  --brand-500: #8b5bea;
+  --brand-600: #6c2bd9;
+  --brand-700: #471a92;
+  --brand-ink: #2a0f63;
+
+  /* Elevation */
+  --elev-1:
+    0 1px 2px
+    rgba(18, 14, 27, 0.05);
+  --elev-2:
+    0 10px 30px
+    rgba(18, 14, 27, 0.08);
+  --elev-3:
+    0 22px 60px
+    rgba(18, 14, 27, 0.12);
+  --elev-brand:
+    0 18px 45px
+    rgba(108, 43, 217, 0.28);
+
+  /* Lines */
+  --line-soft:
+    rgba(20, 18, 23, 0.08);
+  --line-medium:
+    rgba(20, 18, 23, 0.15);
+
+  /* Motion (animations.css references these) */
+  --motion-ease:
+    cubic-bezier(
+      0.22,
+      0.61,
+      0.36,
+      1
+    );
+  --motion-fast: 0.16s;
+  --motion-normal: 0.28s;
+  --motion-medium: 0.45s;
+  --motion-slow: 0.7s;
+  --motion-soft: 0.35s;
+
+  /* Type scale */
+  --text-xs: 0.72rem;
+  --text-sm: 0.82rem;
+  --text-base: 0.95rem;
+  --text-lg: 1.1rem;
+
+  /* Radii */
+  --radius-card: 20px;
+  --radius-panel: 26px;
+  --radius-pill: 999px;
+
+  /* Layer order */
+  --z-header: 200;
+  --z-nav: 900;
+  --z-modal: 1000;
+  --z-toast: 1100;
+}
+
+/* ---------- base ---------- */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  text-rendering: optimizeLegibility;
+
+  font-feature-settings:
+    'cv11',
+    'ss01';
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--brand-600);
+  color: #ffffff;
+}
+
+/* Refined scrollbar (webkit) */
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border:
+    3px solid
+    transparent;
+
+  border-radius: 8px;
+
+  background-clip: content-box;
+
+  background-color:
+    rgba(108, 43, 217, 0.32);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color:
+    rgba(108, 43, 217, 0.55);
+}
+
+/* Keyboard focus can never vanish, whatever older
+   `outline: none` rules say — accessibility first. */
+*:focus-visible {
+  outline: 3px solid
+    rgba(
+      108,
+      43,
+      217,
+      0.45
+    ) !important;
+
+  outline-offset: 2px !important;
+
+  border-radius: 6px;
+}
+
+/* ---------- header ---------- */
+
+.site-header {
+  z-index: var(--z-header);
+
+  box-shadow:
+    0 1px 0
+      var(--line-soft),
+    0 12px 32px -18px
+      rgba(23, 12, 60, 0.25);
+}
+
+.header-inner {
+  min-height: 76px;
+}
+
+.brand-logo {
+  transition:
+    transform
+      var(--motion-normal)
+      var(--motion-ease);
+}
+
+.brand-logo:hover {
+  transform: scale(1.03);
+}
+
+.desktop-nav a {
+  padding: 8px 2px;
+
+  letter-spacing: 0.005em;
+}
+
+.desktop-nav a::before {
+  content: '';
+
+  position: absolute;
+
+  left: 0;
+  right: 100%;
+  bottom: -4px;
+
+  height: 2px;
+
+  border-radius: 2px;
+
+  background: var(--brand-600);
+
+  transition:
+    right
+      var(--motion-normal)
+      var(--motion-ease);
+}
+
+.desktop-nav a:hover::before,
+.desktop-nav a.active::before {
+  right: 0;
+}
+
+/* ---------- buttons: one system ---------- */
+
+.button {
+  position: relative;
+
+  min-height: 50px;
+
+  padding: 0 26px;
+
+  border-radius:
+    var(--radius-pill);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  letter-spacing: 0.01em;
+
+  white-space: nowrap;
+
+  transition:
+    transform
+      var(--motion-normal)
+      var(--motion-ease),
+    box-shadow
+      var(--motion-normal)
+      var(--motion-ease),
+    background
+      var(--motion-normal)
+      var(--motion-ease),
+    border-color
+      var(--motion-normal)
+      var(--motion-ease),
+    color
+      var(--motion-normal)
+      var(--motion-ease);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button:active {
+  transform:
+    translateY(0)
+    scale(0.98);
+}
+
+.button:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+.button-primary {
+  background: linear-gradient(
+    180deg,
+    #7a3fe3 0%,
+    var(--brand-600) 55%,
+    #5f24c4 100%
+  );
+
+  border: 1px solid
+    rgba(58, 20, 114, 0.35);
+
+  color: #ffffff;
+
+  box-shadow:
+    var(--elev-brand),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.22);
+}
+
+.button-primary:hover {
+  background: linear-gradient(
+    180deg,
+    #8450e8 0%,
+    #7440db 55%,
+    #6733cf 100%
+  );
+
+  box-shadow:
+    0 22px 55px
+      rgba(108, 43, 217, 0.36),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.25);
+}
+
+.button-secondary {
+  border: 1px solid
+    var(--line-medium);
+
+  background:
+    rgba(255, 255, 255, 0.9);
+
+  color: var(--text);
+
+  box-shadow:
+    var(--elev-1);
+}
+
+.button-secondary:hover {
+  border-color:
+    var(--brand-primary-border);
+
+  background:
+    var(--brand-primary-soft);
+
+  color: var(--brand-700);
+
+  box-shadow:
+    var(--elev-2);
+}
+
+.button-dark {
+  background: #17131d;
+
+  color: #ffffff;
+
+  box-shadow:
+    var(--elev-2);
+}
+
+.button-dark:hover {
+  background: var(--brand-700);
+
+  box-shadow:
+    var(--elev-brand);
+}
+
+/* ---------- section rhythm + type ---------- */
+
+.section-kicker {
+  letter-spacing: 0.16em;
+}
+
+.section-heading h2 {
+  text-wrap: balance;
+
+  letter-spacing: -0.03em;
+}
+
+.section-heading p {
+  color: var(--text-soft);
+
+  line-height: 1.75;
+}
+
+/* Gradient display text utility */
+.text-gradient-brand {
+  background: linear-gradient(
+    120deg,
+    var(--brand-700),
+    var(--brand-500),
+    var(--brand-400)
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+/* ---------- hero ---------- */
+
+.hero-section {
+  padding:
+    clamp(64px, 9vw, 110px)
+    0;
+}
+
+/* ---------- cards: one language ---------- */
+
+.service-card,
+.why-card,
+.hero-visual-card,
+.auth-form-card,
+.auth-confirmation-card,
+.dashboard-stat-card,
+.dashboard-panel,
+.dashboard-side-card,
+.admin-stat-card,
+.admin-panel,
+.admin-access-card,
+.admin-control-card,
+.admin-data-card,
+.admin-pricing-card,
+.payment-main,
+.payment-security,
+.payment-return-card,
+.bank-transfer-panel,
+.current-quote-card,
+.workspace-panel,
+.workspace-stat-card,
+.workspace-stat-card-v3,
+.workspace-file-card,
+.workspace-payment-card,
+.posho-metric,
+.posho-result,
+.posho-kanban-card,
+.project-directory-card {
+  border: 1px solid
+    var(--line-soft);
+
+  box-shadow:
+    var(--elev-1);
+}
+
+/* Marketing cards lift */
+.service-card,
+.why-card,
+.hero-visual-card {
+  border-radius:
+    var(--radius-card);
+
+  transition:
+    transform
+      var(--motion-normal)
+      var(--motion-ease),
+    box-shadow
+      var(--motion-normal)
+      var(--motion-ease),
+    border-color
+      var(--motion-normal)
+      var(--motion-ease);
+}
+
+.service-card:hover,
+.why-card:hover,
+.hero-visual-card:hover {
+  transform: translateY(-6px);
+
+  border-color:
+    var(--brand-primary-border);
+
+  box-shadow:
+    var(--elev-3),
+    0 0 0 1px
+      rgba(108, 43, 217, 0.06);
+}
+
+/* Portal panels: calm, no lift */
+.workspace-panel,
+.dashboard-panel,
+.admin-panel,
+.payment-main,
+.bank-transfer-panel {
+  border-radius:
+    var(--radius-panel);
+}
+
+/* ---------- forms ---------- */
+
+.auth-field input,
+.auth-field select,
+.auth-field textarea,
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='tel'],
+input[type='number'],
+input[type='search'],
+input[type='url'],
+select,
+textarea {
+  border-color:
+    var(--line-medium);
+}
+
+.auth-field input::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+
+  opacity: 1;
+}
+
+.auth-field input:hover,
+input:hover,
+select:hover,
+textarea:hover {
+  border-color:
+    rgba(108, 43, 217, 0.35);
+}
+
+.auth-field input:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  border-color:
+    var(--brand-600);
+
+  box-shadow:
+    0 0 0 4px
+      rgba(
+        108,
+        43,
+        217,
+        0.1
+      );
+
+  outline: none;
+}
+
+label {
+  letter-spacing: 0.01em;
+}
+
+/* ---------- badges, pills, status ---------- */
+
+.badge,
+.pill,
+.status-pill,
+[class*='badge'],
+[class*='status-'] {
+  letter-spacing: 0.04em;
+}
+
+/* ---------- tables ---------- */
+
+table {
+  border-collapse: collapse;
+}
+
+th {
+  font-size: var(--text-xs);
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: var(--text-muted);
+}
+
+tbody tr {
+  border-top: 1px solid
+    var(--line-soft);
+
+  transition:
+    background
+      var(--motion-fast)
+      var(--motion-ease);
+}
+
+tbody tr:hover {
+  background:
+    rgba(108, 43, 217, 0.035);
+}
+
+/* ---------- footer ---------- */
+
+.site-footer {
+  border-top: 1px solid
+    var(--line-soft);
+}
+
+.site-footer a {
+  transition:
+    color
+      var(--motion-fast)
+      var(--motion-ease);
+}
+
+.site-footer a:hover {
+  color: var(--brand-600);
+}
+
+/* ---------- portal chrome ---------- */
+
+.admin-pro-session span,
+.client-pro-session span {
+  box-shadow:
+    0 0 0 4px
+      rgba(32, 135, 72, 0.15);
+}
+
+/* ---------- verification + system pages ---------- */
+
+.verification-card,
+.system-card {
+  border: 1px solid
+    var(--line-soft);
+
+  box-shadow:
+    var(--elev-2);
+}
+
+/* ---------- motion utilities ---------- */
+
+@keyframes peak-rise {
+  from {
+    opacity: 0;
+
+    transform: translateY(
+      18px
+    );
+  }
+
+  to {
+    opacity: 1;
+
+    transform: none;
+  }
+}
+
+.page-reveal {
+  animation: peak-rise
+    0.55s
+    var(--motion-ease)
+    both;
+}
+
+/* ---------- responsive guards ---------- */
+
+/* Tame oversized display clamps on small phones */
+@media (max-width: 480px) {
+  [class*='hero'] h1,
+  [class*='hero'] h2 {
+    font-size: clamp(
+      2.4rem,
+      11vw,
+      3.4rem
+    ) !important;
+
+    line-height: 1.02;
+  }
+
+  .container {
+    width: min(
+      calc(100% - 32px),
+      var(--container)
+    );
+  }
+
+  .button {
+    min-height: 48px;
+
+    padding: 0 20px;
+
+    font-size: 13.5px;
+  }
+
+  .header-inner {
+    min-height: 68px;
+  }
+}
+
+@media (max-width: 380px) {
+  [class*='hero'] h1,
+  [class*='hero'] h2 {
+    font-size: clamp(
+      2.2rem,
+      10vw,
+      3rem
+    ) !important;
+  }
+}
+
+/* Coarse pointers: larger hit areas, no hover lift */
+@media (pointer: coarse) {
+  .service-card:hover,
+  .why-card:hover,
+  .hero-visual-card:hover,
+  .button:hover {
+    transform: none;
+  }
+
+  .desktop-nav a,
+  .mobile-nav > a {
+    min-height: 44px;
+  }
+}
+
+/* Motion sensitivity: keep every existing guard honest */
+@media (prefers-reduced-motion: reduce) {
+  .page-reveal {
+    animation: none;
+  }
+
+  .button,
+  .service-card,
+  .why-card,
+  .hero-visual-card,
+  .brand-logo {
+    transition: none;
+  }
+}

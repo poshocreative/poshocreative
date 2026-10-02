@@ -4,7 +4,6 @@ import {
 } from 'react';
 
 import Icon from './ui/Icon';
-import AnniversaryBanner from './ui/AnniversaryBanner';
 import {
   NavLink,
   useLocation,
@@ -384,7 +383,6 @@ export default function Header() {
           </div>
         </div>
 
-        <AnniversaryBanner variant="public" />
       </header>
 
       <div
