@@ -985,17 +985,6 @@ export default function Login() {
                 Create an account
               </Link>
             </p>
-
-            <p className="auth-switch-copy">
-              Trouble signing in?{' '}
-              <Link to="/forgot-password">
-                Reset password
-              </Link>{' '}
-              ·{' '}
-              <Link to="/verify-otp">
-                Use OTP code
-              </Link>
-            </p>
           </div>
         </section>
       </div>
