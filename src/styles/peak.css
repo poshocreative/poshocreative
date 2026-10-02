@@ -657,3 +657,273 @@ tbody tr:hover {
     transition: none;
   }
 }
+
+/* ==========================================================
+   FULL-SITE SWEEP — clipping, overflow, grids, tap targets
+   Every rule below fixes an audited breakage (desktop +
+   mobile). Additive guards only; no layout restructuring.
+   ========================================================== */
+
+/* Sticky-safe page overflow (was hidden: masked cuts + broke
+   sticky descendants). */
+html,
+body {
+  overflow-x: clip;
+}
+
+/* Table wrappers work on desktop too, not just mobile. */
+.table-responsive,
+.admin-table-wrap {
+  display: block;
+
+  overflow-x: auto;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Desktop admin ledgers: scroll instead of clipping fixed cols. */
+.admin-data-card {
+  overflow-x: auto;
+}
+
+.admin-data-card .admin-data-row,
+.admin-data-card .admin-order-data-row {
+  min-width: 680px;
+}
+
+/* Desktop account dropdown: layered, bounded, scrollable. */
+.header-account-menu {
+  z-index: 1000;
+
+  max-height: min(70vh, 400px);
+
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+}
+
+/* Same centering-clip bug class as posho-modal: safe pattern. */
+.admin-part-payment-review,
+.order-submission-overlay {
+  align-items: start;
+  justify-items: center;
+
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+}
+
+.admin-part-payment-review > *,
+.order-submission-overlay > * {
+  margin: auto;
+}
+
+.admin-part-payment-review {
+  max-height: none;
+
+  padding-bottom:
+    calc(
+      20px +
+        env(
+          safe-area-inset-bottom,
+          0px
+        )
+    );
+}
+
+/* Grids: children can always shrink + wrap long content
+   instead of forcing columns wider than the viewport.
+   (Column counts stay owned by each component stylesheet.) */
+.section-heading > *,
+.footer-grid > *,
+.services-cross-grid > *,
+.service-directory-item > *,
+.dashboard-order-row > *,
+.order-review-section > * {
+  min-width: 0;
+
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1100px) {
+  .section-heading {
+    grid-template-columns:
+      minmax(0, 1fr) 340px;
+  }
+
+  .footer-grid {
+    grid-template-columns:
+      1.8fr 1fr 1fr 1.1fr;
+  }
+
+  .services-cross-grid {
+    grid-template-columns:
+      1.15fr 0.85fr;
+  }
+
+  .service-directory-item {
+    grid-template-columns:
+      65px 75px minmax(0, 1fr) 55px;
+  }
+
+  .dashboard-order-row {
+    grid-template-columns:
+      minmax(0, 1fr) 170px 28px;
+  }
+
+  .order-review-section {
+    grid-template-columns:
+      160px minmax(0, 1fr);
+  }
+}
+
+/* Wide marketing grids: breathing room + earlier collapse. */
+@media (max-width: 1400px) {
+  .service-capabilities-grid,
+  .why-grid,
+  .services-hero-grid {
+    gap: 44px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .service-capabilities-grid,
+  .why-grid,
+  .services-hero-grid {
+    grid-template-columns:
+      minmax(0, 1fr);
+
+    gap: 32px;
+  }
+}
+
+/* Order workspace: stack + unstick summary on narrow desktop. */
+@media (max-width: 1024px) {
+  .order-workspace {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+
+  .order-summary-card {
+    position: static;
+  }
+}
+
+/* Palette rows: fixed label must not squeeze content. */
+.posho-palette-list button {
+  grid-template-columns:
+    90px minmax(0, 1fr);
+}
+
+/* Bank + finance rows: stack before they crush. */
+@media (max-width: 700px) {
+  .bank-account-detail {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .finance-request-heading,
+  .project-service-platform,
+  .bank-transfer-panel {
+    flex-wrap: wrap;
+  }
+}
+
+/* Stat grids: single column before money figures clip. */
+@media (max-width: 480px) {
+  .dashboard-stats-grid,
+  .admin-dashboard-stat-grid {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+}
+
+/* Platform picker: single column on the smallest phones. */
+@media (max-width: 400px) {
+  .social-platform-grid {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+}
+
+/* Missing tab-bar clearance on one admin surface. */
+.admin-control-content-v2 {
+  padding-bottom:
+    calc(
+      110px +
+        env(
+          safe-area-inset-bottom,
+          0px
+        )
+    );
+}
+
+/* Tap targets: 40px+ on everything primary. */
+.order-file-item > button {
+  width: 40px;
+  height: 40px;
+}
+
+.bank-account-detail button {
+  min-height: 40px;
+
+  padding: 0 12px;
+
+  font-size: 12px;
+}
+
+.dashboard-nav a {
+  min-height: 40px;
+
+  display: inline-flex;
+
+  align-items: center;
+}
+
+.admin-filter-tabs button {
+  min-height: 44px;
+}
+
+.auth-password-toggle {
+  width: 42px;
+  height: 42px;
+}
+
+.admin-pcc-file-actions button,
+.admin-pcc-file-actions footer button {
+  min-height: 40px;
+}
+
+.admin-icon-button {
+  width: 40px;
+  height: 40px;
+}
+
+.admin-signout-button {
+  min-height: 40px;
+}
+
+.client-pro-sheet-heading button,
+.admin-pro-sheet-heading button,
+.posho-toast button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.posho-kanban-move button {
+  min-height: 40px;
+}
+
+.admin-payment-method-control button {
+  min-height: 44px;
+}
+
+/* OTP boxes: 16px type (no iOS zoom) + 44px targets. */
+@media (max-width: 480px) {
+  .otp-box {
+    min-height: 44px;
+
+    font-size: 16px;
+  }
+}

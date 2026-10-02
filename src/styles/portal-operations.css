@@ -111,7 +111,11 @@
 .posho-toast-error .posho-toast-dot { background: #f87171; }
 .posho-toast-info .posho-toast-dot { background: #60a5fa; }
 
-/* ---------- modal ---------- */
+/* ---------- modal ----------
+   Bulletproof pattern: the BACKDROP scrolls, the dialog never
+   clips internally. margin:auto gives safe centering — centered
+   when it fits, top-aligned and reachable when it is tall. */
+
 .posho-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -120,7 +124,10 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 12px calc(20px + env(safe-area-inset-bottom, 0px));
   border: 0;
   width: 100%;
   cursor: default;
@@ -128,19 +135,35 @@
 
 @media (min-width: 720px) {
   .posho-modal-backdrop {
-    align-items: center;
-    padding: 24px;
+    align-items: flex-start;
+    padding: 40px 24px;
+  }
+
+  .posho-modal-backdrop .posho-modal {
+    margin: auto;
   }
 }
 
 .posho-modal {
   background: #fff;
   width: min(560px, 100%);
-  max-height: min(88vh, 760px);
-  overflow: auto;
+  flex: none;
+  max-height: none;
+  overflow: visible;
   border-radius: 20px;
   padding: 22px;
   box-shadow: var(--posho-shadow);
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 719px) {
+  .posho-modal {
+    width: 100%;
+    max-height: min(92dvh, 92vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 20px 20px 0 0;
+  }
 }
 
 .posho-modal-heading {
