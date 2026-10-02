@@ -22,6 +22,7 @@ import {
 import {
   isValidEmail,
   mapAuthErrorToMessage,
+  OTP_CODE_LENGTH,
 } from '../lib/authEmail';
 
 import {
@@ -375,7 +376,7 @@ export default function Login() {
       if (
         verifyingOtp ||
         String(code || '').length <
-          6
+          OTP_CODE_LENGTH
       ) {
         return;
       }
@@ -526,7 +527,7 @@ export default function Login() {
         setOtpCooldown(60);
 
         setInfo(
-          `Enter the 6-digit code we sent to ${form.email.trim()}.`,
+          `Enter the 8-digit code we sent to ${form.email.trim()}.`,
         );
 
         return;
@@ -726,7 +727,9 @@ export default function Login() {
                   </p>
 
                   <OtpInput
-                    length={6}
+                    length={
+                      OTP_CODE_LENGTH
+                    }
                     resetKey={
                       otpResetKey
                     }
@@ -905,7 +908,7 @@ export default function Login() {
                     'otp' && (
                     <p className="auth-hint">
                       We will email you
-                      a 6-digit code.
+                      an 8-digit code.
                       Enter it here —
                       no password
                       needed.

@@ -467,7 +467,7 @@ export default function EmailVerified() {
               >
                 Links expire quickly.
                 Request a fresh email
-                or use your 6-digit
+                or use your 8-digit
                 code instead.
               </p>
 

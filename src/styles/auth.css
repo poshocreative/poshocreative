@@ -846,7 +846,7 @@
 
 /* ==========================================================
    PROFESSIONAL OTP + AUTH STATE SYSTEM
-   Code-only flows: no magic links, 6-digit entry everywhere
+   Code-only flows: no magic links, 8-digit entry everywhere
    ========================================================== */
 
 .auth-mode-tabs {
@@ -930,16 +930,16 @@
   display: grid;
 
   grid-template-columns:
-    repeat(6, minmax(0, 1fr));
+    repeat(8, minmax(0, 1fr));
 
-  gap: 8px;
+  gap: 6px;
 }
 
 .otp-box {
   width: 100%;
   aspect-ratio: 1 / 1.05;
 
-  min-height: 52px;
+  min-height: 48px;
 
   padding: 0;
 
@@ -947,7 +947,7 @@
     1.5px solid
     var(--border);
 
-  border-radius: 14px;
+  border-radius: 12px;
 
   background: #ffffff;
 
@@ -957,7 +957,7 @@
 
   text-align: center;
 
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
 
   caret-color:
@@ -1313,15 +1313,15 @@
 
 @media (max-width: 480px) {
   .otp-grid {
-    gap: 6px;
+    gap: 4px;
   }
 
   .otp-box {
-    min-height: 46px;
+    min-height: 40px;
 
-    border-radius: 11px;
+    border-radius: 9px;
 
-    font-size: 17px;
+    font-size: 15px;
   }
 
   .auth-mode-tab {

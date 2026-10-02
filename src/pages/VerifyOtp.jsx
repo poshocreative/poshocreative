@@ -20,6 +20,7 @@ import {
   emailRedirectTo,
   isValidEmail,
   mapAuthErrorToMessage,
+  OTP_CODE_LENGTH,
 } from '../lib/authEmail';
 
 import { supabase } from '../lib/supabase';
@@ -122,7 +123,7 @@ export default function VerifyOtp() {
     if (
       submitting ||
       String(rawCode || '').length <
-        6
+        OTP_CODE_LENGTH
     ) {
       return;
     }
@@ -341,7 +342,7 @@ export default function VerifyOtp() {
             </h1>
 
             <p>
-              Enter the 6-digit code
+              Enter the 8-digit code
               we emailed you. Codes
               expire quickly. Check
               spam and promotions if
@@ -448,7 +449,9 @@ export default function VerifyOtp() {
               </div>
 
               <OtpInput
-                length={6}
+                length={
+                  OTP_CODE_LENGTH
+                }
                 resetKey={
                   otpResetKey
                 }

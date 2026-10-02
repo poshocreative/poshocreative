@@ -4,8 +4,12 @@ import {
   useState,
 } from 'react';
 
+import {
+  OTP_CODE_LENGTH,
+} from '../lib/authEmail';
+
 export default function OtpInput({
-  length = 6,
+  length = OTP_CODE_LENGTH,
   onComplete,
   disabled = false,
   hasError = false,

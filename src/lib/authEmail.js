@@ -9,6 +9,8 @@ import { supabase } from './supabase';
 export const NO_REPLY_EMAIL =
   'no-reply@poshocreative.com.ng';
 
+export const OTP_CODE_LENGTH = 8;
+
 export const AUTH_RESEND_COOLDOWN_SECONDS = 60;
 
 export function getAppOrigin() {

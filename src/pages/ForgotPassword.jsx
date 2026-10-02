@@ -193,7 +193,7 @@ export default function ForgotPassword() {
               <p>
                 {sent
                   ? `We sent a reset code to ${email}. Enter it on the next step — it expires soon.`
-                  : 'Enter your account email and we will send a secure 6-digit reset code.'}
+                  : 'Enter your account email and we will send a secure 8-digit reset code.'}
               </p>
             </div>
 

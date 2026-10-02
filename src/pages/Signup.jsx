@@ -20,6 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   AUTH_RESEND_COOLDOWN_SECONDS,
   mapAuthErrorToMessage,
+  OTP_CODE_LENGTH,
 } from '../lib/authEmail';
 
 export default function Signup() {
@@ -260,7 +261,7 @@ export default function Signup() {
       if (
         verifyingOtp ||
         String(code || '').length <
-          6
+          OTP_CODE_LENGTH
       ) {
         return;
       }
@@ -321,7 +322,7 @@ export default function Signup() {
             </h1>
 
             <p>
-              We sent a 6-digit
+              We sent an 8-digit
               confirmation code to{' '}
               <strong>
                 {form.email}
@@ -341,7 +342,9 @@ export default function Signup() {
               }}
             >
               <OtpInput
-                length={6}
+                length={
+                  OTP_CODE_LENGTH
+                }
                 resetKey={
                   otpResetKey
                 }
