@@ -1,10 +1,15 @@
-import Icon from './Icon';
+import {
+  useRef,
+} from 'react';
 
-import { useEffect, useRef } from 'react';
-
+import Modal, {
+  ModalHeading,
+} from './Modal';
 
 /**
  * Accessible modal confirmation — replaces window.confirm / alert.
+ * Portal-based: never clipped by ancestors, body locked, Escape
+ * aware, focus trapped in and returned on close.
  */
 export default function ConfirmDialog({
   open,
@@ -20,73 +25,55 @@ export default function ConfirmDialog({
 }) {
   const confirmRef = useRef(null);
 
-  useEffect(() => {
-    if (!open) {
-      return undefined;
-    }
-
-    const handleKey = (event) => {
-      if (event.key === 'Escape') {
-        onClose?.();
-      }
-    };
-
-    window.addEventListener('keydown', handleKey);
-    const timer = window.setTimeout(() => confirmRef.current?.focus(), 40);
-
-    return () => {
-      window.removeEventListener('keydown', handleKey);
-      window.clearTimeout(timer);
-    };
-  }, [open, onClose]);
-
   if (!open) {
     return null;
   }
 
   return (
-    <div className="posho-modal-backdrop" onClick={onClose}>
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className={`posho-modal posho-modal-${tone}`}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="posho-modal-heading">
-          <h3>{title}</h3>
-          <button type="button" onClick={onClose} aria-label="Close dialog" disabled={busy}>
-            <Icon name="close" size={19} />
-          </button>
-        </div>
+    <Modal
+      labelledBy="confirm-dialog-title"
+      busy={busy}
+      dialogClassName={`posho-modal-${tone}`}
+      onClose={onClose}
+    >
+      <ModalHeading
+        id="confirm-dialog-title"
+        title={title}
+        busy={busy}
+        onClose={onClose}
+      />
 
-        {description && <p className="posho-modal-description">{description}</p>}
+      {description && (
+        <p className="posho-modal-description">
+          {description}
+        </p>
+      )}
 
-        <div className="posho-modal-actions">
-          <button
-            type="button"
-            className="button button-secondary"
-            onClick={onClose}
-            disabled={busy}
-          >
-            {cancelLabel}
-          </button>
-          <button
-            ref={confirmRef}
-            type="button"
-            className={
-              tone === 'danger'
-                ? 'posho-button-danger'
-                : 'button button-primary'
-            }
-            onClick={onConfirm}
-            disabled={busy}
-            aria-busy={busy}
-          >
-            {busy ? busyLabel : confirmLabel}
-          </button>
-        </div>
+      <div className="posho-modal-actions">
+        <button
+          type="button"
+          className="button button-secondary"
+          onClick={onClose}
+          disabled={busy}
+        >
+          {cancelLabel}
+        </button>
+
+        <button
+          ref={confirmRef}
+          type="button"
+          className={
+            tone === 'danger'
+              ? 'posho-button-danger'
+              : 'button button-primary'
+          }
+          onClick={onConfirm}
+          disabled={busy}
+          aria-busy={busy}
+        >
+          {busy ? busyLabel : confirmLabel}
+        </button>
       </div>
-    </div>
+    </Modal>
   );
 }

@@ -7,6 +7,9 @@ import {
 
 import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
+import Modal, {
+  ModalHeading,
+} from '../components/ui/Modal';
 import PageHeader from '../components/ui/PageHeader';
 import StatusBadge from '../components/ui/StatusBadge';
 import Tabs from '../components/ui/Tabs';
@@ -18,10 +21,6 @@ import {
 import {
   useToast,
 } from '../components/ui/Toast';
-
-import {
-  useEscapeClose,
-} from '../components/ui/useEscapeClose';
 
 import {
   getMyRequests,
@@ -50,9 +49,6 @@ export default function DashboardRequests() {
     service_slug: 'creative-solutions',
     priority: 'normal',
   });
-
-  useEscapeClose(Boolean(detail) && !busy, () => setDetail(null));
-  useEscapeClose(createOpen && !busy, () => setCreateOpen(false));
 
   const load = useCallback(async () => {
     try {
@@ -204,30 +200,22 @@ export default function DashboardRequests() {
       )}
 
       {createOpen && (
-        <div
-          className="posho-modal-backdrop"
-          onClick={() => !busy && setCreateOpen(false)}
+        <Modal
+          labelledBy="new-request-title"
+          busy={busy}
+          onClose={() =>
+            setCreateOpen(false)
+          }
         >
-          <form
-            role="dialog"
-            aria-modal="true"
-            aria-label="New service request"
-            className="posho-modal"
-            onClick={(event) => event.stopPropagation()}
-            onSubmit={submit}
-          >
-            <div className="posho-modal-heading">
-              <h3>New request</h3>
-
-              <button
-                type="button"
-                onClick={() => setCreateOpen(false)}
-                aria-label="Close"
-                disabled={busy}
-              >
-                <Icon name="close" size={19} />
-              </button>
-            </div>
+          <form onSubmit={submit}>
+            <ModalHeading
+              id="new-request-title"
+              title="New request"
+              busy={busy}
+              onClose={() =>
+                setCreateOpen(false)
+              }
+            />
 
             <div className="posho-form-grid">
               <label>
@@ -301,31 +289,28 @@ export default function DashboardRequests() {
               </button>
             </div>
           </form>
-        </div>
+        </Modal>
       )}
 
       {detail && (
-        <div
-          className="posho-modal-backdrop"
-          onClick={() => !busy && setDetail(null)}
+        <Modal
+          wide
+          labelledBy="request-detail-title"
+          onClose={() =>
+            setDetail(null)
+          }
         >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Request detail"
-            className="posho-modal posho-modal-wide"
-            onClick={(event) => event.stopPropagation()}
-          >
+          <div>
             <div className="posho-modal-heading">
               <div>
                 <span>REQUEST · {detail.reference}</span>
-                <h3 className="posho-long-value">{detail.title}</h3>
+                <h3 id="request-detail-title" className="posho-long-value">{detail.title}</h3>
               </div>
 
               <button
                 type="button"
                 onClick={() => setDetail(null)}
-                aria-label="Close"
+                aria-label="Close dialog"
               >
                 <Icon name="close" size={19} />
               </button>
@@ -465,7 +450,7 @@ export default function DashboardRequests() {
               </button>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

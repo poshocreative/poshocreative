@@ -1,4 +1,8 @@
 import {
+  useEffect,
+} from 'react';
+
+import {
   Route,
   Routes,
   useLocation,
@@ -61,6 +65,54 @@ import VerifyOtp from './pages/VerifyOtp';
 export default function App() {
   const location =
     useLocation();
+
+  // Universal popup hygiene: while ANY legacy dialog backdrop
+  // (.posho-modal-backdrop, overlays, review sheets) is mounted
+  // without the Modal component's own lock, keep the page behind
+  // from scrolling. Modal-component dialogs lock via their own
+  // reference-counted effect and are ignored here.
+  useEffect(() => {
+    const update = () => {
+      const legacyOpen =
+        document.querySelector(
+          '.posho-modal-backdrop:not([data-modal-portal]), .order-submission-overlay, .admin-part-payment-review',
+        );
+
+      const componentLocked =
+        Number(
+          document.body.dataset
+            .poshoModalCount || 0,
+        ) > 0;
+
+      document.body.style.overflow =
+        legacyOpen &&
+        !componentLocked
+          ? 'hidden'
+          : '';
+    };
+
+    update();
+
+    const observer =
+      new MutationObserver(
+        update,
+      );
+
+    observer.observe(
+      document.body,
+      {
+        childList: true,
+        subtree: true,
+      },
+    );
+
+    return () => {
+      observer.disconnect();
+
+      document.body.style.overflow =
+        '';
+    };
+  }, []);
 
   const adminArea =
     /^\/m\/[a-f0-9]{64}(?:\/|$)/

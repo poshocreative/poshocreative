@@ -1,6 +1,6 @@
 
 import Icon from '../ui/Icon';
-import { useEscapeClose } from '../ui/useEscapeClose';
+import Modal from '../ui/Modal';
 import StatusBadge from '../ui/StatusBadge';
 import { formatKobo } from '../../lib/money';
 
@@ -16,8 +16,6 @@ function formatDate(value) {
  * messages, uploads or data changes are possible here.
  */
 export default function ClientPreview({ open, order, work, finance, onClose }) {
-  useEscapeClose(open, onClose);
-
   if (!open || !order) {
     return null;
   }
@@ -36,19 +34,16 @@ export default function ClientPreview({ open, order, work, finance, onClose }) {
   const progress = Math.max(0, Math.min(100, Number(order.progress_percent || 0)));
 
   return (
-    <div className="posho-modal-backdrop" onClick={onClose} style={{ alignItems: 'flex-start' }}>
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Client preview (read-only)"
-        className="posho-modal posho-modal-wide"
-        onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 720 }}
-      >
+    <Modal
+      wide
+      labelledBy="client-preview-title"
+      onClose={onClose}
+    >
+      <div>
         <div className="posho-modal-heading">
           <div>
             <span className="posho-section-label">Preview as client · read-only</span>
-            <h3 className="posho-long-value">{order.project_title}</h3>
+            <h3 id="client-preview-title" className="posho-long-value">{order.project_title}</h3>
           </div>
           <button type="button" onClick={onClose} aria-label="Close preview"><Icon name="close" size={19} /></button>
         </div>
@@ -164,6 +159,6 @@ export default function ClientPreview({ open, order, work, finance, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

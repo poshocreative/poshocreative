@@ -8,6 +8,9 @@ import {
 
 import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
+import Modal, {
+  ModalHeading,
+} from '../components/ui/Modal';
 import PageHeader from '../components/ui/PageHeader';
 import MetricCard from '../components/ui/MetricCard';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -1071,50 +1074,30 @@ export default function AdminRequests() {
       )}
 
       {createOpen && (
-        <div
-          className="posho-modal-backdrop"
-          onClick={() =>
-            !busy &&
+        <Modal
+          labelledBy="admin-new-request-title"
+          busy={busy}
+          onClose={() =>
             setCreateOpen(
               false,
             )
           }
         >
           <form
-            role="dialog"
-            aria-modal="true"
-            aria-label="New service request"
-            className="posho-modal"
-            onClick={(
-              event,
-            ) =>
-              event.stopPropagation()
-            }
             onSubmit={
               submitCreate
             }
           >
-            <div className="posho-modal-heading">
-              <h3>
-                New request
-              </h3>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setCreateOpen(
-                    false,
-                  )
-                }
-                aria-label="Close request form"
-                disabled={
-                  busy
-                }
-              >
-                <Icon name="close"                   size={19}
-                />
-              </button>
-            </div>
+            <ModalHeading
+              id="admin-new-request-title"
+              title="New request"
+              busy={busy}
+              onClose={() =>
+                setCreateOpen(
+                  false,
+                )
+              }
+            />
 
             <p className="posho-modal-description">
               Creating on behalf of a
@@ -1414,7 +1397,7 @@ export default function AdminRequests() {
               </button>
             </div>
           </form>
-        </div>
+        </Modal>
       )}
 
       {detailLoading && (
@@ -1431,26 +1414,16 @@ export default function AdminRequests() {
       )}
 
       {detail && (
-        <div
-          className="posho-modal-backdrop"
-          onClick={() =>
-            !busy &&
+        <Modal
+          wide
+          labelledBy="admin-request-detail-title"
+          busy={busy}
+          onClose={() =>
             setDetail(
               null,
             )
           }
         >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Request detail"
-            className="posho-modal posho-modal-wide"
-            onClick={(
-              event,
-            ) =>
-              event.stopPropagation()
-            }
-          >
             <div className="posho-modal-heading">
               <div>
                 <span>
@@ -1460,7 +1433,7 @@ export default function AdminRequests() {
                   }
                 </span>
 
-                <h3>
+                <h3 id="admin-request-detail-title">
                   {
                     detail.title
                   }
@@ -2104,55 +2077,34 @@ export default function AdminRequests() {
                 </button>
               </form>
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {billing && (
-        <div
-          className="posho-modal-backdrop"
-          onClick={() =>
-            !busy &&
+        <Modal
+          labelledBy="admin-bill-title"
+          busy={busy}
+          onClose={() =>
             setBilling(
               null,
             )
           }
         >
           <form
-            role="dialog"
-            aria-modal="true"
-            aria-label="Bill request"
-            className="posho-modal"
-            onClick={(
-              event,
-            ) =>
-              event.stopPropagation()
-            }
             onSubmit={
               submitBill
             }
           >
-            <div className="posho-modal-heading">
-              <h3>
-                Convert to paid charge
-              </h3>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setBilling(
-                    null,
-                  )
-                }
-                aria-label="Close billing form"
-                disabled={
-                  busy
-                }
-              >
-                <Icon name="close"                   size={19}
-                />
-              </button>
-            </div>
+            <ModalHeading
+              id="admin-bill-title"
+              title="Convert to paid charge"
+              busy={busy}
+              onClose={() =>
+                setBilling(
+                  null,
+                )
+              }
+            />
 
             <p className="posho-modal-description">
               Creates a one-off additional
@@ -2259,7 +2211,7 @@ export default function AdminRequests() {
               </button>
             </div>
           </form>
-        </div>
+        </Modal>
       )}
 
     </div>
