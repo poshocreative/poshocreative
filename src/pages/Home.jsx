@@ -25,7 +25,7 @@ export default function Home() {
             </h1>
 
             <p className="hero-description">
-              Websites. Branding. Social media. Advertising.
+              Websites. Branding. Advertising.
               Business solutions. Posho Creative brings the
               services you need together to transform ideas into
               meaningful results.
@@ -84,7 +84,6 @@ export default function Home() {
               <div className="hero-service-tags">
                 <span>Websites</span>
                 <span>Branding</span>
-                <span>Social Media</span>
                 <span>Advertising</span>
                 <span>Business</span>
               </div>

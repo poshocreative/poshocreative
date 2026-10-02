@@ -72,10 +72,6 @@ export default function Footer() {
               Graphic Design & Branding
             </Link>
 
-            <Link to="/services/social-media-management">
-              Social Media
-            </Link>
-
             <Link to="/services/advertising">
               Advertising
             </Link>

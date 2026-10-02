@@ -10,10 +10,10 @@ const SITE_URL =
   'https://poshocreative.com.ng';
 
 const DEFAULT_TITLE =
-  'Posho Creative | Website Development, Branding, Social Media & Business Services';
+  'Posho Creative | Website Development, Branding, Advertising & Business Services';
 
 const DEFAULT_DESCRIPTION =
-  'Posho Creative provides professional website development, graphic design, branding, social media management, advertising, business support and creative solutions in Nigeria.';
+  'Posho Creative provides professional website development, graphic design, branding, advertising, business support and creative solutions in Nigeria.';
 
 const publicPages = {
   '/': {
@@ -29,7 +29,7 @@ const publicPages = {
       'Creative & Digital Services | Posho Creative',
 
     description:
-      'Explore Posho Creative services including website development, branding, graphic design, social media management, advertising and business support.',
+      'Explore Posho Creative services including website development, branding, graphic design, advertising and business support.',
   },
 
   '/services/website-development': {
@@ -46,14 +46,6 @@ const publicPages = {
 
     description:
       'Professional logo design, brand identity, flyers, business cards, social media graphics and marketing materials.',
-  },
-
-  '/services/social-media-management': {
-    title:
-      'Social Media Management & Growth | Posho Creative',
-
-    description:
-      'Professional social media management, content planning, profile optimisation, growth campaigns and promotion.',
   },
 
   '/services/advertising': {
@@ -93,7 +85,7 @@ const publicPages = {
       'Contact Posho Creative',
 
     description:
-      'Contact Posho Creative to discuss website development, branding, social media, advertising, business support or a custom project.',
+      'Contact Posho Creative to discuss website development, branding, advertising, business support or a custom project.',
   },
 };
 

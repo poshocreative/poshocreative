@@ -31,7 +31,6 @@ const principles = [
 const capabilities = [
   'Website & Web Platform Development',
   'Brand Identity & Graphic Design',
-  'Social Media Management & Growth',
   'Advertising & Promotion',
   'Business Support & Digital Setup',
   'Custom Creative Solutions',

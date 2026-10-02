@@ -106,61 +106,8 @@ export const services = [
   },
 
   {
-    slug: 'social-media-management',
-    number: '03',
-    title: 'Social Media Management & Growth',
-    shortTitle: 'Social Media',
-    icon: 'share',
-
-    tagline: 'Build a stronger and more consistent digital presence.',
-
-    description:
-      'Social media management, content support, promotion and audience-growth services for businesses and creators.',
-
-    heroDescription:
-      'We help businesses and individuals improve how they appear and communicate across social platforms through management, content support, promotion and selected growth services.',
-
-    services: [
-      'Social media management',
-      'Content planning',
-      'Profile optimisation',
-      'Post scheduling',
-      'Creative content support',
-      'Page growth support',
-      'Audience engagement support',
-      'Promotional campaigns',
-      'Account visibility support',
-      'Likes and engagement campaigns',
-      'Follower growth campaigns',
-      'Social media consultation',
-    ],
-
-    outcomes: [
-      {
-        title: 'Consistency',
-        text: 'Maintain a more organised and active presence across your social channels.',
-      },
-      {
-        title: 'Visibility',
-        text: 'Improve how your content and business are presented to potential audiences.',
-      },
-      {
-        title: 'Better direction',
-        text: 'Move beyond random posting with clearer goals and content planning.',
-      },
-    ],
-
-    process: [
-      'Choose the social media service you need.',
-      'Tell us about your account, audience and objectives.',
-      'We define the appropriate management, content or growth approach.',
-      'Work begins according to the agreed service and campaign requirements.',
-    ],
-  },
-
-  {
     slug: 'advertising',
-    number: '04',
+    number: '03',
     title: 'Advertising & Promotion',
     shortTitle: 'Advertising',
     icon: 'campaign',
@@ -213,7 +160,7 @@ export const services = [
 
   {
     slug: 'business-services',
-    number: '05',
+    number: '04',
     title: 'Business Services',
     shortTitle: 'Business',
     icon: 'apartment',
@@ -266,7 +213,7 @@ export const services = [
 
   {
     slug: 'creative-solutions',
-    number: '06',
+    number: '05',
     title: 'Custom Creative Solutions',
     shortTitle: 'Creative Solutions',
     icon: 'star',

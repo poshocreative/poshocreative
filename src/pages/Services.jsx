@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 
 import Icon from '../components/ui/Icon';
 import { services } from '../data/services';
-import SocialPlatformGrid from '../components/SocialPlatformGrid';
 
 export default function Services() {
   return (
@@ -99,47 +98,6 @@ export default function Services() {
                 </Link>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      <section className="social-commerce-showcase">
-        <div className="container social-commerce-showcase-inner">
-          <div className="social-commerce-copy">
-            <span className="section-kicker">SOCIAL & ENTERTAINMENT GROWTH</span>
-            <h2>
-              Campaigns for the platforms your audience already uses.
-            </h2>
-            <p>
-              Request followers, page followers, likes, comments, subscribers,
-              views and promotional campaigns. Every request is reviewed by
-              Management before a secure payment is enabled.
-            </p>
-
-            <div className="social-commerce-actions">
-              <Link
-                to="/order?service=social-media-management"
-                className="button button-primary"
-              >
-                Order social growth
-                <Icon name="arrow_forward" size={18} />
-              </Link>
-
-              <Link
-                to="/order?service=advertising"
-                className="button button-secondary"
-              >
-                Plan an ad campaign
-              </Link>
-            </div>
-          </div>
-
-          <div className="social-commerce-platforms">
-            <span>SUPPORTED PLATFORMS</span>
-            <SocialPlatformGrid
-              interactive={false}
-              compact
-            />
           </div>
         </div>
       </section>
