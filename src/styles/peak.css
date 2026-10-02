@@ -157,8 +157,6 @@ svg {
   z-index: var(--z-header);
 
   box-shadow:
-    0 1px 0
-      var(--line-soft),
     0 12px 32px -18px
       rgba(23, 12, 60, 0.25);
 }
@@ -384,43 +382,12 @@ svg {
     0;
 }
 
-/* ---------- cards: one language ---------- */
+/* ---------- cards: motion only ----------
+   NOTE: never add borders here. Several panel shells are
+   transparent layout containers — a border renders as a
+   stray floating rectangle. Borders belong to the
+   component stylesheets that own each card. */
 
-.service-card,
-.why-card,
-.hero-visual-card,
-.auth-confirmation-card,
-.dashboard-stat-card,
-.dashboard-panel,
-.dashboard-side-card,
-.admin-stat-card,
-.admin-panel,
-.admin-access-card,
-.admin-control-card,
-.admin-data-card,
-.admin-pricing-card,
-.payment-main,
-.payment-security,
-.payment-return-card,
-.bank-transfer-panel,
-.current-quote-card,
-.workspace-panel,
-.workspace-stat-card,
-.workspace-stat-card-v3,
-.workspace-file-card,
-.workspace-payment-card,
-.posho-metric,
-.posho-result,
-.posho-kanban-card,
-.project-directory-card {
-  border: 1px solid
-    var(--line-soft);
-
-  box-shadow:
-    var(--elev-1);
-}
-
-/* Marketing cards lift */
 .service-card,
 .why-card,
 .hero-visual-card {
@@ -547,9 +514,6 @@ th {
 }
 
 tbody tr {
-  border-top: 1px solid
-    var(--line-soft);
-
   transition:
     background
       var(--motion-fast)
@@ -562,11 +526,6 @@ tbody tr:hover {
 }
 
 /* ---------- footer ---------- */
-
-.site-footer {
-  border-top: 1px solid
-    var(--line-soft);
-}
 
 .site-footer a {
   transition:
@@ -590,8 +549,7 @@ tbody tr:hover {
 
 /* ---------- verification + system pages ---------- */
 
-.verification-card,
-.system-card {
+.verification-card {
   border: 1px solid
     var(--line-soft);
 
