@@ -8,6 +8,7 @@ import {
 
 import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
+import FieldError from '../components/ui/FieldError';
 import Modal, {
   ModalHeading,
 } from '../components/ui/Modal';
@@ -166,6 +167,12 @@ export default function AdminRequests() {
     useState(false);
 
   const [
+    createErrors,
+    setCreateErrors,
+  ] =
+    useState({});
+
+  const [
     form,
     setForm,
   ] =
@@ -217,6 +224,35 @@ export default function AdminRequests() {
   ] =
     useState('');
 
+  const focusCreateField = (
+    id,
+  ) => {
+    window.setTimeout(
+      () => {
+        document
+          .getElementById(
+            id,
+          )
+          ?.focus();
+      },
+      30,
+    );
+  };
+
+  const openCreate = () => {
+    setCreateErrors({});
+    setCreateOpen(true);
+  };
+
+  const closeCreate = () => {
+    if (busy) {
+      return;
+    }
+
+    setCreateErrors({});
+    setCreateOpen(false);
+  };
+
   useEscapeClose(
     Boolean(
       detail,
@@ -231,9 +267,7 @@ export default function AdminRequests() {
     createOpen &&
       !busy,
     () =>
-      setCreateOpen(
-        false,
-      ),
+      closeCreate(),
   );
 
   useEscapeClose(
@@ -515,7 +549,7 @@ export default function AdminRequests() {
   const setField = (
     field,
     value,
-  ) =>
+  ) => {
     setForm(
       (
         current,
@@ -526,10 +560,92 @@ export default function AdminRequests() {
       }),
     );
 
+    setCreateErrors(
+      (
+        current,
+      ) => {
+        if (
+          !current[field]
+        ) {
+          return current;
+        }
+
+        const next = {
+          ...current,
+        };
+
+        delete next[field];
+
+        return next;
+      },
+    );
+  };
+
   const submitCreate = async (
     event,
   ) => {
     event.preventDefault();
+
+    const nextErrors = {};
+
+    if (
+      !String(
+        form.customer_id ||
+          '',
+      ).trim()
+    ) {
+      nextErrors.customer_id =
+        'Choose the client this request is for.';
+    }
+
+    if (
+      !form.title.trim()
+    ) {
+      nextErrors.title =
+        'Give the request a short title.';
+    } else if (
+      form.title.trim()
+        .length < 4
+    ) {
+      nextErrors.title =
+        'Give a little more detail — at least 4 characters.';
+    }
+
+    if (
+      !form.description.trim()
+    ) {
+      nextErrors.description =
+        'Describe the work so nothing is lost in handover.';
+    } else if (
+      form.description.trim()
+        .length < 10
+    ) {
+      nextErrors.description =
+        'Add a little more context — at least 10 characters.';
+    }
+
+    setCreateErrors(
+      nextErrors,
+    );
+
+    const firstInvalid =
+      nextErrors.customer_id
+        ? 'admin-request-client'
+        : nextErrors.title
+          ? 'admin-request-title'
+          : nextErrors.description
+            ? 'admin-request-description'
+            : '';
+
+    if (
+      firstInvalid
+    ) {
+      focusCreateField(
+        firstInvalid,
+      );
+
+      return;
+    }
 
     try {
       setBusy(
@@ -566,6 +682,7 @@ export default function AdminRequests() {
       toast.success(
         'Request created and audited.',
       );
+      setCreateErrors({});
       setCreateOpen(
         false,
       );
@@ -867,9 +984,7 @@ export default function AdminRequests() {
             type="button"
             className="button button-primary"
             onClick={() =>
-              setCreateOpen(
-                true,
-              )
+              openCreate()
             }
           >
             <Icon name="add"               size={17}
@@ -1078,24 +1193,21 @@ export default function AdminRequests() {
           labelledBy="admin-new-request-title"
           busy={busy}
           onClose={() =>
-            setCreateOpen(
-              false,
-            )
+            closeCreate()
           }
         >
           <form
             onSubmit={
               submitCreate
             }
+            noValidate
           >
             <ModalHeading
               id="admin-new-request-title"
               title="New request"
               busy={busy}
               onClose={() =>
-                setCreateOpen(
-                  false,
-                )
+                closeCreate()
               }
             />
 
@@ -1106,12 +1218,19 @@ export default function AdminRequests() {
             </p>
 
             <div className="posho-form-grid">
-              <label>
+              <label
+                className={
+                  createErrors.customer_id
+                    ? 'field-invalid'
+                    : ''
+                }
+              >
                 <span>
                   Client
                 </span>
 
                 <select
+                  id="admin-request-client"
                   value={
                     form.customer_id
                   }
@@ -1125,7 +1244,14 @@ export default function AdminRequests() {
                         .value,
                     )
                   }
-                  required
+                  aria-invalid={Boolean(
+                    createErrors.customer_id,
+                  )}
+                  aria-describedby={
+                    createErrors.customer_id
+                      ? 'admin-request-client-error'
+                      : undefined
+                  }
                 >
                   <option value="">
                     Choose client…
@@ -1149,14 +1275,28 @@ export default function AdminRequests() {
                     ),
                   )}
                 </select>
+
+                <FieldError
+                  id="admin-request-client-error"
+                  message={
+                    createErrors.customer_id
+                  }
+                />
               </label>
 
-              <label>
+              <label
+                className={
+                  createErrors.title
+                    ? 'field-invalid'
+                    : ''
+                }
+              >
                 <span>
                   Title
                 </span>
 
                 <input
+                  id="admin-request-title"
                   value={
                     form.title
                   }
@@ -1170,18 +1310,39 @@ export default function AdminRequests() {
                         .value,
                     )
                   }
-                  required
                   maxLength={200}
                   placeholder="Update homepage hero"
+                  aria-invalid={Boolean(
+                    createErrors.title,
+                  )}
+                  aria-describedby={
+                    createErrors.title
+                      ? 'admin-request-title-error'
+                      : undefined
+                  }
+                />
+
+                <FieldError
+                  id="admin-request-title-error"
+                  message={
+                    createErrors.title
+                  }
                 />
               </label>
 
-              <label>
+              <label
+                className={
+                  createErrors.description
+                    ? 'field-invalid'
+                    : ''
+                }
+              >
                 <span>
                   Description
                 </span>
 
                 <textarea
+                  id="admin-request-description"
                   value={
                     form.description
                   }
@@ -1195,8 +1356,22 @@ export default function AdminRequests() {
                         .value,
                     )
                   }
-                  required
                   maxLength={5000}
+                  aria-invalid={Boolean(
+                    createErrors.description,
+                  )}
+                  aria-describedby={
+                    createErrors.description
+                      ? 'admin-request-description-error'
+                      : undefined
+                  }
+                />
+
+                <FieldError
+                  id="admin-request-description-error"
+                  message={
+                    createErrors.description
+                  }
                 />
               </label>
 
@@ -1370,9 +1545,7 @@ export default function AdminRequests() {
                 type="button"
                 className="button button-secondary"
                 onClick={() =>
-                  setCreateOpen(
-                    false,
-                  )
+                  closeCreate()
                 }
                 disabled={
                   busy

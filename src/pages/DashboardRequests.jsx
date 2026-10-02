@@ -7,6 +7,7 @@ import {
 
 import Icon from '../components/ui/Icon';
 import BrandLoader from '../components/BrandLoader';
+import FieldError from '../components/ui/FieldError';
 import Modal, {
   ModalHeading,
 } from '../components/ui/Modal';
@@ -50,6 +51,57 @@ export default function DashboardRequests() {
     priority: 'normal',
   });
 
+  const [fieldErrors, setFieldErrors] =
+    useState({});
+
+  const updateFormField = (
+    field,
+    value,
+  ) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+
+    setFieldErrors(
+      (current) => {
+        if (!current[field]) {
+          return current;
+        }
+
+        const next = {
+          ...current,
+        };
+
+        delete next[field];
+
+        return next;
+      },
+    );
+  };
+
+  const focusField = (id) => {
+    window.setTimeout(() => {
+      document
+        .getElementById(id)
+        ?.focus();
+    }, 30);
+  };
+
+  const openCreate = () => {
+    setFieldErrors({});
+    setCreateOpen(true);
+  };
+
+  const closeCreate = () => {
+    if (busy) {
+      return;
+    }
+
+    setFieldErrors({});
+    setCreateOpen(false);
+  };
+
   const load = useCallback(async () => {
     try {
       setError('');
@@ -82,8 +134,41 @@ export default function DashboardRequests() {
   const submit = async (event) => {
     event.preventDefault();
 
-    if (!form.title.trim() || !form.description.trim()) {
-      toast.error('Title and description are required.');
+    const nextErrors = {};
+
+    if (!form.title.trim()) {
+      nextErrors.title =
+        'Tell us what you need — a short title is required.';
+    } else if (
+      form.title.trim().length < 4
+    ) {
+      nextErrors.title =
+        'Give a little more detail — at least 4 characters.';
+    }
+
+    if (!form.description.trim()) {
+      nextErrors.description =
+        'Add a few details so Management can act without back-and-forth.';
+    } else if (
+      form.description.trim()
+        .length < 10
+    ) {
+      nextErrors.description =
+        'Add a little more context — at least 10 characters.';
+    }
+
+    setFieldErrors(nextErrors);
+
+    if (
+      Object.keys(nextErrors)
+        .length > 0
+    ) {
+      focusField(
+        nextErrors.title
+          ? 'request-title'
+          : 'request-description',
+      );
+
       return;
     }
 
@@ -102,6 +187,7 @@ export default function DashboardRequests() {
         `Request ${result.reference} submitted. Management will respond here.`,
       );
       setCreateOpen(false);
+      setFieldErrors({});
       setForm({
         title: '',
         description: '',
@@ -130,7 +216,7 @@ export default function DashboardRequests() {
           <button
             type="button"
             className="button button-primary"
-            onClick={() => setCreateOpen(true)}
+            onClick={() => openCreate()}
           >
             <Icon name="add" size={17} />
             New request
@@ -161,7 +247,7 @@ export default function DashboardRequests() {
             <button
               type="button"
               className="button button-primary"
-              onClick={() => setCreateOpen(true)}
+              onClick={() => openCreate()}
             >
               Submit a request
             </button>
@@ -204,49 +290,94 @@ export default function DashboardRequests() {
           labelledBy="new-request-title"
           busy={busy}
           onClose={() =>
-            setCreateOpen(false)
+            closeCreate()
           }
         >
-          <form onSubmit={submit}>
+          <form
+            onSubmit={submit}
+            noValidate
+          >
             <ModalHeading
               id="new-request-title"
               title="New request"
               busy={busy}
               onClose={() =>
-                setCreateOpen(false)
+                closeCreate()
               }
             />
 
             <div className="posho-form-grid">
-              <label>
+              <label
+                className={
+                  fieldErrors.title
+                    ? 'field-invalid'
+                    : ''
+                }
+              >
                 <span>What do you need?</span>
                 <input
+                  id="request-title"
                   value={form.title}
                   onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      title: event.target.value,
-                    }))
+                    updateFormField(
+                      'title',
+                      event.target.value,
+                    )
                   }
-                  required
                   maxLength={200}
                   placeholder="Update homepage headline"
+                  aria-invalid={Boolean(
+                    fieldErrors.title,
+                  )}
+                  aria-describedby={
+                    fieldErrors.title
+                      ? 'request-title-error'
+                      : undefined
+                  }
+                />
+
+                <FieldError
+                  id="request-title-error"
+                  message={
+                    fieldErrors.title
+                  }
                 />
               </label>
 
-              <label>
+              <label
+                className={
+                  fieldErrors.description
+                    ? 'field-invalid'
+                    : ''
+                }
+              >
                 <span>Details</span>
                 <textarea
+                  id="request-description"
                   value={form.description}
                   onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      description: event.target.value,
-                    }))
+                    updateFormField(
+                      'description',
+                      event.target.value,
+                    )
                   }
-                  required
                   maxLength={5000}
                   placeholder="Current text, new text, links…"
+                  aria-invalid={Boolean(
+                    fieldErrors.description,
+                  )}
+                  aria-describedby={
+                    fieldErrors.description
+                      ? 'request-description-error'
+                      : undefined
+                  }
+                />
+
+                <FieldError
+                  id="request-description-error"
+                  message={
+                    fieldErrors.description
+                  }
                 />
               </label>
 
@@ -273,7 +404,7 @@ export default function DashboardRequests() {
               <button
                 type="button"
                 className="button button-secondary"
-                onClick={() => setCreateOpen(false)}
+                onClick={() => closeCreate()}
                 disabled={busy}
               >
                 Cancel

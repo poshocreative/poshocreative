@@ -927,3 +927,67 @@ body {
     font-size: 16px;
   }
 }
+
+/* ==========================================================
+   BRANDED FORM VALIDATION
+   Replaces the browser-native "Please fill out this field"
+   bubble. Usage: <form noValidate>, inputs get aria-invalid +
+   aria-describedby pointing at the FieldError id, .field-invalid
+   on the wrapping label. Never style :invalid (fires too early).
+   ========================================================== */
+
+.field-error {
+  display: inline-flex;
+
+  align-items: flex-start;
+
+  gap: 6px;
+
+  margin-top: 7px;
+
+  color: #b3261e;
+
+  font-size: 12.5px;
+  font-weight: 600;
+
+  line-height: 1.5;
+
+  animation: peak-rise
+    0.25s
+    var(--motion-ease)
+    both;
+}
+
+.field-error .material-symbols-rounded {
+  flex: none;
+
+  margin-top: 1px;
+
+  color: #b3261e;
+}
+
+.field-invalid input,
+.field-invalid select,
+.field-invalid textarea {
+  border-color:
+    rgba(179, 38, 30, 0.65) !important;
+
+  background:
+    rgba(179, 38, 30, 0.035);
+}
+
+.field-invalid input:focus,
+.field-invalid select:focus,
+.field-invalid textarea:focus {
+  border-color:
+    #b3261e !important;
+
+  box-shadow:
+    0 0 0 4px
+      rgba(
+        179,
+        38,
+        30,
+        0.1
+      );
+}
