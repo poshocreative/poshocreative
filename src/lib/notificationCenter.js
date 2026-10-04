@@ -2,76 +2,45 @@ import {
   supabase,
 } from './supabase';
 
+// Customer workspace timeline must ONLY ever show the signed-in
+// customer's own rows. A direct table select is subject to the broad
+// admin / team-member RLS policies, which leak other customers'
+// notifications into this personal timeline (and those foreign rows
+// can then never be opened or marked read). These SECURITY DEFINER
+// RPCs scope strictly to the customer link OR the order link.
 export async function getMyActivityNotifications() {
   const {
     data,
     error,
   } =
-    await supabase
-      .from(
-        'notification_events',
-      )
-      .select(`
-        id,
-        order_id,
-        event_type,
-        payload,
-        read_at,
-        created_at,
-        orders (
-          reference,
-          project_title,
-          service_slug,
-          status,
-          progress_percent,
-          progress_label
-        )
-      `)
-      .order(
-        'created_at',
-        {
-          ascending:
-            false,
-        },
-      );
+    await supabase.rpc(
+      'get_my_notifications',
+    );
 
   if (error) {
     throw error;
   }
 
-  return data || [];
+  return Array.isArray(data)
+    ? data
+    : [];
 }
 
 export async function getUnreadNotificationCount() {
   const {
-    count,
+    data,
     error,
   } =
-    await supabase
-      .from(
-        'notification_events',
-      )
-      .select(
-        'id',
-        {
-          count:
-            'exact',
-
-          head:
-            true,
-        },
-      )
-      .is(
-        'read_at',
-        null,
-      );
+    await supabase.rpc(
+      'get_my_unread_notification_count',
+    );
 
   if (error) {
     throw error;
   }
 
   return Number(
-    count ||
+    data ||
       0,
   );
 }
