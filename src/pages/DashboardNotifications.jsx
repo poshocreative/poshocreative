@@ -601,6 +601,39 @@ export default function DashboardNotifications() {
           readError,
         );
 
+        // The row is gone (or belongs to another account).
+        // Refresh so the stale card disappears instead of
+        // trapping the user with a dead "not found" error.
+        if (
+          String(
+            readError.message ||
+              '',
+          )
+            .toLowerCase()
+            .includes(
+              'could not be found',
+            )
+        ) {
+          setMessage(
+            'That update is no longer available. Refreshing your list…',
+          );
+
+          try {
+            const fresh =
+              await getMyActivityNotifications();
+
+            setNotifications(
+              fresh,
+            );
+          } catch {
+            // Keep the existing list if the refresh fails.
+          }
+
+          notifyShell();
+
+          return false;
+        }
+
         setError(
           readError.message ||
             'This update could not be marked as read.',
@@ -613,32 +646,68 @@ export default function DashboardNotifications() {
     };
 
   const openNotification =
-    async (
+    (
       notification,
     ) => {
-      const success =
-        await markOneRead(
-          notification,
-        );
-
-      if (
-        !success &&
-        !notification
-          .read_at
-      ) {
-        return;
-      }
-
       const destination =
         getNotificationDestination(
           notification,
         );
 
+      // Opening always wins. Marking as read is a best-effort
+      // side effect and must never strand the user on this page
+      // with a "could not be found" error.
       navigate(
         resolvePortalPath(
           destination.path,
           portalRoutes,
         ),
+      );
+
+      if (
+        notification
+          .read_at
+      ) {
+        return;
+      }
+
+      const now =
+        new Date()
+          .toISOString();
+
+      setNotifications(
+        (
+          current,
+        ) =>
+          current.map(
+            (
+              item,
+            ) =>
+              item.id ===
+              notification.id
+                ? {
+                    ...item,
+                    read_at:
+                      item.read_at ||
+                      now,
+                  }
+                : item,
+          ),
+      );
+
+      notifyShell();
+
+      markActivityNotificationRead(
+        notification.id,
+      ).catch(
+        (
+          readError,
+        ) => {
+          console.error(
+            'Background mark-read failed:',
+            readError,
+          );
+        },
       );
     };
 
@@ -646,7 +715,8 @@ export default function DashboardNotifications() {
     async () => {
       if (
         metrics.unread ===
-        0
+          0 ||
+        markingAll
       ) {
         return;
       }
@@ -659,45 +729,53 @@ export default function DashboardNotifications() {
         setError('');
         setMessage('');
 
-        const result =
-          await markAllActivityNotificationsRead();
+        const before =
+          metrics.unread;
 
-        const now =
-          new Date()
-            .toISOString();
+        await markAllActivityNotificationsRead();
+
+        // Server is the source of truth. Reload instead of
+        // blindly stamping every card read — otherwise the UI
+        // claims success and the unread badges return on refresh.
+        const fresh =
+          await getMyActivityNotifications();
 
         setNotifications(
-          (
-            current,
-          ) =>
-            current.map(
-              (
-                notification,
-              ) => ({
-                ...notification,
-
-                read_at:
-                  notification
-                    .read_at ||
-                  now,
-              }),
-            ),
+          fresh,
         );
 
-        setMessage(
-          Number(
-            result
-              ?.updated_count ||
-              0,
-          ) ===
+        const after =
+          fresh.filter(
+            (
+              notification,
+            ) =>
+              !notification
+                .read_at,
+          ).length;
+
+        const cleared =
+          before -
+          after;
+
+        if (
+          cleared <=
+          0
+        ) {
+          setError(
+            'No updates could be marked as read. Refresh and try again.',
+          );
+        } else if (
+          cleared ===
           1
-            ? '1 update marked as read.'
-            : `${Number(
-                result
-                  ?.updated_count ||
-                  0,
-              )} updates marked as read.`,
-        );
+        ) {
+          setMessage(
+            '1 update marked as read.',
+          );
+        } else {
+          setMessage(
+            `${cleared} updates marked as read.`,
+          );
+        }
 
         notifyShell();
       } catch (
