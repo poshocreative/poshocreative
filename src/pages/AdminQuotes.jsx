@@ -40,7 +40,12 @@ export default function AdminQuotes() {
       setError('');
       setLoading(true);
       setQuotes(await getAdminQuotes());
-    } catch {
+    } catch (loadError) {
+      console.error(
+        'Unable to load quotes:',
+        loadError,
+      );
+
       setError('Quotes could not be loaded.');
     } finally {
       setLoading(false);
