@@ -9,6 +9,7 @@ import {
 
 import Icon from './ui/Icon';
 import {
+  Navigate,
   NavLink,
   Outlet,
   useLocation,
@@ -18,6 +19,14 @@ import {
 import {
   useAuth,
 } from '../context/AuthContext';
+
+import {
+  isAdminEmail,
+} from '../config/app';
+
+import {
+  getAdminAccessState,
+} from '../lib/admin';
 
 import {
   getUnreadNotificationCount,
@@ -97,6 +106,84 @@ function routeMatches(
   );
 }
 
+// Management never works inside the client workspace. Admins and team
+// members are bounced to the management-portal equivalent so the two
+// portals are never the same experience: /m/* is for Management,
+// /w/* is for the client whose rows are being viewed.
+function toManagementPath(
+  pathname,
+  adminBase,
+) {
+  if (!adminBase) {
+    return null;
+  }
+
+  const segments =
+    String(
+      pathname || '',
+    )
+      .split('/')
+      .filter(
+        Boolean,
+      );
+
+  if (
+    segments[0] !==
+    'w'
+  ) {
+    return null;
+  }
+
+  const rest =
+    segments.slice(2);
+
+  const head =
+    rest[0] || '';
+
+  if (
+    head ===
+    'orders'
+  ) {
+    // /w/:token/orders/:ref/pay is a client checkout; Management
+    // lands on the order itself instead of a Pay screen.
+    if (rest[1]) {
+      return `${adminBase}/orders/${rest[1]}`;
+    }
+
+    return `${adminBase}/orders`;
+  }
+
+  if (
+    head ===
+    'payments'
+  ) {
+    return `${adminBase}/payments`;
+  }
+
+  if (
+    head ===
+    'requests'
+  ) {
+    return `${adminBase}/requests`;
+  }
+
+  if (
+    head ===
+    'files'
+  ) {
+    return `${adminBase}/orders`;
+  }
+
+  if (
+    head ===
+    'proposals'
+  ) {
+    return `${adminBase}/quotes`;
+  }
+
+  return adminBase;
+}
+
 export default function DashboardShell() {
   const {
     profile,
@@ -104,6 +191,7 @@ export default function DashboardShell() {
     signOut,
     signingOut,
     customerPath,
+    portalRoutes,
   } =
     useAuth();
 
@@ -124,6 +212,52 @@ export default function DashboardShell() {
     setMoreOpen,
   ] =
     useState(false);
+
+  const isAdminAccount =
+    isAdminEmail(
+      user?.email,
+    );
+
+  const [
+    isTeamManagement,
+    setIsTeamManagement,
+  ] =
+    useState(false);
+
+  useEffect(() => {
+    if (
+      !user?.id ||
+      isAdminAccount
+    ) {
+      return undefined;
+    }
+
+    let active = true;
+
+    getAdminAccessState().then(
+      (result) => {
+        if (
+          active &&
+          result?.isTeamMember
+        ) {
+          setIsTeamManagement(
+            true,
+          );
+        }
+      },
+      () => {
+        // Fail open: ordinary customers keep the client workspace
+        // when the access check cannot complete.
+      },
+    );
+
+    return () => {
+      active = false;
+    };
+  }, [
+    user?.id,
+    isAdminAccount,
+  ]);
 
   const navigation =
     useMemo(
@@ -369,6 +503,30 @@ export default function DashboardShell() {
     99
       ? '99+'
       : unreadCount;
+
+  if (
+    isAdminAccount ||
+    isTeamManagement
+  ) {
+    const managementTarget =
+      toManagementPath(
+        location.pathname,
+        portalRoutes?.adminBase,
+      );
+
+    if (
+      managementTarget
+    ) {
+      return (
+        <Navigate
+          to={
+            managementTarget
+          }
+          replace
+        />
+      );
+    }
+  }
 
   return (
     <main className="client-pro-shell">
