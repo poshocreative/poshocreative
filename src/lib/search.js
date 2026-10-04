@@ -150,7 +150,7 @@ export async function globalSearch(
               'order_quotes',
             )
             .select(
-              'id,amount_kobo,status,order_id,orders(reference,project_title)',
+              'id,amount_kobo,status,order_id,orders!order_quotes_order_id_fkey(reference,project_title)',
             )
             .limit(
               200,

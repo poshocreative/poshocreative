@@ -908,9 +908,15 @@ export async function getAdminPayments() {
 }
 
 export async function getAdminQuotes() {
+  // Flat queries instead of a double-nested embed
+  // (quotes -> orders -> customers). The orders embed carries an
+  // explicit foreign-key hint because order_quotes and orders are
+  // linked twice (order_quotes.order_id and the reverse
+  // orders.current_quote_id) and PostgREST rejects the ambiguous
+  // bare embed with PGRST201.
   const {
-    data,
-    error,
+    data: quotes,
+    error: quotesError,
   } =
     await supabase
       .from(
@@ -918,6 +924,7 @@ export async function getAdminQuotes() {
       )
       .select(`
         id,
+        order_id,
         amount_kobo,
         currency,
         status,
@@ -925,13 +932,10 @@ export async function getAdminQuotes() {
         valid_until,
         sent_at,
         created_at,
-        orders (
+        orders!order_quotes_order_id_fkey (
+          customer_id,
           reference,
-          project_title,
-          customers (
-            full_name,
-            email
-          )
+          project_title
         )
       `)
       .order(
@@ -942,11 +946,154 @@ export async function getAdminQuotes() {
         },
       );
 
-  if (error) {
-    throw error;
+  if (quotesError) {
+    console.error(
+      'Quote list with orders failed, retrying bare rows:',
+      quotesError,
+    );
+
+    // Last resort: bare rows without project context still beat
+    // a dead page. The caller renders missing relations as blank.
+    const {
+      data: bare,
+      error: bareError,
+    } =
+      await supabase
+        .from(
+          'order_quotes',
+        )
+        .select(`
+          id,
+          order_id,
+          amount_kobo,
+          currency,
+          status,
+          message,
+          valid_until,
+          sent_at,
+          created_at
+        `)
+        .order(
+          'created_at',
+          {
+            ascending:
+              false,
+          },
+        );
+
+    if (bareError) {
+      throw bareError;
+    }
+
+    return (
+      bare ||
+      []
+    ).map(
+      (
+        quote,
+      ) => ({
+        ...quote,
+        orders:
+          null,
+      }),
+    );
   }
 
-  return data || [];
+  const rows =
+    quotes ||
+    [];
+
+  const customerIds = [
+    ...new Set(
+      rows
+        .map(
+          (
+            quote,
+          ) =>
+            quote.orders
+              ?.customer_id,
+        )
+        .filter(
+          Boolean,
+        ),
+    ),
+  ];
+
+  let customersById =
+    {};
+
+  if (
+    customerIds.length >
+    0
+  ) {
+    const {
+      data: customers,
+      error: customersError,
+    } =
+      await supabase
+        .from(
+          'customers',
+        )
+        .select(`
+          id,
+          full_name,
+          email
+        `)
+        .in(
+          'id',
+          customerIds,
+        );
+
+    if (customersError) {
+      console.error(
+        'Quote customer names failed, continuing without them:',
+        customersError,
+      );
+    } else {
+      customersById =
+        Object.fromEntries(
+          (
+            customers ||
+            []
+          ).map(
+            (
+              customer,
+            ) => [
+              customer.id,
+              customer,
+            ],
+          ),
+        );
+    }
+  }
+
+  return rows.map(
+    (
+      quote,
+    ) => ({
+      ...quote,
+
+      orders:
+        quote.orders
+          ? {
+              reference:
+                quote.orders
+                  .reference,
+
+              project_title:
+                quote.orders
+                  .project_title,
+
+              customers:
+                customersById[
+                  quote.orders
+                    .customer_id
+                ] ||
+                null,
+            }
+          : null,
+    }),
+  );
 }
 
 export async function getAdminCatalog() {
