@@ -449,12 +449,12 @@ button.posho-kanban-card:hover {
 }
 
 .posho-palette {
-  width: min(560px, 100%);
-  max-height: min(70vh, 600px);
+  width: min(600px, 100%);
+  max-height: min(70vh, 620px);
   display: flex;
   flex-direction: column;
   background: #fff;
-  border-radius: 18px;
+  border-radius: 20px;
   box-shadow: var(--posho-shadow);
   overflow: hidden;
 }
@@ -462,8 +462,8 @@ button.posho-kanban-card:hover {
 .posho-palette-input-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
+  gap: 12px;
+  padding: 16px 18px;
   border-bottom: 1px solid var(--posho-line);
 }
 
@@ -477,31 +477,115 @@ button.posho-kanban-card:hover {
   color: var(--posho-ink);
 }
 
+.posho-palette-input-row input::placeholder {
+  color: var(--posho-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.posho-palette-esc {
+  flex-shrink: 0;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--posho-muted);
+  background: #f4f2f7;
+  border: 1px solid var(--posho-line);
+  border-radius: 6px;
+  padding: 3px 7px;
+}
+
 .posho-palette-list {
   overflow: auto;
-  padding: 8px;
-  display: grid;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.posho-palette-section {
+  display: flex;
+  flex-direction: column;
   gap: 2px;
 }
 
+.posho-palette-section-title {
+  margin: 4px 8px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--posho-muted);
+}
+
 .posho-palette-list button {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 4px 10px;
-  align-items: baseline;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   text-align: left;
   border: 0;
   background: transparent;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 9px 10px;
   cursor: pointer;
   font: inherit;
   color: inherit;
   min-width: 0;
+  width: 100%;
 }
 
 .posho-palette-list button.active {
   background: #f1e8ff;
+}
+
+.posho-palette-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #f4f2f7;
+  color: var(--posho-ink);
+}
+
+.posho-palette-list button.active .posho-palette-icon {
+  background: #fff;
+  color: var(--brand-700, #5b21b6);
+}
+
+.posho-palette-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.posho-palette-list button strong {
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.posho-palette-list button small {
+  font-size: 12px;
+  color: var(--posho-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.posho-palette-enter {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand-700, #5b21b6);
 }
 
 .posho-palette-group {
@@ -512,17 +596,20 @@ button.posho-kanban-card:hover {
   color: var(--posho-muted);
 }
 
-.posho-palette-list button strong {
-  font-size: 14px;
-  overflow-wrap: anywhere;
-  grid-column: 2;
+.posho-palette-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 28px 20px;
+  color: var(--posho-muted);
+  font-size: 13px;
 }
 
-.posho-palette-list button small {
-  grid-column: 2;
-  font-size: 12px;
-  color: var(--posho-muted);
-  overflow-wrap: anywhere;
+.posho-palette-empty strong {
+  color: var(--posho-ink);
+  font-size: 14px;
 }
 
 .posho-palette-hint {
@@ -531,6 +618,35 @@ button.posho-kanban-card:hover {
   padding: 10px 16px;
   margin: 0;
   border-top: 1px solid var(--posho-line);
+}
+
+.posho-palette-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 10px 18px;
+  border-top: 1px solid var(--posho-line);
+  font-size: 12px;
+  color: var(--posho-muted);
+  white-space: nowrap;
+}
+
+.posho-palette-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.posho-palette-footer kbd {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  background: #f4f2f7;
+  border: 1px solid var(--posho-line);
+  border-radius: 6px;
+  padding: 2px 6px;
+  color: var(--posho-ink);
 }
 
 .posho-proof-frame {

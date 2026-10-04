@@ -809,11 +809,7 @@ body {
   }
 }
 
-/* Palette rows: fixed label must not squeeze content. */
-.posho-palette-list button {
-  grid-template-columns:
-    90px minmax(0, 1fr);
-}
+/* Palette rows use flex layout with icon + text (see portal-components.css). */
 
 /* Bank + finance rows: stack before they crush. */
 @media (max-width: 700px) {
